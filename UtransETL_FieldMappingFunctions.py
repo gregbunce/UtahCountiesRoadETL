@@ -2,88 +2,31 @@ import arcpy
 
 def Washington(rows, listOfStreetTypes):
     for row in rows:
-        row.STATE_L = "UT"
-        row.STATE_R = "UT"
+        # set all fields to empty or zero or none
+        setDefaultValues(row)
+
+        # set county specific fields
         row.COUNTY_L = "49053"
         row.COUNTY_R = "49053"
-        row.STATUS = ""
-        row.CARTOCODE = ""
-        row.FULLNAME = ""
         row.FROMADDR_L = row.L_F_ADD
         row.TOADDR_L = row.L_T_ADD
         row.FROMADDR_R = row.R_F_ADD
         row.TOADDR_R = row.R_T_ADD
-        row.PARITY_L = ""
-        row.PARITY_R = ""
         row.PREDIR = row.PRE_DIR[:1]
         row.NAME = row.S_NAME.upper()
         row.POSTTYPE = row.S_TYPE
         row.POSTDIR = row.SUF_DIR
         row.AN_NAME = row.ACS_NAME
         row.AN_POSTDIR = row.ACS_SUF
-        row.A1_PREDIR = ""
         row.A1_NAME = row.ALIAS1
         row.A1_POSTTYPE = row.A1_POSTTYPE
-        row.A1_POSTDIR = ""
-        row.A2_PREDIR = ""
         row.A2_NAME = row.ALIAS2
         row.A2_POSTTYPE = row.ALIAS2_TYP
-        row.A2_POSTDIR = ""
-        row.QUADRANT_L = ""
-        row.QUADRANT_R = ""
-        row.ADDRSYS_L = ""
-        row.ADDRSYS_R = ""
-        row.POSTCOMM_L = ""
-        row.POSTCOMM_R = ""
-        row.ZIPCODE_L = ""
-        row.ZIPCODE_R = ""
-        row.INCMUNI_L = ""
-        row.INCMUNI_R = ""
-        row.UNINCCOM_L = ""
-        row.UNINCCOM_R = ""
-        row.NBRHDCOM_L = ""
-        row.NBRHDCOM_R = ""
-        row.ER_CAD_ZONES = ""
-        row.ESN_L = ""
-        row.ESN_R = ""
-        row.MSAGCOMM_L = ""
-        row.MSAGCOMM_R = ""
         row.ONEWAY = row.ONE_WAY
-        row.VERT_LEVEL = ""
         row.SPEED_LMT = row.SPD_LMT
-        row.ACCESSCODE = ""
-        row.DOT_HWYNAM = ""
-        row.DOT_RTNAME = ""
-        row.DOT_RTPART = ""
-        row.DOT_F_MILE = ""
-        row.DOT_T_MILE = ""
-        row.DOT_FCLASS = ""
         row.DOT_SRFTYP = row.S_SURF
-        row.DOT_CLASS = ""
-        row.DOT_OWN_L = ""
-        row.DOT_OWN_R = ""
-        row.DOT_AADT = 0
-        row.DOT_AADTYR = ""
-        row.DOT_THRULANES = 0
-        row.BIKE_L = ""
-        row.BIKE_R = ""
-        row.BIKE_PLN_L = ""
-        row.BIKE_PLN_R = ""
-        row.BIKE_REGPR = ""
-        row.BIKE_NOTES = ""
-        row.UNIQUE_ID = ""
-        row.LOCAL_UID = ""
-        row.UTAHRD_UID = ""
         row.SOURCE = row.SOURCE
-        row.UPDATED = ""
-        row.EFFECTIVE = ""
-        row.EXPIRE = ""
-        row.CREATED = ""
-        row.CREATOR = ""
-        row.EDITOR = ""
-        row.CUSTOMTAGS = ""
-        row.UTRANS_NOTES = ""
-    
+        
         # store the row
         rows.updateRow(row)  
         del row
@@ -91,6 +34,7 @@ def Washington(rows, listOfStreetTypes):
 
 def Utah(rows, listOfStreetTypes):
     for row in rows:
+        # variables
         POSTDIR_FROM_ROADNAME = None
         POSTDIR_FROM_ALTROADNAME = None
         ACS_FROM_ALTROADNAME = None
@@ -98,8 +42,10 @@ def Utah(rows, listOfStreetTypes):
         ACS_FROM_ALTROADNAME2 = None
         str_roadname_split = None
 
-        row.STATE_L = "UT"
-        row.STATE_R = "UT"
+        # set all fields to empty or zero or none
+        setDefaultValues(row)
+
+        # set county specific fields
         row.COUNTY_L = "49049"
         row.COUNTY_R = "49049"
         row.FROMADDR_L = row.FROMLEFT
@@ -236,19 +182,16 @@ def Utah(rows, listOfStreetTypes):
 
 def Davis(rows, listOfStreetTypes):
     for row in rows:
-        row.STATE_L = "UT"
-        row.STATE_R = "UT"
+        # set all fields to empty or zero or none
+        setDefaultValues(row)
+
+        # set county specific fields
         row.COUNTY_L = "49011"
         row.COUNTY_R = "49011"
-        row.STATUS = ""
-        row.CARTOCODE = ""
-        row.FULLNAME = ""
         row.FROMADDR_L = row.LeftFrom
         row.TOADDR_L = row.LeftTo
         row.FROMADDR_R = row.RightFrom
         row.TOADDR_R = row.RightTo
-        row.PARITY_L = ""
-        row.PARITY_R = ""
         if row.PrefixDire != None:
             row.PREDIR = row.PrefixDire[:1]
         if row.RoadName != None:
@@ -256,70 +199,7 @@ def Davis(rows, listOfStreetTypes):
         if row.RoadNameTy != None:
             row.POSTTYPE = row.RoadNameTy
         row.POSTDIR = row.PostDirect
-        row.AN_NAME = ""
-        row.AN_POSTDIR = ""
-        row.A1_PREDIR = ""
-        row.A1_NAME = ""
-        row.A1_POSTTYPE = ""
-        row.A1_POSTDIR = ""
-        row.A2_PREDIR = ""
-        row.A2_NAME = ""
-        row.A2_POSTTYPE = ""
-        row.A2_POSTDIR = ""
-        row.QUADRANT_L = ""
-        row.QUADRANT_R = ""
-        row.ADDRSYS_L = ""
-        row.ADDRSYS_R = ""
-        row.POSTCOMM_L = ""
-        row.POSTCOMM_R = ""
-        row.ZIPCODE_L = ""
-        row.ZIPCODE_R = ""
-        row.INCMUNI_L = ""
-        row.INCMUNI_R = ""
-        row.UNINCCOM_L = ""
-        row.UNINCCOM_R = ""
-        row.NBRHDCOM_L = ""
-        row.NBRHDCOM_R = ""
-        row.ER_CAD_ZONES = ""
-        row.ESN_L = ""
-        row.ESN_R = ""
-        row.MSAGCOMM_L = ""
-        row.MSAGCOMM_R = ""
-        row.ONEWAY = ""
-        row.VERT_LEVEL = ""
-        row.SPEED_LMT = None
-        row.ACCESSCODE = ""
-        row.DOT_HWYNAM = ""
-        row.DOT_RTNAME = ""
-        row.DOT_RTPART = ""
-        row.DOT_F_MILE = None
-        row.DOT_T_MILE = None
-        row.DOT_FCLASS = ""
         row.DOT_SRFTYP = row.RoadSurfac
-        row.DOT_CLASS = ""
-        row.DOT_OWN_L = ""
-        row.DOT_OWN_R = ""
-        row.DOT_AADT = None
-        row.DOT_AADTYR = ""
-        row.DOT_THRULANES = None
-        row.BIKE_L = ""
-        row.BIKE_R = ""
-        row.BIKE_PLN_L = ""
-        row.BIKE_PLN_R = ""
-        row.BIKE_REGPR = ""
-        row.BIKE_NOTES = ""
-        row.UNIQUE_ID = ""
-        row.LOCAL_UID = ""
-        row.UTAHRD_UID = ""
-        row.SOURCE = ""
-        row.UPDATED = None
-        row.EFFECTIVE = None
-        row.EXPIRE = None
-        row.CREATED = None
-        row.CREATOR = ""
-        row.EDITOR = ""
-        row.CUSTOMTAGS = ""
-        row.UTRANS_NOTES = ""
 
         # check if alias names exist (maybe make this a global function that we can reuse for other counties who do a similar alias name concatination field)
         if row.RoadAliasN != None:
@@ -366,20 +246,151 @@ def Davis(rows, listOfStreetTypes):
                             row.A1_NAME = alphaStreetName
                         else:
                             row.A1_NAME = davisAliasName[:30]
-                    else: 
+                    else:
                         row.A1_NAME = davisAliasName[:30]
         # store the row
         rows.updateRow(row)
         del row
 
 
+def Weber(rows, listOfStreetTypes):
+    for row in rows:
+        # set all fields to empty or zero or none
+        setDefaultValues(row)
+
+        # set county specific fields
+        row.COUNTY_L = "49057"
+        row.COUNTY_R = "49057"        
+        row.STATUS = ""
+        row.FROMADDR_L = 0
+        row.TOADDR_L = 0
+        row.FROMADDR_R = 0
+        row.TOADDR_R = 0
+        row.PREDIR = ""
+        row.NAME = ""
+        row.POSTTYPE = ""
+        row.POSTDIR = ""
+        row.AN_NAME = ""
+        row.AN_POSTDIR = ""
+        row.A1_PREDIR = ""
+        row.A1_NAME = ""
+        row.A1_POSTTYPE = ""
+        row.A1_POSTDIR = ""
+        row.A2_PREDIR = ""
+        row.A2_NAME = ""
+        row.A2_POSTTYPE = ""
+        row.A2_POSTDIR = ""
+        row.UNINCCOM_L = ""
+        row.UNINCCOM_R = ""
+        row.NBRHDCOM_L = ""
+        row.NBRHDCOM_R = ""
+        row.ER_CAD_ZONES = ""
+        row.ESN_L = ""
+        row.ESN_R = ""
+        row.MSAGCOMM_L = ""
+        row.MSAGCOMM_R = ""
+        row.ONEWAY = ""
+        row.VERT_LEVEL = ""
+        row.SPEED_LMT = None
+        row.ACCESSCODE = ""
+
+
+        # store the row
+        rows.updateRow(row)
+        del row
 
 
 
+def setDefaultValues(row):
+        row.STATE_L = "UT"
+        row.STATE_R = "UT"
+        row.COUNTY_L = ""
+        row.COUNTY_R = ""        
+        row.STATUS = ""
+        row.CARTOCODE = ""
+        row.FULLNAME = ""
+        row.FROMADDR_L = 0
+        row.TOADDR_L = 0
+        row.FROMADDR_R = 0
+        row.TOADDR_R = 0
+        row.PARITY_L = ""
+        row.PARITY_R = ""
+        row.PREDIR = ""
+        row.NAME = ""
+        row.POSTTYPE = ""
+        row.POSTDIR = ""
+        row.AN_NAME = ""
+        row.AN_POSTDIR = ""
+        row.A1_PREDIR = ""
+        row.A1_NAME = ""
+        row.A1_POSTTYPE = ""
+        row.A1_POSTDIR = ""
+        row.A2_PREDIR = ""
+        row.A2_NAME = ""
+        row.A2_POSTTYPE = ""
+        row.A2_POSTDIR = ""
+        row.QUADRANT_L = ""
+        row.QUADRANT_R = ""
+        row.ADDRSYS_L = ""
+        row.ADDRSYS_R = ""
+        row.POSTCOMM_L = ""
+        row.POSTCOMM_R = ""
+        row.ZIPCODE_L = ""
+        row.ZIPCODE_R = ""
+        row.INCMUNI_L = ""
+        row.INCMUNI_R = ""
+        row.UNINCCOM_L = ""
+        row.UNINCCOM_R = ""
+        row.NBRHDCOM_L = ""
+        row.NBRHDCOM_R = ""
+        row.ER_CAD_ZONES = ""
+        row.ESN_L = ""
+        row.ESN_R = ""
+        row.MSAGCOMM_L = ""
+        row.MSAGCOMM_R = ""
+        row.ONEWAY = ""
+        row.VERT_LEVEL = ""
+        row.SPEED_LMT = None
+        row.ACCESSCODE = ""
+        row.DOT_HWYNAM = ""
+        row.DOT_RTNAME = ""
+        row.DOT_RTPART = ""
+        row.DOT_F_MILE = None
+        row.DOT_T_MILE = None
+        row.DOT_FCLASS = ""
+        row.DOT_SRFTYP = ""
+        row.DOT_CLASS = ""
+        row.DOT_OWN_L = ""
+        row.DOT_OWN_R = ""
+        row.DOT_AADT = None
+        row.DOT_AADTYR = ""
+        row.DOT_THRULANES = None
+        row.BIKE_L = ""
+        row.BIKE_R = ""
+        row.BIKE_PLN_L = ""
+        row.BIKE_PLN_R = ""
+        row.BIKE_REGPR = ""
+        row.BIKE_NOTES = ""
+        row.UNIQUE_ID = ""
+        row.LOCAL_UID = ""
+        row.UTAHRD_UID = ""
+        row.SOURCE = ""
+        row.UPDATED = None
+        row.EFFECTIVE = None
+        row.EXPIRE = None
+        row.CREATED = None
+        row.CREATOR = ""
+        row.EDITOR = ""
+        row.CUSTOMTAGS = ""
+        row.UTRANS_NOTES = ""
 
 
 ### _________________________________________________
 ### use this template for utrans field mapping etl
+#row.STATE_L = "UT"
+#row.STATE_R = "UT"
+#row.COUNTY_L = "490**"
+#row.COUNTY_R = "490**"
 #row.STATUS = ""
 #row.CARTOCODE = ""
 #row.FULLNAME = ""
@@ -405,10 +416,6 @@ def Davis(rows, listOfStreetTypes):
 #row.A2_POSTDIR = ""
 #row.QUADRANT_L = ""
 #row.QUADRANT_R = ""
-#row.STATE_L = ""
-#row.STATE_R = ""
-#row.COUNTY_L = ""
-#row.COUNTY_R = ""
 #row.ADDRSYS_L = ""
 #row.ADDRSYS_R = ""
 #row.POSTCOMM_L = ""
