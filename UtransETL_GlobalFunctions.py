@@ -213,3 +213,13 @@ def GetRoadTypeDomains (geoDatabaseNgSchema):
                 listOfDomains.append(val.upper())
                 listOfDomains.append(desc.upper())
     return listOfDomains
+
+
+## remove the post type if the street name is numeric
+#def removePostTypeIfNumeric(rows):
+#    for row in rows:
+#        if len(row.NAME) == 1:
+#            if row.NAME[0].isdigit():
+#                row.POSTTYPE = ""
+#        rows.updateRow(row)
+#    del row

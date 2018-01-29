@@ -77,6 +77,12 @@ rows = arcpy.UpdateCursor(outputFeatureClass)
 UpperCoreUtransFields(rows)
 del rows
 
+## remove the street type if a numeric street name
+#arcpy.AddMessage("Remove PostType if numeric street name...")
+#rows = arcpy.UpdateCursor(outputFeatureClass)
+#removePostTypeIfNumeric(rows)
+#del rows
+
 arcpy.Delete_management (countySourceTEMP, "")
 
 # remove curves from the the data in our schema

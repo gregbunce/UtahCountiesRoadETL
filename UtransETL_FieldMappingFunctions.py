@@ -261,15 +261,14 @@ def Weber(rows, listOfStreetTypes):
         # set county specific fields
         row.COUNTY_L = "49057"
         row.COUNTY_R = "49057"        
-        row.STATUS = ""
-        row.FROMADDR_L = 0
-        row.TOADDR_L = 0
-        row.FROMADDR_R = 0
-        row.TOADDR_R = 0
-        row.PREDIR = ""
-        row.NAME = ""
-        row.POSTTYPE = ""
-        row.POSTDIR = ""
+        row.FROMADDR_L = row.LEFTFROM
+        row.TOADDR_L = row.LEFTTO
+        row.FROMADDR_R = row.RIGHTFROM
+        row.TOADDR_R = row.RIGHTTO
+        row.PREDIR = row.PREDIR[:1]
+        row.NAME = row.S_NAME[:30]
+        row.POSTTYPE = row.STREETTYPE
+        row.POSTDIR = row.SUFDIR
         row.AN_NAME = ""
         row.AN_POSTDIR = ""
         row.A1_PREDIR = ""
@@ -280,25 +279,25 @@ def Weber(rows, listOfStreetTypes):
         row.A2_NAME = ""
         row.A2_POSTTYPE = ""
         row.A2_POSTDIR = ""
-        row.UNINCCOM_L = ""
-        row.UNINCCOM_R = ""
-        row.NBRHDCOM_L = ""
-        row.NBRHDCOM_R = ""
-        row.ER_CAD_ZONES = ""
-        row.ESN_L = ""
-        row.ESN_R = ""
-        row.MSAGCOMM_L = ""
-        row.MSAGCOMM_R = ""
-        row.ONEWAY = ""
-        row.VERT_LEVEL = ""
-        row.SPEED_LMT = None
-        row.ACCESSCODE = ""
+        row.SPEED_LMT = row.SPEEDLIMIT
+        row.LOCAL_UID = row.S_UNIQUE
 
+        # weed out the alias name from their "ALIAS" and "ACS_ALIAS" fields
+
+
+
+
+        # remove PostDir if street name is alpha
+        if removePostDirIfAlpha(row) == true:
+            row.POSTDIR = ""
+
+        # remove PostType is street name is numeric
+        if removePostTypeIfNumeric(row) == true:
+            row.POSTTYPE = ""
 
         # store the row
         rows.updateRow(row)
         del row
-
 
 
 def setDefaultValues(row):
@@ -383,6 +382,19 @@ def setDefaultValues(row):
         row.EDITOR = ""
         row.CUSTOMTAGS = ""
         row.UTRANS_NOTES = ""
+
+
+# remove the post type if the street name is numeric
+def removePostTypeIfNumeric(row):
+    if len(row.NAME) == 1:
+        if row.NAME[0].isdigit():
+            return true
+
+# remove the post dir if the street name is numeric
+def removePostDirIfAlpha(row):
+    if row.NAME[0].isalpha():
+        return true
+
 
 
 ### _________________________________________________
