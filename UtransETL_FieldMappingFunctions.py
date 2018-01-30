@@ -284,7 +284,7 @@ def Weber(rows, listOfStreetTypes):
 
         # weed out the alias name from their "ALIAS" and "ACS_ALIAS" fields
         # check if ALIAS == S_NAME (Weber has tons of alias names that match the steret name)
-        if row.ALIAS != ' ' or row.ALIASE != None or row.ALIAS is not None:
+        if row.ALIAS != ' ' or row.ALIAS != None or row.ALIAS is not None:
             if row.ALIAS.strip() != row.S_NAME.strip(): 
                 # check if alias or numeric
                 if row.ALIAS.isdigit():
@@ -328,6 +328,47 @@ def Weber(rows, listOfStreetTypes):
         # remove PostType is street name is numeric
         if removePostTypeIfNumeric(row) == True:
             row.POSTTYPE = ""
+
+        # store the row
+        rows.updateRow(row)
+        del row
+
+
+def SaltLake(rows, listOfStreetTypes):
+    for row in rows:
+        # set county specific fields
+        row.STATE_L = "UT"
+        row.STATE_R = "UT"
+        row.COUNTY_L = "49035"
+        row.COUNTY_R = "49035"
+
+        # clear the A1_NAME AND A1_POSTYPE fields if the same data is in AN_NAME
+        if (row.A1_NAME != ' ' or row.A1_NAME != None or row.A1_NAME is not None) and (row.AN_NAME != ' ' or row.AN_NAME != None or row.AN_NAME is not None):
+            a1_name = str(row.A1_NAME) # the numeric street name and post type, and sometimes post dir
+            an_name = str(row.AN_NAME) # just the numeric street name
+            # check if street name is contained in the A1_NAME field
+            arcpy.AddMessage(a1_name + " " + an_name)
+            if a1_name != '' and an_name != '':
+                if str(an_name) in str(a1_name):
+                    # clear out the A1_NAME fields
+                    row.A1_PREDIR = ""
+                    row.A1_NAME = ""
+                    row.A1_POSTTYPE = ""
+                    row.A1_POSTDIR = ""
+  
+         # clear the A2_NAME AND A2_POSTYPE fields if the same data is in AN_NAME
+        if (row.A2_NAME != ' ' or row.A2_NAME != None or row.A2_NAME is not None) and (row.AN_NAME != ' ' or row.AN_NAME != None or row.AN_NAME is not None):
+            a2_name = str(row.A2_NAME) # the numeric street name and post type, and sometimes post dir
+            an_name = str(row.AN_NAME) # just the numeric street name
+            # check if street name is contained in the A2_NAME field
+            arcpy.AddMessage(a2_name + " " + an_name)
+            if a2_name != '' and an_name != '':
+                if an_name in a2_name:
+                    # clear out the A1_NAME fields
+                    row.A2_PREDIR = ""
+                    row.A2_NAME = ""
+                    row.A2_POSTTYPE = ""
+                    row.A2_POSTDIR = ""                             
 
         # store the row
         rows.updateRow(row)
