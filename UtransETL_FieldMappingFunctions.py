@@ -288,8 +288,20 @@ def Weber(rows, listOfStreetTypes):
             if row.ALIAS.strip() != row.S_NAME.strip(): 
                 # check if alias or numeric
                 if row.ALIAS.isdigit():
-                    row.AN_NAME = row.ALIAS
-                    row.AN_POSTDIR = row.SUFDIR
+                    # use the ACS_ALIAS field becuase it has the sufdir baked in
+                    acsAlias = row.ACS_ALIAS.strip()
+                    if len(acsAlias) > 0:
+                        acsAlias_split = acsAlias.split(" ")
+                        # check if last word in array is post dir
+                        if acsAlias_split[-1] == "N" or acsAlias_split[-1] == "S" or acsAlias_split[-1] == "E" or acsAlias_split[-1] == "W":
+                            row.AN_POSTDIR = acsAlias_split[-1].strip()
+                            # remove the post dir from the string
+                            an_name = acsAlias.rsplit(' ', 1)[0]
+                            row.AN_NAME = an_name
+                        else:
+                            # use the suf dir field to get the post type
+                            row.AN_NAME = row.ALIAS
+                            row.AN_POSTDIR = row.SUFDIR
                 else: # alias is alpha
                 # get alias name as string
                     aliasName = row.ALIAS
