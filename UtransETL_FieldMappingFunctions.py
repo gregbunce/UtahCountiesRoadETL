@@ -283,16 +283,38 @@ def Weber(rows, listOfStreetTypes):
         row.LOCAL_UID = row.S_UNIQUE
 
         # weed out the alias name from their "ALIAS" and "ACS_ALIAS" fields
-
-
-
+        # check if ALIAS == S_NAME (Weber has tons of alias names that match the steret name)
+        if row.ALIAS != ' ' or row.ALIASE != None or row.ALIAS is not None:
+            if row.ALIAS.strip() != row.S_NAME.strip(): 
+                # check if alias or numeric
+                if row.ALIAS.isdigit():
+                    row.AN_NAME = row.ALIAS
+                    row.AN_POSTDIR = row.SUFDIR
+                else: # alias is alpha
+                # get alias name as string
+                    aliasName = row.ALIAS
+                    # check if there's a least one word in the string
+                    if len(aliasName) > 0:
+                        # parse out the string into array, so we can check for sufdir or street type
+                        aliasName_split = aliasName.split(" ")                
+                        # check if the last word in array is an official street type from our domain
+                        if aliasName_split[-1].isalpha():
+                            # check if last word in string is a valid street type
+                            if aliasName_split[-1].upper() in listOfStreetTypes:
+                                # add the street type to the street type field
+                                row.A1_POSTTYPE = aliasName_split[-1]
+                                # remove the street type from the string
+                                alphaStreetName = aliasName.rsplit(' ', 1)[0]
+                                row.A1_NAME = alphaStreetName
+                            else:
+                                row.A1_NAME = row.ALIAS
 
         # remove PostDir if street name is alpha
-        if removePostDirIfAlpha(row) == true:
+        if removePostDirIfAlpha(row) == True:
             row.POSTDIR = ""
-
+        
         # remove PostType is street name is numeric
-        if removePostTypeIfNumeric(row) == true:
+        if removePostTypeIfNumeric(row) == True:
             row.POSTTYPE = ""
 
         # store the row
@@ -386,14 +408,13 @@ def setDefaultValues(row):
 
 # remove the post type if the street name is numeric
 def removePostTypeIfNumeric(row):
-    if len(row.NAME) == 1:
-        if row.NAME[0].isdigit():
-            return true
+    if row.NAME[0].isdigit():
+        return True
 
-# remove the post dir if the street name is numeric
+# remove the post dir if the street name is alpha
 def removePostDirIfAlpha(row):
     if row.NAME[0].isalpha():
-        return true
+        return True
 
 
 
