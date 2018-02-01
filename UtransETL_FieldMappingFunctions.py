@@ -1,6 +1,6 @@
 import arcpy
 
-def Washington(rows, listOfStreetTypes):
+def Washington(rows):
     for row in rows:
         # set all fields to empty or zero or none
         setDefaultValues(row)
@@ -32,7 +32,7 @@ def Washington(rows, listOfStreetTypes):
         del row
 
 
-def Utah(rows, listOfStreetTypes):
+def Utah(rows):
     for row in rows:
         # variables
         POSTDIR_FROM_ROADNAME = None
@@ -180,7 +180,10 @@ def Utah(rows, listOfStreetTypes):
         del row
 
 
-def Davis(rows, listOfStreetTypes):
+def Davis(rows):
+    # get post direction domains
+    listOfStreetTypes = GetRoadTypeDomains()
+
     for row in rows:
         # set all fields to empty or zero or none
         setDefaultValues(row)
@@ -253,7 +256,10 @@ def Davis(rows, listOfStreetTypes):
         del row
 
 
-def Weber(rows, listOfStreetTypes):
+def Weber(rows):
+    # get post direction domains
+    dictOfValidPostTypes = CreatePostTypeDictionary()
+
     for row in rows:
         # set all fields to empty or zero or none
         setDefaultValues(row)
@@ -267,7 +273,15 @@ def Weber(rows, listOfStreetTypes):
         row.TOADDR_R = row.RIGHTTO
         row.PREDIR = row.PREDIR[:1]
         row.NAME = row.S_NAME[:30]
-        row.POSTTYPE = row.STREETTYPE
+
+        # check if valid post type
+        postTypeDomain = GetCodedDomainValue(row.STREETTYPE, dictOfValidPostTypes)
+        if postTypeDomain != "":
+            row.POSTTYPE = postTypeDomain
+        else: # add the post type they gave to the notes field so we can evaluate it
+            if len(validPostType) > 0:
+                row.UTRANS_NOTES = "POSTTYPE: " + postTypeDomain + "; "
+
         row.POSTDIR = row.SUFDIR
         row.AN_NAME = ""
         row.AN_POSTDIR = ""
@@ -312,9 +326,10 @@ def Weber(rows, listOfStreetTypes):
                         # check if the last word in array is an official street type from our domain
                         if aliasName_split[-1].isalpha():
                             # check if last word in string is a valid street type
-                            if aliasName_split[-1].upper() in listOfStreetTypes:
+                            postTypeDomain = GetCodedDomainValue(aliasName_split[-1].upper(), dictOfValidPostTypes)
+                            if postTypeDomain != "":
                                 # add the street type to the street type field
-                                row.A1_POSTTYPE = aliasName_split[-1]
+                                row.A1_POSTTYPE = postTypeDomain
                                 # remove the street type from the string
                                 alphaStreetName = aliasName.rsplit(' ', 1)[0]
                                 row.A1_NAME = alphaStreetName
@@ -334,7 +349,7 @@ def Weber(rows, listOfStreetTypes):
         del row
 
 
-def SaltLake(rows, listOfStreetTypes):
+def SaltLake(rows):
     for row in rows:
         # set county specific fields
         row.STATE_L = "UT"
@@ -374,6 +389,86 @@ def SaltLake(rows, listOfStreetTypes):
         rows.updateRow(row)
         del row
 
+
+def Beaver(rows):
+    for row in rows:
+        # set all fields to empty or zero or none
+        setDefaultValues(row)
+
+        # set county specific fields
+        row.COUNTY_L = "49001"
+        row.COUNTY_R = "49001"        
+        row.FROMADDR_L = row.L_F_ADD
+        row.TOADDR_L = row.L_T_ADD
+        row.FROMADDR_R = row.R_F_ADD
+        row.TOADDR_R = row.R_T_ADD
+        row.PREDIR = row.PREDIR[:1]
+        row.NAME = row.STREETNAME[:30]
+        row.POSTTYPE = row.STREETTYPE
+        row.POSTDIR = row.SUFDIR
+        row.AN_NAME = row.ACSNAME
+        row.AN_POSTDIR = row.ACSSUF
+        row.A1_PREDIR = ""
+        row.A1_NAME = row.ALIAS1
+        row.A1_POSTTYPE = row.ALIAS1TYP
+        row.A1_POSTDIR = ""
+        row.A2_PREDIR = ""
+        row.A2_NAME = row.ALIAS2
+        row.A2_POSTTYPE = row.ALIAS2TYP
+        row.A2_POSTDIR = ""
+        row.DOT_SRFTYP = row.SURFTYPE
+        row.DOT_FCLASS = row.CLASS
+        row.VERT_LEVEL = row.VERTLEVEL
+        row.SPEED_LMT = row.SPEED
+        row.LOCAL_UID = row.CO_UNIQUE
+
+        # store the row
+        rows.updateRow(row)
+        del row
+
+
+def BoxElder(rows):
+    for row in rows:
+        # set all fields to empty or zero or none
+        setDefaultValues(row)
+
+        # set county specific fields
+        row.COUNTY_L = "49001"
+        row.COUNTY_R = "49001"    
+        
+        #### fix these field names, i copied them from beaver function.....    
+        ##row.FROMADDR_L = row.L_F_ADD
+        ##row.TOADDR_L = row.L_T_ADD
+        ##row.FROMADDR_R = row.R_F_ADD
+        ##row.TOADDR_R = row.R_T_ADD
+        ##row.PREDIR = row.PREDIR[:1]
+        ##row.NAME = row.STREETNAME[:30]
+        ##row.POSTTYPE = row.STREETTYPE
+        ##row.POSTDIR = row.SUFDIR
+        ##row.AN_NAME = row.ACSNAME
+        ##row.AN_POSTDIR = row.ACSSUF
+        ##row.A1_PREDIR = ""
+        ##row.A1_NAME = row.ALIAS1
+        ##row.A1_POSTTYPE = row.ALIAS1TYP
+        ##row.A1_POSTDIR = ""
+        ##row.A2_PREDIR = ""
+        ##row.A2_NAME = row.ALIAS2
+        ##row.A2_POSTTYPE = row.ALIAS2TYP
+        ##row.A2_POSTDIR = ""
+        ##row.DOT_SRFTYP = row.SURFTYPE
+        ##row.DOT_FCLASS = row.CLASS
+        ##row.VERT_LEVEL = row.VERTLEVEL
+        ##row.SPEED_LMT = row.SPEED
+        ##row.LOCAL_UID = row.CO_UNIQUE
+
+        # store the row
+        rows.updateRow(row)
+        del row
+
+
+
+###########################################
+#### GENERAL FUNCTIONS BELOW THIS LINE ####
 
 def setDefaultValues(row):
         row.STATE_L = "UT"
@@ -468,6 +563,72 @@ def removePostTypeIfNumeric(row):
 def removePostDirIfAlpha(row):
     if row.NAME[0].isalpha():
         return True
+
+
+### get a list of road type domain names and descriptions
+##def GetRoadTypeDomains ():
+##    listOfDomains = []
+##    domains = arcpy.da.ListDomains("K:/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb")
+
+##    for domain in domains:
+##        if domain.name == 'CVDomain_StreetType':
+##            coded_values = domain.codedValues
+##            for val, desc in coded_values.items():
+##                listOfDomains.append(val.upper())
+##                listOfDomains.append(desc.upper())
+##    return listOfDomains
+
+
+
+# create a dictionary of coded domain values and descripitons
+def CreatePostTypeDictionary():
+    dictOfPostTypeDomainsDescriptions = {}
+    domains = arcpy.da.ListDomains("K:/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb")
+
+    for domain in domains:
+        if domain.name == 'CVDomain_StreetType':
+            coded_values = domain.codedValues
+            for val, desc in coded_values.items():
+
+                # create a list for the dictionary of coded value and description
+                listOfDomainDescriptions = []
+
+                # check if domain val is same as description, if so only add one to list
+                if val.upper() == desc.upper():
+                    listOfDomainDescriptions.append(val.upper())
+                else:
+                    listOfDomainDescriptions.append(val.upper())
+                    listOfDomainDescriptions.append(desc.upper())
+
+                # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
+                if val == "WAY":
+                    listOfDomainDescriptions.append("WY")
+                if val == "PKWY":
+                    listOfDomainDescriptions.append("PKY")
+
+                # add value and descripiton to the dictionary 
+                dictOfPostTypeDomainsDescriptions[val.upper()] = listOfDomainDescriptions
+
+    return dictOfPostTypeDomainsDescriptions
+
+
+# return the coded domain val (aka: the dict key) from the dictionary 
+def GetCodedDomainValue(valueToCheck, dictionaryToCheck):
+    if valueToCheck == None:
+        valueToCheck = ""
+    for key, value in dictionaryToCheck.iteritems():
+        if valueToCheck == "":
+            return ""
+        if valueToCheck == key:
+            return key
+        if type(value) is str:
+            if valueToCheck == value:
+                return key
+        else:
+            for v in value:
+                if valueToCheck == v:
+                    return key
+    return ""
 
 
 

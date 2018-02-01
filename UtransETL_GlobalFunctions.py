@@ -201,18 +201,18 @@ def UpperCoreUtransFields (rows):
     del row
 
 
-# get a list of road type domain names and descriptions
-def GetRoadTypeDomains (geoDatabaseNgSchema):
-    listOfDomains = []
-    domains = arcpy.da.ListDomains(geoDatabaseNgSchema)
+## get a list of road type domain names and descriptions
+#def GetRoadTypeDomains (geoDatabaseNgSchema):
+#    listOfDomains = []
+#    domains = arcpy.da.ListDomains(geoDatabaseNgSchema)
 
-    for domain in domains:
-        if domain.name == 'CVDomain_StreetType':
-            coded_values = domain.codedValues
-            for val, desc in coded_values.items():
-                listOfDomains.append(val.upper())
-                listOfDomains.append(desc.upper())
-    return listOfDomains
+#    for domain in domains:
+#        if domain.name == 'CVDomain_StreetType':
+#            coded_values = domain.codedValues
+#            for val, desc in coded_values.items():
+#                listOfDomains.append(val.upper())
+#                listOfDomains.append(desc.upper())
+#    return listOfDomains
 
 
 ## remove the post type if the street name is numeric

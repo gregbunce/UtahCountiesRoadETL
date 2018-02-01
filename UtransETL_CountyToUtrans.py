@@ -3,7 +3,7 @@ import sys
 # sys.path.insert(0, '..')
 # import functions from global functions
 from UtransETL_GlobalFunctions import CalcUtransFields, GetUtransFieldSpecs, UpperCoreUtransFields, GetRoadTypeDomains
-from UtransETL_FieldMappingFunctions import Washington, Utah, Davis, Weber, SaltLake
+from UtransETL_FieldMappingFunctions import Washington, Utah, Davis, Weber, SaltLake, Beaver, BoxElder
 import arcpy, os
 from arcpy import env
 import time
@@ -56,7 +56,7 @@ for field in utransFieldSpecs:
 # get roadtype domain values in list
 current_step += 1
 arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Get domain values for street types from utah data model...")
-listOfStreetTypes = GetRoadTypeDomains("K:/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb")
+#listOfStreetTypes = GetRoadTypeDomains("K:/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb")
 
 # loop through all the fields and calc over values.
 current_step += 1
@@ -64,7 +64,7 @@ arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] B
 rows = arcpy.UpdateCursor(countySourceTEMP)
 #if countyName == "Washington":
 #    Washington(rows)
-eval(countyName)(rows, listOfStreetTypes)
+eval(countyName)(rows)
 del rows
 current_step += 1
 arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Finished calculating over values to utrans schema...")
