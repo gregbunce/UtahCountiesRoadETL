@@ -1,4 +1,9 @@
 import arcpy
+from datetime import date
+import os.path
+
+# global scope variables -- see bottom of file for those dependent on fucntion data, aka: variable is assigned after the functions have been instantiated
+NextGenFGDB = "K:/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb"
 
 def Washington(rows):
     for row in rows:
@@ -14,7 +19,17 @@ def Washington(rows):
         row.TOADDR_R = row.R_T_ADD
         row.PREDIR = row.PRE_DIR[:1]
         row.NAME = row.S_NAME.upper()
-        row.POSTTYPE = row.S_TYPE
+
+        # check if valid post type
+        postTypeDomain = GetCodedDomainValue(row.S_TYPE, dictOfValidPostTypes)
+        if postTypeDomain != "":
+            row.POSTTYPE = postTypeDomain
+        elif postTypeDomain == "" and len(row.S_TYPE) > 1:  
+            # add the post type they gave to the notes field so we can evaluate it
+            row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.S_TYPE + "; "
+            # add the bad domain value to the text file log
+            AddBadValueToTextFile("49053", "POSTTYPE", str(row.STREETTYPE))
+
         row.POSTDIR = row.SUF_DIR
         row.AN_NAME = row.ACS_NAME
         row.AN_POSTDIR = row.ACS_SUF
@@ -80,9 +95,15 @@ def Utah(rows):
                         # it's not a digit, it's alpha roadname
                         row.NAME = row.ROADNAME[:30].upper()
 
-        # check streettype
-        if row.ROADTYPE != None:
-            row.POSTTYPE = row.ROADTYPE.upper()
+        # check if valid post type
+        postTypeDomain = GetCodedDomainValue(row.ROADTYPE, dictOfValidPostTypes)
+        if postTypeDomain != "":
+            row.POSTTYPE = postTypeDomain
+        elif postTypeDomain == "" and len(row.ROADTYPE) > 1:  
+            # add the post type they gave to the notes field so we can evaluate it
+            row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.ROADTYPE + "; "
+            # add the bad domain value to the text file log
+            AddBadValueToTextFile("49049", "POSTTYPE", str(row.STREETTYPE))
 
             # check if it's an acs road to see if we can ommit the streettype value that they often add
             if str_roadname_split != None:
@@ -199,8 +220,17 @@ def Davis(rows):
             row.PREDIR = row.PrefixDire[:1]
         if row.RoadName != None:
             row.NAME = row.RoadName[:40]
-        if row.RoadNameTy != None:
-            row.POSTTYPE = row.RoadNameTy
+
+        # check if valid post type
+        postTypeDomain = GetCodedDomainValue(row.RoadNameTy, dictOfValidPostTypes)
+        if postTypeDomain != "":
+            row.POSTTYPE = postTypeDomain
+        elif postTypeDomain == "" and len(row.RoadNameTy) > 1:  
+            # add the post type they gave to the notes field so we can evaluate it
+            row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.RoadNameTy + "; "
+            # add the bad domain value to the text file log
+            AddBadValueToTextFile("49011", "POSTTYPE", str(row.STREETTYPE))
+           
         row.POSTDIR = row.PostDirect
         row.DOT_SRFTYP = row.RoadSurfac
 
@@ -257,9 +287,6 @@ def Davis(rows):
 
 
 def Weber(rows):
-    # get post direction domains
-    dictOfValidPostTypes = CreatePostTypeDictionary()
-
     for row in rows:
         # set all fields to empty or zero or none
         setDefaultValues(row)
@@ -278,9 +305,11 @@ def Weber(rows):
         postTypeDomain = GetCodedDomainValue(row.STREETTYPE, dictOfValidPostTypes)
         if postTypeDomain != "":
             row.POSTTYPE = postTypeDomain
-        else: # add the post type they gave to the notes field so we can evaluate it
-            if len(validPostType) > 0:
-                row.UTRANS_NOTES = "POSTTYPE: " + postTypeDomain + "; "
+        elif postTypeDomain == "" and len(row.STREETTYPE) > 1:  
+            # add the post type they gave to the notes field so we can evaluate it
+            row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.STREETTYPE + "; "
+            # add the bad domain value to the text file log
+            AddBadValueToTextFile("49057", "POSTTYPE", str(row.STREETTYPE))
 
         row.POSTDIR = row.SUFDIR
         row.AN_NAME = ""
@@ -357,6 +386,16 @@ def SaltLake(rows):
         row.COUNTY_L = "49035"
         row.COUNTY_R = "49035"
 
+        # check if valid post type
+        postTypeDomain = GetCodedDomainValue(row.POSTTYPE, dictOfValidPostTypes)
+        if postTypeDomain != "":
+            row.POSTTYPE = postTypeDomain
+        elif postTypeDomain == "" and len(row.POSTTYPE) > 1:  
+            # add the post type they gave to the notes field so we can evaluate it
+            row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.POSTTYPE + "; "
+            # add the bad domain value to the text file log
+            AddBadValueToTextFile("49035", "POSTTYPE", str(row.STREETTYPE))
+
         # clear the A1_NAME AND A1_POSTYPE fields if the same data is in AN_NAME
         if (row.A1_NAME != ' ' or row.A1_NAME != None or row.A1_NAME is not None) and (row.AN_NAME != ' ' or row.AN_NAME != None or row.AN_NAME is not None):
             a1_name = str(row.A1_NAME) # the numeric street name and post type, and sometimes post dir
@@ -402,9 +441,19 @@ def Beaver(rows):
         row.TOADDR_L = row.L_T_ADD
         row.FROMADDR_R = row.R_F_ADD
         row.TOADDR_R = row.R_T_ADD
-        row.PREDIR = row.PREDIR[:1]
+        row.PREDIR = row.PREDIR_[:1]
         row.NAME = row.STREETNAME[:30]
-        row.POSTTYPE = row.STREETTYPE
+
+        # check if valid post type
+        postTypeDomain = GetCodedDomainValue(row.STREETTYPE, dictOfValidPostTypes)
+        if postTypeDomain != "":
+            row.POSTTYPE = postTypeDomain
+        elif postTypeDomain == "" and len(row.STREETTYPE) > 1:  
+            # add the post type they gave to the notes field so we can evaluate it
+            row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.STREETTYPE + "; "
+            # add the bad domain value to the text file log
+            AddBadValueToTextFile("49001", "POSTTYPE", str(row.STREETTYPE))
+
         row.POSTDIR = row.SUFDIR
         row.AN_NAME = row.ACSNAME
         row.AN_POSTDIR = row.ACSSUF
@@ -421,6 +470,24 @@ def Beaver(rows):
         row.VERT_LEVEL = row.VERTLEVEL
         row.SPEED_LMT = row.SPEED
         row.LOCAL_UID = row.CO_UNIQUE
+
+        # check for status valid values
+        statusValue = GetCodedDomainValue(row.STATUS_, dictOfValidStatus)
+        if statusValue != "":
+            row.STATUS = statusValue
+        elif statusValue == "" and len(row.STATUS_) > 0:
+            # add the post type they gave to the notes field so we can evaluate it
+            row.UTRANS_NOTES = row.UTRANS_NOTES + "STATUS: " + row.STATUS_ + "; "
+            # add the bad domain value to the text file log
+            AddBadValueToTextFile("49001", "STATUS", str(row.STATUS_))
+
+        ## remove PostDir if street name is alpha
+        #if removePostDirIfAlpha(row) == True:
+        #    row.POSTDIR = ""
+
+        # remove PostType is street name is numeric
+        if removePostTypeIfNumeric(row) == True:
+            row.POSTTYPE = ""
 
         # store the row
         rows.updateRow(row)
@@ -467,14 +534,14 @@ def BoxElder(rows):
 
 
 
-###########################################
-#### GENERAL FUNCTIONS BELOW THIS LINE ####
+######################################################################
+#### GENERAL (NON-FIELD COUNTY MAPPING) FUNCTIONS BELOW THIS LINE ####
 
 def setDefaultValues(row):
         row.STATE_L = "UT"
         row.STATE_R = "UT"
         row.COUNTY_L = ""
-        row.COUNTY_R = ""        
+        row.COUNTY_R = "" 
         row.STATUS = ""
         row.CARTOCODE = ""
         row.FULLNAME = ""
@@ -565,28 +632,13 @@ def removePostDirIfAlpha(row):
         return True
 
 
-### get a list of road type domain names and descriptions
-##def GetRoadTypeDomains ():
-##    listOfDomains = []
-##    domains = arcpy.da.ListDomains("K:/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb")
-
-##    for domain in domains:
-##        if domain.name == 'CVDomain_StreetType':
-##            coded_values = domain.codedValues
-##            for val, desc in coded_values.items():
-##                listOfDomains.append(val.upper())
-##                listOfDomains.append(desc.upper())
-##    return listOfDomains
-
-
-
-# create a dictionary of coded domain values and descripitons
-def CreatePostTypeDictionary():
-    dictOfPostTypeDomainsDescriptions = {}
-    domains = arcpy.da.ListDomains("K:/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb")
+# create a dictionary of coded domain values and descripitons for fields with domains
+def CreateDomainDictionary(domain_name):
+    dictOfDomainsValuesDescriptions = {}
+    domains = arcpy.da.ListDomains(NextGenFGDB)
 
     for domain in domains:
-        if domain.name == 'CVDomain_StreetType':
+        if domain.name == domain_name:
             coded_values = domain.codedValues
             for val, desc in coded_values.items():
 
@@ -600,22 +652,41 @@ def CreatePostTypeDictionary():
                     listOfDomainDescriptions.append(val.upper())
                     listOfDomainDescriptions.append(desc.upper())
 
-                # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
-                if val == "WAY":
-                    listOfDomainDescriptions.append("WY")
-                if val == "PKWY":
-                    listOfDomainDescriptions.append("PKY")
+                # ADD CUSTOM VALUES TO DICTIONARY #
+                # if domain is 'CVDomain_StreetType'
+                if domain_name == 'CVDomain_StreetType':
+                    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
+                    if val == "WAY":
+                        listOfDomainDescriptions.append("WY")
+                    if val == "PKWY":
+                        listOfDomainDescriptions.append("PKY")
+
+                # if domain is 'CVDomain_Status'
+                if domain_name == 'CVDomain_Status':
+                    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
+                    if val.upper() == "ACTIVE":
+                        listOfDomainDescriptions.append("A")
+                    if val.upper() == "PLANNED":
+                        listOfDomainDescriptions.append("P")
+                    #if val == "Construction":
+                    #    listOfDomainDescriptions.append("P")
+                    #if val == "Reconstruction":
+                    #    listOfDomainDescriptions.append("P")
+                    if val.upper() == "RETIRED":
+                        listOfDomainDescriptions.append("R")
 
                 # add value and descripiton to the dictionary 
-                dictOfPostTypeDomainsDescriptions[val.upper()] = listOfDomainDescriptions
+                dictOfDomainsValuesDescriptions[val] = listOfDomainDescriptions
 
-    return dictOfPostTypeDomainsDescriptions
+    return dictOfDomainsValuesDescriptions
 
 
 # return the coded domain val (aka: the dict key) from the dictionary 
 def GetCodedDomainValue(valueToCheck, dictionaryToCheck):
-    if valueToCheck == None:
+    if valueToCheck == None or valueToCheck is None or valueToCheck == " ":
         valueToCheck = ""
+    else:
+        valueToCheck = valueToCheck.upper()
     for key, value in dictionaryToCheck.iteritems():
         if valueToCheck == "":
             return ""
@@ -631,87 +702,17 @@ def GetCodedDomainValue(valueToCheck, dictionaryToCheck):
     return ""
 
 
+# add bad value to domain text file log
+def AddBadValueToTextFile(county_number, field_name, field_value):
+    # add the bad domain value to the text doc so we can inspect them
+    text_file_path = "K:/AGRC Projects/UtransEditing/Scripts and Tools/_script_logs/CountiesDomainValueErrors.txt"
+    if os.path.exists(text_file_path):
+        file = open(text_file_path, "a")
+        # DATE, COUNTY, FIELDNAME, VALUE
+        file.write("\n" + str(date.today()) + "," + county_number + "," + field_name + "," + field_value)
+        file.close()
 
-### _________________________________________________
-### use this template for utrans field mapping etl
-#row.STATE_L = "UT"
-#row.STATE_R = "UT"
-#row.COUNTY_L = "490**"
-#row.COUNTY_R = "490**"
-#row.STATUS = ""
-#row.CARTOCODE = ""
-#row.FULLNAME = ""
-#row.FROMADDR_L = 0
-#row.TOADDR_L = 0
-#row.FROMADDR_R = 0
-#row.TOADDR_R = 0
-#row.PARITY_L = ""
-#row.PARITY_R = ""
-#row.PREDIR = ""
-#row.NAME = ""
-#row.POSTTYPE = ""
-#row.POSTDIR = ""
-#row.AN_NAME = ""
-#row.AN_POSTDIR = ""
-#row.A1_PREDIR = ""
-#row.A1_NAME = ""
-#row.A1_POSTTYPE = ""
-#row.A1_POSTDIR = ""
-#row.A2_PREDIR = ""
-#row.A2_NAME = ""
-#row.A2_POSTTYPE = ""
-#row.A2_POSTDIR = ""
-#row.QUADRANT_L = ""
-#row.QUADRANT_R = ""
-#row.ADDRSYS_L = ""
-#row.ADDRSYS_R = ""
-#row.POSTCOMM_L = ""
-#row.POSTCOMM_R = ""
-#row.ZIPCODE_L = ""
-#row.ZIPCODE_R = ""
-#row.INCMUNI_L = ""
-#row.INCMUNI_R = ""
-#row.UNINCCOM_L = ""
-#row.UNINCCOM_R = ""
-#row.NBRHDCOM_L = ""
-#row.NBRHDCOM_R = ""
-#row.ER_CAD_ZONES = ""
-#row.ESN_L = ""
-#row.ESN_R = ""
-#row.MSAGCOMM_L = ""
-#row.MSAGCOMM_R = ""
-#row.ONEWAY = ""
-#row.VERT_LEVEL = ""
-#row.SPEED_LMT = None
-#row.ACCESSCODE = ""
-#row.DOT_HWYNAM = ""
-#row.DOT_RTNAME = ""
-#row.DOT_RTPART = ""
-#row.DOT_F_MILE = None
-#row.DOT_T_MILE = None
-#row.DOT_FCLASS = ""
-#row.DOT_SRFTYP = ""
-#row.DOT_CLASS = ""
-#row.DOT_OWN_L = ""
-#row.DOT_OWN_R = ""
-#row.DOT_AADT = None
-#row.DOT_AADTYR = ""
-#row.DOT_THRULANES = None
-#row.BIKE_L = ""
-#row.BIKE_R = ""
-#row.BIKE_PLN_L = ""
-#row.BIKE_PLN_R = ""
-#row.BIKE_REGPR = ""
-#row.BIKE_NOTES = ""
-#row.UNIQUE_ID = ""
-#row.LOCAL_UID = ""
-#row.UTAHRD_UID = ""
-#row.SOURCE = ""
-#row.UPDATED = None
-#row.EFFECTIVE = None
-#row.EXPIRE = None
-#row.CREATED = None
-#row.CREATOR = ""
-#row.EDITOR = ""
-#row.CUSTOMTAGS = ""
-#row.UTRANS_NOTES = ""
+
+## global variables that are dependent on function instantiation
+dictOfValidPostTypes = CreateDomainDictionary('CVDomain_StreetType')
+dictOfValidStatus = CreateDomainDictionary('CVDomain_Status')

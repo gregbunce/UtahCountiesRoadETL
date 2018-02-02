@@ -2,14 +2,17 @@ import sys
 # go up a level in directory structure
 # sys.path.insert(0, '..')
 # import functions from global functions
-from UtransETL_GlobalFunctions import CalcUtransFields, GetUtransFieldSpecs, UpperCoreUtransFields, GetRoadTypeDomains
+from UtransETL_GlobalFunctions import CalcUtransFields, GetUtransFieldSpecs, UpperCoreUtransFields
 from UtransETL_FieldMappingFunctions import Washington, Utah, Davis, Weber, SaltLake, Beaver, BoxElder
 import arcpy, os
 from arcpy import env
 import time
 from datetime import date
 
+# get county name
 countyName = arcpy.GetParameterAsText(1)
+
+# create print message variables
 total_steps = 13
 current_step = 0
 
@@ -50,8 +53,16 @@ utransFieldSpecs = GetUtransFieldSpecs()
 current_step += 1
 arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Adding missing fields to county-temp layer...")
 for field in utransFieldSpecs:
-   if not arcpy.ListFields(countySourceTEMP, field[0]):
-       arcpy.AddField_management(*(countySourceTEMP,) + field)
+    # the field is not there, so add the utrans-based-schema one
+    if not arcpy.ListFields(countySourceTEMP, field[0]):
+        arcpy.AddField_management(*(countySourceTEMP,) + field)
+    else:
+        # field is there so rename it (add underscore after field name so we know it's the county's field when field mapping)
+        new_field_name = str(field[0]) + "_"
+        arcpy.AddMessage("renamed " + field[0] + " to " + new_field_name)
+        arcpy.AlterField_management(countySourceTEMP, field[0], new_field_name)
+        # add utrans-based-domain one
+        arcpy.AddField_management(*(countySourceTEMP,) + field)
 
 # get roadtype domain values in list
 current_step += 1
@@ -69,7 +80,7 @@ del rows
 current_step += 1
 arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Finished calculating over values to utrans schema...")
       
-# append VECC temp schema with UTNGDM
+# append county temp schema with UTNGDM
 current_step += 1
 arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Append county-temp values to Utrans Data Model feature class.")
 arcpy.Append_management (countySourceTEMP, outputFeatureClass, "NO_TEST", "", "")
