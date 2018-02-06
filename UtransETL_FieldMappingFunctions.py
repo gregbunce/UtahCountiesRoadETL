@@ -305,12 +305,13 @@ def Weber(rows):
         postTypeDomain = GetCodedDomainValue(row.STREETTYPE, dictOfValidPostTypes)
         if postTypeDomain != "":
             row.POSTTYPE = postTypeDomain
-        elif postTypeDomain == "" and len(row.STREETTYPE) > 1:  
-            # add the post type they gave to the notes field so we can evaluate it
-            row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.STREETTYPE + "; "
-            # add the bad domain value to the text file log
-            AddBadValueToTextFile("49057", "POSTTYPE", str(row.STREETTYPE))
-
+        elif postTypeDomain == "" and row.STREETTYPE != None:
+            if len(row.STREETTYPE) > 1:
+                # add the post type they gave to the notes field so we can evaluate it
+                row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.STREETTYPE + "; "
+                # add the bad domain value to the text file log
+                AddBadValueToTextFile("49057", "POSTTYPE", str(row.STREETTYPE))
+        
         row.POSTDIR = row.SUFDIR
         row.AN_NAME = ""
         row.AN_POSTDIR = ""
@@ -388,7 +389,6 @@ def SaltLake(rows):
 
         ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
         # transfer values from same name fields that were renamed with an underscore (this allows us to enforce our domains via the validation code here) 
-        row.STATUS = row.STATUS_
         row.CARTOCODE = row.CARTOCODE_
         row.FULLNAME = row.FULLNAME_
         row.FROMADDR_L = row.FROMADDR_L_
@@ -409,10 +409,6 @@ def SaltLake(rows):
         row.A2_NAME = row.A2_NAME_
         row.A2_POSTTYPE = row.A2_POSTTYPE_
         row.A2_POSTDIR = row.A2_POSTDIR_
-        row.STATE_L = row.STATE_L_
-        row.STATE_R = row.STATE_R_
-        row.COUNTY_L = row.COUNTY_L_
-        row.COUNTY_R = row.COUNTY_R_
         row.ADDRSYS_L = row.ADDRSYS_L_
         row.ADDRSYS_R = row.ADDRSYS_R_
         row.ZIPCODE_L = row.ZIPCODE_L_
@@ -421,7 +417,6 @@ def SaltLake(rows):
         row.INCMUNI_R = row.INCMUNI_R_
         row.UNINCCOM_L = row.UNINCCOM_L_
         row.UNINCCOM_R = row.UNINCCOM_R_
-        row.ONEWAY = row.ONEWAY_
         row.VERT_LEVEL = row.VERT_LEVEL_
         row.SPEED_LMT = row.SPEED_LMT_
         row.ACCESSCODE = row.ACCESSCODE_
@@ -453,7 +448,7 @@ def SaltLake(rows):
         row.CUSTOMTAGS = row.CUSTOMTAGS_
 
         ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
-        # check if valid post type
+        # validate POSTTYPE value
         postTypeDomain = GetCodedDomainValue(row.POSTTYPE_, dictOfValidPostTypes)
         if postTypeDomain != "":
             row.POSTTYPE = postTypeDomain
@@ -463,6 +458,29 @@ def SaltLake(rows):
                 row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.POSTTYPE_ + "; "
                 # add the bad domain value to the text file log
                 AddBadValueToTextFile("49035", "POSTTYPE", str(row.POSTTYPE_))
+
+        # validate STATUS value
+        statusDomain = GetCodedDomainValue(row.STATUS_, dictOfValidStatus)
+        if statusDomain != "":
+            row.STATUS = statusDomain
+        elif statusDomain == "" and row.STATUS_ != None: 
+            if len(row.STATUS_) > 1:  
+                # add the post type they gave to the notes field so we can evaluate it
+                row.UTRANS_NOTES = row.UTRANS_NOTES + "STATUS: " + row.STATUS_ + "; "
+                # add the bad domain value to the text file log
+                AddBadValueToTextFile("49035", "STATUS", str(row.STATUS_))
+
+        # validate ONEWAY value (vecc doesn't have a domain on this field, but their length is limited to one character)
+        onewayDomain = GetCodedDomainValue(row.ONEWAY_, dictOfValidOneWay)
+        if onewayDomain != "":
+            row.ONEWAY = onewayDomain
+        elif onewayDomain == "" and row.ONEWAY_ != None: 
+            if len(row.ONEWAY_) > 1:  
+                # add the post type they gave to the notes field so we can evaluate it
+                row.UTRANS_NOTES = row.UTRANS_NOTES + "ONEWAY: " + row.ONEWAY_ + "; "
+                # add the bad domain value to the text file log
+                AddBadValueToTextFile("49035", "ONEWAY", str(row.ONEWAY_))
+
 
         # clear the A1_NAME AND A1_POSTYPE fields if the same data is in AN_NAME
         if (row.A1_NAME_ != ' ' or row.A1_NAME_ != None or row.A1_NAME_ is not None) and (row.AN_NAME_ != ' ' or row.AN_NAME_ != None or row.AN_NAME_ is not None):
@@ -715,10 +733,10 @@ def CreateDomainDictionary(domain_name):
 
                 # check if domain val is same as description, if so only add one to list
                 if val.upper() == desc.upper():
-                    listOfDomainDescriptions.append(val.upper())
+                    listOfDomainDescriptions.append(val.upper().strip())
                 else:
-                    listOfDomainDescriptions.append(val.upper())
-                    listOfDomainDescriptions.append(desc.upper())
+                    listOfDomainDescriptions.append(val.upper().strip())
+                    listOfDomainDescriptions.append(desc.upper().strip())
 
                 # ADD CUSTOM VALUES TO DICTIONARY #
                 # if domain is 'CVDomain_StreetType'
@@ -736,12 +754,38 @@ def CreateDomainDictionary(domain_name):
                         listOfDomainDescriptions.append("A")
                     if val.upper() == "PLANNED":
                         listOfDomainDescriptions.append("P")
-                    #if val == "Construction":
-                    #    listOfDomainDescriptions.append("P")
-                    #if val == "Reconstruction":
-                    #    listOfDomainDescriptions.append("P")
                     if val.upper() == "RETIRED":
                         listOfDomainDescriptions.append("R")
+
+                ## if domain is 'CVDomain_AccessIssues'
+                #if domain_name == 'CVDomain_AccessIssues':
+                #    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
+                #    if val.upper() == "":
+                #        listOfDomainDescriptions.append("")
+
+                ## if domain is 'CVDomain_RoadClass'
+                #if domain_name == 'CVDomain_RoadClass':
+                #    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
+                #    if val.upper() == "":
+                #        listOfDomainDescriptions.append("")
+
+                ## if domain is 'CVDomain_SurfaceType'
+                #if domain_name == 'CVDomain_SurfaceType':
+                #    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
+                #    if val.upper() == "":
+                #        listOfDomainDescriptions.append("")
+
+                ## if domain is 'CVDomain_OneWay'
+                #if domain_name == 'CVDomain_OneWay':
+                #    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
+                #    if val.upper() == "":
+                #        listOfDomainDescriptions.append("")
+
+                ## if domain is 'CVDomain_VerticalLevel'
+                #if domain_name == 'CVDomain_VerticalLevel':
+                #    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
+                #    if val.upper() == "":
+                #        listOfDomainDescriptions.append("")
 
                 # add value and descripiton to the dictionary 
                 dictOfDomainsValuesDescriptions[val] = listOfDomainDescriptions
@@ -789,4 +833,8 @@ dictOfValidRoadClass = CreateDomainDictionary('CVDomain_RoadClass')
 dictOfValidSurfaceType = CreateDomainDictionary('CVDomain_SurfaceType')
 dictOfValidOneWay = CreateDomainDictionary('CVDomain_OneWay')
 dictOfValidVerticalLevel = CreateDomainDictionary('CVDomain_VerticalLevel')
-
+arcpy.AddMessage(dictOfValidAccessIssues)
+arcpy.AddMessage(dictOfValidRoadClass)
+arcpy.AddMessage(dictOfValidSurfaceType)
+arcpy.AddMessage(dictOfValidOneWay)
+arcpy.AddMessage(dictOfValidVerticalLevel)
