@@ -386,20 +386,88 @@ def SaltLake(rows):
         row.COUNTY_L = "49035"
         row.COUNTY_R = "49035"
 
+        ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
+        # transfer values from same name fields that were renamed with an underscore (this allows us to enforce our domains via the validation code here) 
+        row.STATUS = row.STATUS_
+        row.CARTOCODE = row.CARTOCODE_
+        row.FULLNAME = row.FULLNAME_
+        row.FROMADDR_L = row.FROMADDR_L_
+        row.TOADDR_L = row.TOADDR_L_
+        row.FROMADDR_R = row.FROMADDR_R_
+        row.TOADDR_R = row.TOADDR_R_
+        row.PARITY_L = row.PARITY_L_
+        row.PARITY_R = row.PARITY_R_
+        row.PREDIR = row.PREDIR_
+        row.NAME = row.NAME_
+        row.POSTDIR = row.POSTDIR_
+        row.AN_NAME = row.AN_NAME_
+        row.AN_POSTDIR = row.AN_POSTDIR_
+        row.A1_NAME = row.A1_NAME_
+        row.A1_POSTTYPE = row.A1_POSTTYPE_
+        row.A1_POSTDIR = row.A1_POSTDIR_
+        row.A2_PREDIR = row.A2_PREDIR_
+        row.A2_NAME = row.A2_NAME_
+        row.A2_POSTTYPE = row.A2_POSTTYPE_
+        row.A2_POSTDIR = row.A2_POSTDIR_
+        row.STATE_L = row.STATE_L_
+        row.STATE_R = row.STATE_R_
+        row.COUNTY_L = row.COUNTY_L_
+        row.COUNTY_R = row.COUNTY_R_
+        row.ADDRSYS_L = row.ADDRSYS_L_
+        row.ADDRSYS_R = row.ADDRSYS_R_
+        row.ZIPCODE_L = row.ZIPCODE_L_
+        row.ZIPCODE_R = row.ZIPCODE_R_
+        row.INCMUNI_L = row.INCMUNI_L_
+        row.INCMUNI_R = row.INCMUNI_R_
+        row.UNINCCOM_L = row.UNINCCOM_L_
+        row.UNINCCOM_R = row.UNINCCOM_R_
+        row.ONEWAY = row.ONEWAY_
+        row.VERT_LEVEL = row.VERT_LEVEL_
+        row.SPEED_LMT = row.SPEED_LMT_
+        row.ACCESSCODE = row.ACCESSCODE_
+        row.DOT_HWYNAM = row.DOT_HWYNAM_
+        row.DOT_RTNAME = row.DOT_RTNAME_
+        row.DOT_RTPART = row.DOT_RTPART_
+        row.DOT_F_MILE = row.DOT_F_MILE_
+        row.DOT_T_MILE = row.DOT_T_MILE_
+        row.DOT_FCLASS = row.DOT_FCLASS_
+        row.DOT_SRFTYP = row.DOT_SRFTYP_
+        row.DOT_CLASS = row.DOT_CLASS_
+        row.DOT_OWN_L = row.DOT_OWN_L_
+        row.DOT_OWN_R = row.DOT_OWN_R_
+        row.DOT_AADT = row.DOT_AADT_
+        row.DOT_AADTYR = row.DOT_AADTYR_
+        row.BIKE_L = row.BIKE_L_
+        row.BIKE_R = row.BIKE_R_
+        row.BIKE_PLN_L = row.BIKE_PLN_L_
+        row.BIKE_PLN_R = row.BIKE_PLN_R_
+        row.BIKE_NOTES = row.BIKE_NOTES_
+        row.UNIQUE_ID = row.UNIQUE_ID_
+        row.LOCAL_UID = row.LOCAL_UID_
+        row.UTAHRD_UID = row.UTAHRD_UID_
+        row.SOURCE = row.SOURCE_
+        row.UPDATED = row.UPDATED_
+        row.EFFECTIVE = row.EFFECTIVE_
+        row.EXPIRE = row.EXPIRE_
+        row.EDITOR = row.EDITOR_
+        row.CUSTOMTAGS = row.CUSTOMTAGS_
+
+        ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
         # check if valid post type
-        postTypeDomain = GetCodedDomainValue(row.POSTTYPE, dictOfValidPostTypes)
+        postTypeDomain = GetCodedDomainValue(row.POSTTYPE_, dictOfValidPostTypes)
         if postTypeDomain != "":
             row.POSTTYPE = postTypeDomain
-        elif postTypeDomain == "" and len(row.POSTTYPE) > 1:  
-            # add the post type they gave to the notes field so we can evaluate it
-            row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.POSTTYPE + "; "
-            # add the bad domain value to the text file log
-            AddBadValueToTextFile("49035", "POSTTYPE", str(row.STREETTYPE))
+        elif postTypeDomain == "" and row.POSTTYPE_ != None: 
+            if len(row.POSTTYPE_) > 1:  
+                # add the post type they gave to the notes field so we can evaluate it
+                row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.POSTTYPE_ + "; "
+                # add the bad domain value to the text file log
+                AddBadValueToTextFile("49035", "POSTTYPE", str(row.POSTTYPE_))
 
         # clear the A1_NAME AND A1_POSTYPE fields if the same data is in AN_NAME
-        if (row.A1_NAME != ' ' or row.A1_NAME != None or row.A1_NAME is not None) and (row.AN_NAME != ' ' or row.AN_NAME != None or row.AN_NAME is not None):
-            a1_name = str(row.A1_NAME) # the numeric street name and post type, and sometimes post dir
-            an_name = str(row.AN_NAME) # just the numeric street name
+        if (row.A1_NAME_ != ' ' or row.A1_NAME_ != None or row.A1_NAME_ is not None) and (row.AN_NAME_ != ' ' or row.AN_NAME_ != None or row.AN_NAME_ is not None):
+            a1_name = str(row.A1_NAME_) # the numeric street name and post type, and sometimes post dir
+            an_name = str(row.AN_NAME_) # just the numeric street name
             # check if street name is contained in the A1_NAME field
             arcpy.AddMessage(a1_name + " " + an_name)
             if a1_name != '' and an_name != '':
@@ -411,9 +479,9 @@ def SaltLake(rows):
                     row.A1_POSTDIR = ""
   
          # clear the A2_NAME AND A2_POSTYPE fields if the same data is in AN_NAME
-        if (row.A2_NAME != ' ' or row.A2_NAME != None or row.A2_NAME is not None) and (row.AN_NAME != ' ' or row.AN_NAME != None or row.AN_NAME is not None):
-            a2_name = str(row.A2_NAME) # the numeric street name and post type, and sometimes post dir
-            an_name = str(row.AN_NAME) # just the numeric street name
+        if (row.A2_NAME_ != ' ' or row.A2_NAME_ != None or row.A2_NAME_ is not None) and (row.AN_NAME_ != ' ' or row.AN_NAME_ != None or row.AN_NAME_ is not None):
+            a2_name = str(row.A2_NAME_) # the numeric street name and post type, and sometimes post dir
+            an_name = str(row.AN_NAME_) # just the numeric street name
             # check if street name is contained in the A2_NAME field
             arcpy.AddMessage(a2_name + " " + an_name)
             if a2_name != '' and an_name != '':
@@ -716,3 +784,9 @@ def AddBadValueToTextFile(county_number, field_name, field_value):
 ## global variables that are dependent on function instantiation
 dictOfValidPostTypes = CreateDomainDictionary('CVDomain_StreetType')
 dictOfValidStatus = CreateDomainDictionary('CVDomain_Status')
+dictOfValidAccessIssues = CreateDomainDictionary('CVDomain_AccessIssues')
+dictOfValidRoadClass = CreateDomainDictionary('CVDomain_RoadClass')
+dictOfValidSurfaceType = CreateDomainDictionary('CVDomain_SurfaceType')
+dictOfValidOneWay = CreateDomainDictionary('CVDomain_OneWay')
+dictOfValidVerticalLevel = CreateDomainDictionary('CVDomain_VerticalLevel')
+
