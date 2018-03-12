@@ -9,10 +9,11 @@ def Washington(rows):
     for row in rows:
         # set all fields to empty or zero or none
         setDefaultValues(row)
+        countyNumber = "49053"
 
         # set county specific fields
-        row.COUNTY_L = "49053"
-        row.COUNTY_R = "49053"
+        row.COUNTY_L = countyNumber
+        row.COUNTY_R = countyNumber
         row.FROMADDR_L = row.L_F_ADD
         row.TOADDR_L = row.L_T_ADD
         row.FROMADDR_R = row.R_F_ADD
@@ -28,7 +29,7 @@ def Washington(rows):
             # add the post type they gave to the notes field so we can evaluate it
             row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.S_TYPE + "; "
             # add the bad domain value to the text file log
-            AddBadValueToTextFile("49053", "POSTTYPE", str(row.STREETTYPE))
+            AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.STREETTYPE))
 
         row.POSTDIR = row.SUF_DIR
         row.AN_NAME = row.ACS_NAME
@@ -50,6 +51,7 @@ def Washington(rows):
 def Utah(rows):
     for row in rows:
         # variables
+        countyNumber = "49049"
         POSTDIR_FROM_ROADNAME = None
         POSTDIR_FROM_ALTROADNAME = None
         ACS_FROM_ALTROADNAME = None
@@ -61,8 +63,8 @@ def Utah(rows):
         setDefaultValues(row)
 
         # set county specific fields
-        row.COUNTY_L = "49049"
-        row.COUNTY_R = "49049"
+        row.COUNTY_L = countyNumber
+        row.COUNTY_R = countyNumber
         row.FROMADDR_L = row.FROMLEFT
         row.TOADDR_L = row.TOLEFT
         row.FROMADDR_R = row.FROMRIGHT
@@ -103,7 +105,7 @@ def Utah(rows):
             # add the post type they gave to the notes field so we can evaluate it
             row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.ROADTYPE + "; "
             # add the bad domain value to the text file log
-            AddBadValueToTextFile("49049", "POSTTYPE", str(row.STREETTYPE))
+            AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.STREETTYPE))
 
             # check if it's an acs road to see if we can ommit the streettype value that they often add
             if str_roadname_split != None:
@@ -204,14 +206,15 @@ def Utah(rows):
 def Davis(rows):
     # get post direction domains
     listOfStreetTypes = GetRoadTypeDomains()
+    countyNumber = "49011"
 
     for row in rows:
         # set all fields to empty or zero or none
         setDefaultValues(row)
 
         # set county specific fields
-        row.COUNTY_L = "49011"
-        row.COUNTY_R = "49011"
+        row.COUNTY_L = countyNumber
+        row.COUNTY_R = countyNumber
         row.FROMADDR_L = row.LeftFrom
         row.TOADDR_L = row.LeftTo
         row.FROMADDR_R = row.RightFrom
@@ -229,7 +232,7 @@ def Davis(rows):
             # add the post type they gave to the notes field so we can evaluate it
             row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.RoadNameTy + "; "
             # add the bad domain value to the text file log
-            AddBadValueToTextFile("49011", "POSTTYPE", str(row.STREETTYPE))
+            AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.STREETTYPE))
            
         row.POSTDIR = row.PostDirect
         row.DOT_SRFTYP = row.RoadSurfac
@@ -290,10 +293,11 @@ def Weber(rows):
     for row in rows:
         # set all fields to empty or zero or none
         setDefaultValues(row)
+        countyNumber = "49057"
 
         # set county specific fields
-        row.COUNTY_L = "49057"
-        row.COUNTY_R = "49057"        
+        row.COUNTY_L = countyNumber
+        row.COUNTY_R = countyNumber        
         row.FROMADDR_L = row.LEFTFROM
         row.TOADDR_L = row.LEFTTO
         row.FROMADDR_R = row.RIGHTFROM
@@ -310,7 +314,7 @@ def Weber(rows):
                 # add the post type they gave to the notes field so we can evaluate it
                 row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.STREETTYPE + "; "
                 # add the bad domain value to the text file log
-                AddBadValueToTextFile("49057", "POSTTYPE", str(row.STREETTYPE))
+                AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.STREETTYPE))
         
         row.POSTDIR = row.SUFDIR
         row.AN_NAME = ""
@@ -381,11 +385,13 @@ def Weber(rows):
 
 def SaltLake(rows):
     for row in rows:
+        countyNumber = "49035"
+        
         # set county specific fields
         row.STATE_L = "UT"
         row.STATE_R = "UT"
-        row.COUNTY_L = "49035"
-        row.COUNTY_R = "49035"
+        row.COUNTY_L = countyNumber
+        row.COUNTY_R = countyNumber
 
         ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
         # transfer values from same name fields that were renamed with an underscore (this allows us to enforce our domains via the validation code here) 
@@ -457,7 +463,7 @@ def SaltLake(rows):
                 # add the post type they gave to the notes field so we can evaluate it
                 row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.POSTTYPE_ + "; "
                 # add the bad domain value to the text file log
-                AddBadValueToTextFile("49035", "POSTTYPE", str(row.POSTTYPE_))
+                AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.POSTTYPE_))
 
         # validate STATUS value
         statusDomain = GetCodedDomainValue(row.STATUS_, dictOfValidStatus)
@@ -468,7 +474,7 @@ def SaltLake(rows):
                 # add the post type they gave to the notes field so we can evaluate it
                 row.UTRANS_NOTES = row.UTRANS_NOTES + "STATUS: " + row.STATUS_ + "; "
                 # add the bad domain value to the text file log
-                AddBadValueToTextFile("49035", "STATUS", str(row.STATUS_))
+                AddBadValueToTextFile(countyNumber, "STATUS", str(row.STATUS_))
 
         # validate ONEWAY value (vecc doesn't have a domain on this field, but their length is limited to one character)
         onewayDomain = GetCodedDomainValue(row.ONEWAY_, dictOfValidOneWay)
@@ -479,7 +485,7 @@ def SaltLake(rows):
                 # add the post type they gave to the notes field so we can evaluate it
                 row.UTRANS_NOTES = row.UTRANS_NOTES + "ONEWAY: " + row.ONEWAY_ + "; "
                 # add the bad domain value to the text file log
-                AddBadValueToTextFile("49035", "ONEWAY", str(row.ONEWAY_))
+                AddBadValueToTextFile(countyNumber, "ONEWAY", str(row.ONEWAY_))
 
 
         # clear the A1_NAME AND A1_POSTYPE fields if the same data is in AN_NAME
@@ -519,10 +525,11 @@ def Beaver(rows):
     for row in rows:
         # set all fields to empty or zero or none
         setDefaultValues(row)
+        countyNumber = "49001"
 
         # set county specific fields
-        row.COUNTY_L = "49001"
-        row.COUNTY_R = "49001"        
+        row.COUNTY_L = countyNumber
+        row.COUNTY_R = countyNumber        
         row.FROMADDR_L = row.L_F_ADD
         row.TOADDR_L = row.L_T_ADD
         row.FROMADDR_R = row.R_F_ADD
@@ -538,7 +545,7 @@ def Beaver(rows):
             # add the post type they gave to the notes field so we can evaluate it
             row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.STREETTYPE + "; "
             # add the bad domain value to the text file log
-            AddBadValueToTextFile("49001", "POSTTYPE", str(row.STREETTYPE))
+            AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.STREETTYPE))
 
         row.POSTDIR = row.SUFDIR
         row.AN_NAME = row.ACSNAME
@@ -565,7 +572,7 @@ def Beaver(rows):
             # add the post type they gave to the notes field so we can evaluate it
             row.UTRANS_NOTES = row.UTRANS_NOTES + "STATUS: " + row.STATUS_ + "; "
             # add the bad domain value to the text file log
-            AddBadValueToTextFile("49001", "STATUS", str(row.STATUS_))
+            AddBadValueToTextFile(countyNumber, "STATUS", str(row.STATUS_))
 
         ## remove PostDir if street name is alpha
         #if removePostDirIfAlpha(row) == True:
@@ -584,20 +591,31 @@ def BoxElder(rows):
     for row in rows:
         # set all fields to empty or zero or none
         setDefaultValues(row)
+        countyNumber = "49003"
 
         # set county specific fields
-        row.COUNTY_L = "49001"
-        row.COUNTY_R = "49001"    
+        row.COUNTY_L = countyNumber
+        row.COUNTY_R = countyNumber    
         
-        #### fix these field names, i copied them from beaver function.....    
-        ##row.FROMADDR_L = row.L_F_ADD
-        ##row.TOADDR_L = row.L_T_ADD
-        ##row.FROMADDR_R = row.R_F_ADD
-        ##row.TOADDR_R = row.R_T_ADD
-        ##row.PREDIR = row.PREDIR[:1]
-        ##row.NAME = row.STREETNAME[:30]
-        ##row.POSTTYPE = row.STREETTYPE
-        ##row.POSTDIR = row.SUFDIR
+        ## fix these field names, i copied them from beaver function.....    
+        row.FROMADDR_L = row.L_F_ADD
+        row.TOADDR_L = row.L_T_ADD
+        row.FROMADDR_R = row.R_F_ADD
+        row.TOADDR_R = row.R_T_ADD
+        row.PREDIR = row.PRE_DIR[:1]
+        row.NAME = row.S_NAME[:30]
+
+        # check if valid post type
+        postTypeDomain = GetCodedDomainValue(row.S_TYPE, dictOfValidPostTypes)
+        if postTypeDomain != "":
+            row.POSTTYPE = postTypeDomain
+        elif postTypeDomain == "" and len(row.S_TYPE) > 1:  
+            # add the post type they gave to the notes field so we can evaluate it
+            row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.S_TYPE + "; "
+            # add the bad domain value to the text file log
+            AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.S_TYPE))
+
+        row.POSTDIR = row.SUF_DIR
         ##row.AN_NAME = row.ACSNAME
         ##row.AN_POSTDIR = row.ACSSUF
         ##row.A1_PREDIR = ""
@@ -609,10 +627,21 @@ def BoxElder(rows):
         ##row.A2_POSTTYPE = row.ALIAS2TYP
         ##row.A2_POSTDIR = ""
         ##row.DOT_SRFTYP = row.SURFTYPE
-        ##row.DOT_FCLASS = row.CLASS
-        ##row.VERT_LEVEL = row.VERTLEVEL
-        ##row.SPEED_LMT = row.SPEED
-        ##row.LOCAL_UID = row.CO_UNIQUE
+        
+        # check if valid CLASS
+        classDomain = GetCodedDomainValue(row.CLASS, dictOfValidRoadClass)
+        if classDomain != "":
+            row.DOT_FCLASS = classDomain
+        elif classDomain == "" and len(row.CLASS) > 0:
+            # add the CLASS they gave to the notes field so we can evaluate it
+            row.UTRANS_NOTES = row.UTRANS_NOTES + "DOT_FCLASS: " + row.CLASS + "; "
+            # add the bad domain value to the text file log
+            AddBadValueToTextFile(countyNumber, "DOT_FCLASS", str(row.CLASS))
+        
+        row.VERT_LEVEL = row.VERTLEVEL
+        row.SPEED_LMT = row.SPD_LMT
+        row.LOCAL_UID = row.CO_UNIQUE
+        row.ONEWAY = row.ONE_WAY
 
         # store the row
         rows.updateRow(row)
@@ -833,6 +862,8 @@ dictOfValidRoadClass = CreateDomainDictionary('CVDomain_RoadClass')
 dictOfValidSurfaceType = CreateDomainDictionary('CVDomain_SurfaceType')
 dictOfValidOneWay = CreateDomainDictionary('CVDomain_OneWay')
 dictOfValidVerticalLevel = CreateDomainDictionary('CVDomain_VerticalLevel')
+arcpy.AddMessage(dictOfValidPostTypes)
+arcpy.AddMessage(dictOfValidStatus)
 arcpy.AddMessage(dictOfValidAccessIssues)
 arcpy.AddMessage(dictOfValidRoadClass)
 arcpy.AddMessage(dictOfValidSurfaceType)
