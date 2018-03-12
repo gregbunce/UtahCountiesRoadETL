@@ -605,7 +605,7 @@ def BoxElder(rows):
         row.PREDIR = row.PRE_DIR[:1]
         row.NAME = row.S_NAME[:30]
 
-        # check if valid post type
+        # check if valid POSTTYPE
         postTypeDomain = GetCodedDomainValue(row.S_TYPE, dictOfValidPostTypes)
         if postTypeDomain != "":
             row.POSTTYPE = postTypeDomain
@@ -616,17 +616,16 @@ def BoxElder(rows):
             AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.S_TYPE))
 
         row.POSTDIR = row.SUF_DIR
-        ##row.AN_NAME = row.ACSNAME
-        ##row.AN_POSTDIR = row.ACSSUF
+        row.AN_NAME = row.ACS_NAME
+        row.AN_POSTDIR = row.ACS_SUF
         ##row.A1_PREDIR = ""
-        ##row.A1_NAME = row.ALIAS1
-        ##row.A1_POSTTYPE = row.ALIAS1TYP
+        row.A1_NAME = row.ALIAS1
+        row.A1_POSTTYPE = row.ALIAS1_TYP
         ##row.A1_POSTDIR = ""
         ##row.A2_PREDIR = ""
-        ##row.A2_NAME = row.ALIAS2
-        ##row.A2_POSTTYPE = row.ALIAS2TYP
+        row.A2_NAME = row.ALIAS2
+        row.A2_POSTTYPE = row.ALIAS2_TYP
         ##row.A2_POSTDIR = ""
-        ##row.DOT_SRFTYP = row.SURFTYPE
         
         # check if valid CLASS
         classDomain = GetCodedDomainValue(row.CLASS, dictOfValidRoadClass)
