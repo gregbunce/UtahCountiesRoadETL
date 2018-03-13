@@ -609,7 +609,7 @@ def BoxElder(rows):
         postTypeDomain = GetCodedDomainValue(row.S_TYPE, dictOfValidPostTypes)
         if postTypeDomain != "":
             row.POSTTYPE = postTypeDomain
-        elif postTypeDomain == "" and len(row.S_TYPE) > 1:  
+        elif postTypeDomain == "" and len(row.S_TYPE) > 1:
             # add the post type they gave to the notes field so we can evaluate it
             row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.S_TYPE + "; "
             # add the bad domain value to the text file log
@@ -618,21 +618,17 @@ def BoxElder(rows):
         row.POSTDIR = row.SUF_DIR
         row.AN_NAME = row.ACS_NAME
         row.AN_POSTDIR = row.ACS_SUF
-        ##row.A1_PREDIR = ""
         row.A1_NAME = row.ALIAS1
         row.A1_POSTTYPE = row.ALIAS1_TYP
-        ##row.A1_POSTDIR = ""
-        ##row.A2_PREDIR = ""
         row.A2_NAME = row.ALIAS2
         row.A2_POSTTYPE = row.ALIAS2_TYP
-        ##row.A2_POSTDIR = ""
         
         # check if valid CLASS
         classDomain = GetCodedDomainValue(row.CLASS, dictOfValidRoadClass)
         if classDomain != "":
             row.DOT_FCLASS = classDomain
         elif classDomain == "" and row.CLASS is not None:
-            if row.CLASS != "" or row.CLASS != " ":
+            if not row.CLASS.isspace():
                 # add the CLASS they gave to the notes field so we can evaluate it
                 row.UTRANS_NOTES = row.UTRANS_NOTES + "DOT_FCLASS: " + row.CLASS + "; "
                 # add the bad domain value to the text file log
