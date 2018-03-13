@@ -145,3 +145,4 @@ finalFeatureClassOutput = dirname + "\\" + countyName + "ETL_" + strDate
 arcpy.AlterAliasName(finalFeatureClassOutput, "COUNTY_STREETS")
 
 arcpy.AddMessage("ETL Process Done!")
+arcpy.AddMessage("*REMINDER*: Check for non-valid domains in either the UTRANS_NOTES field or the text file here K:/AGRC Projects/UtransEditing/Scripts and Tools/_script_logs/CountiesDomainValueErrors.txt")

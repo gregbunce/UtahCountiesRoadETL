@@ -631,11 +631,12 @@ def BoxElder(rows):
         classDomain = GetCodedDomainValue(row.CLASS, dictOfValidRoadClass)
         if classDomain != "":
             row.DOT_FCLASS = classDomain
-        elif classDomain == "" and len(row.CLASS) > 0:
-            # add the CLASS they gave to the notes field so we can evaluate it
-            row.UTRANS_NOTES = row.UTRANS_NOTES + "DOT_FCLASS: " + row.CLASS + "; "
-            # add the bad domain value to the text file log
-            AddBadValueToTextFile(countyNumber, "DOT_FCLASS", str(row.CLASS))
+        elif classDomain == "" and row.CLASS is not None:
+            if row.CLASS != "" or row.CLASS != " ":
+                # add the CLASS they gave to the notes field so we can evaluate it
+                row.UTRANS_NOTES = row.UTRANS_NOTES + "DOT_FCLASS: " + row.CLASS + "; "
+                # add the bad domain value to the text file log
+                AddBadValueToTextFile(countyNumber, "DOT_FCLASS", str(row.CLASS))
         
         row.VERT_LEVEL = row.VERTLEVEL
         row.SPEED_LMT = row.SPD_LMT
