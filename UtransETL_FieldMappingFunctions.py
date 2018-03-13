@@ -642,6 +642,11 @@ def BoxElder(rows):
         row.LOCAL_UID = row.CO_UNIQUE
         row.ONEWAY = row.ONE_WAY
 
+        # map fields that have been remapped in UtransETL_CountyToUtrans.py >> step 3
+        row.DOT_RTNAME = row.DOT_RTNAME_
+        row.DOT_RTPART = row.DOT_RTPART_
+        row.SOURCE = row.SOURCE_
+
         # store the row
         rows.updateRow(row)
         del row
@@ -861,10 +866,10 @@ dictOfValidRoadClass = CreateDomainDictionary('CVDomain_RoadClass')
 dictOfValidSurfaceType = CreateDomainDictionary('CVDomain_SurfaceType')
 dictOfValidOneWay = CreateDomainDictionary('CVDomain_OneWay')
 dictOfValidVerticalLevel = CreateDomainDictionary('CVDomain_VerticalLevel')
-arcpy.AddMessage(dictOfValidPostTypes)
-arcpy.AddMessage(dictOfValidStatus)
-arcpy.AddMessage(dictOfValidAccessIssues)
-arcpy.AddMessage(dictOfValidRoadClass)
-arcpy.AddMessage(dictOfValidSurfaceType)
-arcpy.AddMessage(dictOfValidOneWay)
-arcpy.AddMessage(dictOfValidVerticalLevel)
+arcpy.AddMessage("  Approved-Domain PostType: " + str(dictOfValidPostTypes))
+arcpy.AddMessage("  Approved-Domain Status: " + str(dictOfValidStatus))
+arcpy.AddMessage("  Approved-Domain AccessIssues: " + str(dictOfValidAccessIssues))
+arcpy.AddMessage("  Approved-Domain RoadClass: " + str(dictOfValidRoadClass))
+arcpy.AddMessage("  Approved-Domain SurfaceType: " + str(dictOfValidSurfaceType))
+arcpy.AddMessage("  Approved-Domain OneWay: " + str(dictOfValidOneWay))
+arcpy.AddMessage("  Approved-Domain VerticalLevels: " + str(dictOfValidVerticalLevel))

@@ -59,8 +59,8 @@ for field in utransFieldSpecs:
     else:
         # field is there so rename it (add underscore after field name so we know it's the county's field when field mapping)
         new_field_name = str(field[0]) + "_"
-        arcpy.AddMessage("renamed " + field[0] + " to " + new_field_name)
-        arcpy.AlterField_management(countySourceTEMP, field[0], new_field_name)
+        arcpy.AddMessage("  renamed " + field[0] + " to " + new_field_name)
+        arcpy.AlterField_management(countySourceTEMP, field[0], new_field_name, new_field_name)
         # add utrans-based-domain one
         arcpy.AddField_management(*(countySourceTEMP,) + field)
 
@@ -73,13 +73,12 @@ arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] G
 current_step += 1
 arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Begin calculating over values to utrans schema...")
 rows = arcpy.UpdateCursor(countySourceTEMP)
-#if countyName == "Washington":
-#    Washington(rows)
+# call the update rows function for the specified county
 eval(countyName)(rows)
 del rows
 current_step += 1
 arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Finished calculating over values to utrans schema...")
-      
+
 # append county temp schema with UTNGDM
 current_step += 1
 arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Append county-temp values to Utrans Data Model feature class.")
