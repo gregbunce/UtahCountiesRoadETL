@@ -616,8 +616,20 @@ def BoxElder(rows):
             AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.S_TYPE))
 
         row.POSTDIR = row.SUF_DIR
-        row.AN_NAME = row.ACS_NAME
-        row.AN_POSTDIR = row.ACS_SUF
+
+        # validate the AN_NAME value
+        if row.ACS_NAME != "":
+            # call the validation function
+            an_Name, an_PostDir = Validate_AN_NAME(row.ACS_NAME)
+            # AN_NAME
+            row.AN_NAME = an_Name            
+
+            # AN_POSTDIR
+            if an_PostDir != "":
+                row.AN_POSTDIR = an_PostDir
+            else:
+                row.AN_POSTDIR = row.ACS_SUF
+
         row.A1_NAME = row.ALIAS1
         row.A1_POSTTYPE = row.ALIAS1_TYP
         row.A2_NAME = row.ALIAS2
@@ -855,6 +867,35 @@ def AddBadValueToTextFile(county_number, field_name, field_value):
         file.close()
 
 
+# validate the county's AN_NAME value and parse if necessary 
+def Validate_AN_NAME(an_Name):
+    # call this function this way to get both values
+    # an_Name, an_PostDir = Validate_AN_NAME(value)
+    
+    returnAN_NAME = ""
+    returnAN_POSTDIR = ""
+    
+    if an_Name.isdigit():
+        # row.AN_NAME = an_Name
+        returnAN_NAME = an_Name
+    else:
+        # check if any of the values are numeric (maybe they added the postdir in the field)
+        if any(char.isdigit() for char in an_Name):
+            # parse the streetname
+            an_Name_split = an_Name.split(" ")
+            # see if there's more than one word
+            if len(an_Name_split) > 1:
+                # check if first word is numeric
+                if an_Name_split[0].isdigit():
+                    # this is a valid AN_NAME
+                    returnAN_NAME = anName_split[0]
+                    # check if second word is a valid AN_POSTDIR
+                    an_POSTDIR = an_Name_split[1].upper()
+                    if an_POSTDIR in ("N","S","E","W"):
+                        returnAN_POSTDIR = an_POSTDIR
+    return returnAN_NAME, returnAN_POSTDIR
+
+
 ## global variables that are dependent on function instantiation
 dictOfValidPostTypes = CreateDomainDictionary('CVDomain_StreetType')
 dictOfValidStatus = CreateDomainDictionary('CVDomain_Status')
@@ -863,10 +904,10 @@ dictOfValidRoadClass = CreateDomainDictionary('CVDomain_RoadClass')
 dictOfValidSurfaceType = CreateDomainDictionary('CVDomain_SurfaceType')
 dictOfValidOneWay = CreateDomainDictionary('CVDomain_OneWay')
 dictOfValidVerticalLevel = CreateDomainDictionary('CVDomain_VerticalLevel')
-arcpy.AddMessage("  Approved-Domain PostType: " + str(dictOfValidPostTypes))
-arcpy.AddMessage("  Approved-Domain Status: " + str(dictOfValidStatus))
-arcpy.AddMessage("  Approved-Domain AccessIssues: " + str(dictOfValidAccessIssues))
-arcpy.AddMessage("  Approved-Domain RoadClass: " + str(dictOfValidRoadClass))
-arcpy.AddMessage("  Approved-Domain SurfaceType: " + str(dictOfValidSurfaceType))
-arcpy.AddMessage("  Approved-Domain OneWay: " + str(dictOfValidOneWay))
-arcpy.AddMessage("  Approved-Domain VerticalLevels: " + str(dictOfValidVerticalLevel))
+#arcpy.AddMessage("  Approved-Domain PostType: " + str(dictOfValidPostTypes))
+#arcpy.AddMessage("  Approved-Domain Status: " + str(dictOfValidStatus))
+#arcpy.AddMessage("  Approved-Domain AccessIssues: " + str(dictOfValidAccessIssues))
+#arcpy.AddMessage("  Approved-Domain RoadClass: " + str(dictOfValidRoadClass))
+#arcpy.AddMessage("  Approved-Domain SurfaceType: " + str(dictOfValidSurfaceType))
+#arcpy.AddMessage("  Approved-Domain OneWay: " + str(dictOfValidOneWay))
+#arcpy.AddMessage("  Approved-Domain VerticalLevels: " + str(dictOfValidVerticalLevel))
