@@ -592,12 +592,12 @@ def BoxElder(rows):
         # set all fields to empty or zero or none
         setDefaultValues(row)
         countyNumber = "49003"
+        postType_fromStreetName = False
 
         # set county specific fields
         row.COUNTY_L = countyNumber
         row.COUNTY_R = countyNumber    
-        
-        ## fix these field names, i copied them from beaver function.....    
+            
         row.FROMADDR_L = row.L_F_ADD
         row.TOADDR_L = row.L_T_ADD
         row.FROMADDR_R = row.R_F_ADD
@@ -651,7 +651,7 @@ def BoxElder(rows):
         row.LOCAL_UID = row.CO_UNIQUE
         row.ONEWAY = row.ONE_WAY
 
-        # map fields that have been remapped in UtransETL_CountyToUtrans.py >> step 3
+        # these fields have been renamed in UtransETL_CountyToUtrans.py (in step 3) becuase they had the same field name so we added an underscore to enforce our domain
         row.DOT_RTNAME = row.DOT_RTNAME_
         row.DOT_RTPART = row.DOT_RTPART_
         row.SOURCE = row.SOURCE_
@@ -660,6 +660,111 @@ def BoxElder(rows):
         rows.updateRow(row)
         del row
 
+
+def Carbon(rows):
+    for row in rows:
+        # set all fields to empty or zero or none
+        setDefaultValues(row)
+        countyNumber = "49007"
+
+        # set county specific fields
+        row.COUNTY_L = countyNumber
+        row.COUNTY_R = countyNumber    
+          
+        row.FROMADDR_L = row.L_F_ADD
+        row.TOADDR_L = row.L_T_ADD
+        row.FROMADDR_R = row.R_F_ADD
+        row.TOADDR_R = row.R_T_ADD
+        row.PREDIR = row.PRE_DIR[:1]
+        
+        ## NAME
+        # remove the posttype, if present.
+        # get the last word in the string.
+        if row.S_NAME != "":
+            countystreetname = row.S_NAME[:30].strip()
+            countystreetname_split = countystreetname.split()
+            # make sure there's more than one word
+            if len(countystreetname_split) > 1:
+                last_word = countystreetname_split[-1]
+                # if the last word is "AV" just remove it and move on (they add AV when they have an AVE already in the s_type)
+                if last_word == "AV":
+                    # remove the word.
+                    countystreetname = countystreetname.rsplit(' ', 1)[0]
+                    # write value to NAME field.
+                    row.NAME = countystreetname
+                else:
+                    # check if last word is posttype
+                    postTypeDomain = GetCodedDomainValue(row.S_TYPE, last_word)
+                    if postTypeDomain != "":
+                        # a recognized posttype was found in the streettype, maybe use this as the valid posttype
+                        # check if county's s_type has a value, if not use this one from the streetname.
+                        if row.S_TYPE == "":
+                            # no value in s_type, so use this value.
+                            row.POSTTYPE = postTypeDomain
+                            postType_fromStreetName = True
+
+                            # remove this posttype value from the streetname and then assign it.
+                            countystreetname = countystreetname.rsplit(' ', 1)[0]
+                    
+                            # write value to NAME field.
+                            row.NAME = countystreetname
+        
+        ## POSTTYPE 
+        if postType_fromStreetName == False:
+            # check if valid POSTTYPE
+            postTypeDomain = GetCodedDomainValue(row.S_TYPE, dictOfValidPostTypes)
+            if postTypeDomain != "":
+                row.POSTTYPE = postTypeDomain
+            elif postTypeDomain == "" and len(row.S_TYPE) > 1:
+                # add the post type they gave to the notes field so we can evaluate it
+                row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.S_TYPE + "; "
+                # add the bad domain value to the text file log
+                AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.S_TYPE))
+        
+        ## POSTDIR
+        if row.SUF_DIR in ("N","S","E","W"):
+            row.POSTDIR = row.SUF_DIR
+
+        # AN_NAME and AN_POSTDIR
+        if row.ACS_NAME != "":
+            # call the validation function
+            an_Name, an_PostDir = Validate_AN_NAME(row.ACS_NAME)
+            # AN_NAME
+            if an_Name != "":
+                row.AN_NAME = an_Name            
+
+            # AN_POSTDIR
+            if an_PostDir != "":
+                row.AN_POSTDIR = an_PostDir
+            else:
+                row.AN_POSTDIR = row.ACS_SUF
+
+        row.A1_NAME = row.ALIAS1
+        row.A1_POSTTYPE = row.ALIAS1_TYP
+        row.A2_NAME = row.ALIAS2
+        row.A2_POSTTYPE = row.ALIAS2_TYP
+        
+        ## DOT_SRFTYP - check if valid value
+        classSurfType = GetCodedDomainValue(row.S_SURF2, dictOfValidSurfaceType)
+        if classSurfType != "":
+            row.DOT_SRFTYP = classSurfType
+
+        # CLASS - check if valid value
+        classDomain = GetCodedDomainValue(row.CLASS, dictOfValidRoadClass)
+        if classDomain != "":
+            row.DOT_FCLASS = classDomain
+        elif classDomain == "" and row.CLASS is not None:
+            if not row.CLASS.isspace():
+                # add the CLASS they gave to the notes field so we can evaluate it
+                row.UTRANS_NOTES = row.UTRANS_NOTES + "DOT_FCLASS: " + row.CLASS + "; "
+                # add the bad domain value to the text file log
+                AddBadValueToTextFile(countyNumber, "DOT_FCLASS", str(row.CLASS))
+        
+        row.SPEED_LMT = row.SPD_LMT
+
+        # store the row
+        rows.updateRow(row)
+        del row
 
 
 ######################################################################
@@ -799,6 +904,14 @@ def CreateDomainDictionary(domain_name):
                     if val.upper() == "RETIRED":
                         listOfDomainDescriptions.append("R")
 
+                # if domain is 'CVDomain_SurfaceType'
+                if domain_name == 'CVDomain_SurfaceType':
+                    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
+                    if val.upper() == "UNDEFINED":
+                        listOfDomainDescriptions.append("U")
+                    if val.upper() == "GRAVEL":
+                        listOfDomainDescriptions.append("I")
+
                 ## if domain is 'CVDomain_AccessIssues'
                 #if domain_name == 'CVDomain_AccessIssues':
                 #    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
@@ -807,12 +920,6 @@ def CreateDomainDictionary(domain_name):
 
                 ## if domain is 'CVDomain_RoadClass'
                 #if domain_name == 'CVDomain_RoadClass':
-                #    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
-                #    if val.upper() == "":
-                #        listOfDomainDescriptions.append("")
-
-                ## if domain is 'CVDomain_SurfaceType'
-                #if domain_name == 'CVDomain_SurfaceType':
                 #    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
                 #    if val.upper() == "":
                 #        listOfDomainDescriptions.append("")
