@@ -592,7 +592,6 @@ def BoxElder(rows):
         # set all fields to empty or zero or none
         setDefaultValues(row)
         countyNumber = "49003"
-        postType_fromStreetName = False
 
         # set county specific fields
         row.COUNTY_L = countyNumber
@@ -666,6 +665,7 @@ def Carbon(rows):
         # set all fields to empty or zero or none
         setDefaultValues(row)
         countyNumber = "49007"
+        postType_fromStreetName = False
 
         # set county specific fields
         row.COUNTY_L = countyNumber
