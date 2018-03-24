@@ -680,8 +680,8 @@ def Carbon(rows):
         ## NAME
         # remove the posttype, if present.
         # get the last word in the string.
-        if row.S_NAME != "":
-            countystreetname = row.S_NAME[:30].strip()
+        countystreetname = row.S_NAME
+        if not countystreetname.isspace():
             countystreetname_split = countystreetname.split()
             # make sure there's more than one word
             if len(countystreetname_split) > 1:
@@ -693,21 +693,24 @@ def Carbon(rows):
                     # write value to NAME field.
                     row.NAME = countystreetname
                 else:
-                    # check if last word is posttype
-                    postTypeDomain = GetCodedDomainValue(row.S_TYPE, last_word)
-                    if postTypeDomain != "":
-                        # a recognized posttype was found in the streettype, maybe use this as the valid posttype
-                        # check if county's s_type has a value, if not use this one from the streetname.
-                        if row.S_TYPE == "":
-                            # no value in s_type, so use this value.
-                            row.POSTTYPE = postTypeDomain
-                            postType_fromStreetName = True
+                    # check if last word in streetname is posttype (if the county posttype field is empty)
+                    countyPostType = row.S_TYPE
+                    if not countyPostType.isspace():
+                        if countyPostType != "":
+                            postTypeDomain = GetCodedDomainValue(last_word, dictOfValidPostTypes)
+                            if postTypeDomain != "":
+                                # a recognized posttype was found in the streettype, maybe use this as the valid posttype
+                                # check if county's s_type has a value, if not use this one from the streetname.
+                                if row.S_TYPE == "":
+                                    # no value in s_type, so use this value.
+                                    row.POSTTYPE = postTypeDomain
+                                    postType_fromStreetName = True
 
-                            # remove this posttype value from the streetname and then assign it.
-                            countystreetname = countystreetname.rsplit(' ', 1)[0]
+                                    # remove this posttype value from the streetname and then assign it.
+                                    countystreetname = countystreetname.rsplit(' ', 1)[0]
                     
-                            # write value to NAME field.
-                            row.NAME = countystreetname
+                                    # write value to NAME field.
+                                    row.NAME = countystreetname
         
         ## POSTTYPE 
         if postType_fromStreetName == False:
@@ -726,9 +729,9 @@ def Carbon(rows):
             row.POSTDIR = row.SUF_DIR
 
         # AN_NAME and AN_POSTDIR
-        if row.ACS_NAME != "":
+        if row.ACS_ALIAS != "":
             # call the validation function
-            an_Name, an_PostDir = Validate_AN_NAME(row.ACS_NAME)
+            an_Name, an_PostDir = Validate_AN_NAME(row.ACS_ALIAS)
             # AN_NAME
             if an_Name != "":
                 row.AN_NAME = an_Name            
@@ -736,8 +739,6 @@ def Carbon(rows):
             # AN_POSTDIR
             if an_PostDir != "":
                 row.AN_POSTDIR = an_PostDir
-            else:
-                row.AN_POSTDIR = row.ACS_SUF
 
         row.A1_NAME = row.ALIAS1
         row.A1_POSTTYPE = row.ALIAS1_TYP
@@ -995,7 +996,7 @@ def Validate_AN_NAME(an_Name):
                 # check if first word is numeric
                 if an_Name_split[0].isdigit():
                     # this is a valid AN_NAME
-                    returnAN_NAME = anName_split[0]
+                    returnAN_NAME = an_Name_split[0]
                     # check if second word is a valid AN_POSTDIR
                     an_POSTDIR = an_Name_split[1].upper()
                     if an_POSTDIR in ("N","S","E","W"):
