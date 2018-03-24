@@ -681,36 +681,43 @@ def Carbon(rows):
         # remove the posttype, if present.
         # get the last word in the string.
         countystreetname = row.S_NAME
-        if not countystreetname.isspace():
-            countystreetname_split = countystreetname.split()
-            # make sure there's more than one word
-            if len(countystreetname_split) > 1:
-                last_word = countystreetname_split[-1]
-                # if the last word is "AV" just remove it and move on (they add AV when they have an AVE already in the s_type)
-                if last_word == "AV":
-                    # remove the word.
-                    countystreetname = countystreetname.rsplit(' ', 1)[0]
-                    # write value to NAME field.
-                    row.NAME = countystreetname
-                else:
-                    # check if last word in streetname is posttype (if the county posttype field is empty)
-                    countyPostType = row.S_TYPE
-                    if not countyPostType.isspace():
-                        if countyPostType != "":
-                            postTypeDomain = GetCodedDomainValue(last_word, dictOfValidPostTypes)
-                            if postTypeDomain != "":
-                                # a recognized posttype was found in the streettype, maybe use this as the valid posttype
-                                # check if county's s_type has a value, if not use this one from the streetname.
-                                if row.S_TYPE == "":
-                                    # no value in s_type, so use this value.
-                                    row.POSTTYPE = postTypeDomain
-                                    postType_fromStreetName = True
+        if countystreetname != "":
+            if not countystreetname.isspace():
+                countystreetname_split = countystreetname.split()
+                # make sure there's more than one word
+                if len(countystreetname_split) > 1:
+                    last_word = countystreetname_split[-1]
+                    # if the last word is "AV" just remove it and move on (they add AV when they have an AVE already in the s_type)
+                    if last_word == "AV":
+                        # remove the word.
+                        countystreetname = countystreetname.rsplit(' ', 1)[0]
+                        # write value to NAME field.
+                        row.NAME = countystreetname
+                    else:
+                        # check if last word in streetname is posttype (if the county posttype field is empty)
+                        countyPostType = row.S_TYPE
+                        if not countyPostType.isspace():
+                            if countyPostType != "":
+                                postTypeDomain = GetCodedDomainValue(last_word, dictOfValidPostTypes)
+                                if postTypeDomain != "":
+                                    # a recognized posttype was found in the streettype, maybe use this as the valid posttype
+                                    # check if county's s_type has a value, if not use this one from the streetname.
+                                    if row.S_TYPE == "":
+                                        # no value in s_type, so use this value.
+                                        row.POSTTYPE = postTypeDomain
+                                        postType_fromStreetName = True
 
-                                    # remove this posttype value from the streetname and then assign it.
-                                    countystreetname = countystreetname.rsplit(' ', 1)[0]
+                                        # remove this posttype value from the streetname and then assign it.
+                                        countystreetname = countystreetname.rsplit(' ', 1)[0]
                     
-                                    # write value to NAME field.
+                                        # write value to NAME field.
+                                        row.NAME = countystreetname
+                                else:
                                     row.NAME = countystreetname
+                else:
+                    # the county street name is less than two words
+                    row.NAME = countystreetname
+
         
         ## POSTTYPE 
         if postType_fromStreetName == False:
@@ -739,6 +746,9 @@ def Carbon(rows):
             # AN_POSTDIR
             if an_PostDir != "":
                 row.AN_POSTDIR = an_PostDir
+                # if an_postdir is same as postdir then remove postdir
+                if an_PostDir == row.POSTDIR:
+                    row.POSTDIR = ""
 
         row.A1_NAME = row.ALIAS1
         row.A1_POSTTYPE = row.ALIAS1_TYP
@@ -908,10 +918,10 @@ def CreateDomainDictionary(domain_name):
                 # if domain is 'CVDomain_SurfaceType'
                 if domain_name == 'CVDomain_SurfaceType':
                     # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
-                    if val.upper() == "UNDEFINED":
-                        listOfDomainDescriptions.append("U")
-                    if val.upper() == "GRAVEL":
-                        listOfDomainDescriptions.append("I")
+                    if val.upper() == "U":
+                        listOfDomainDescriptions.append("UNDEFINED")
+                    if val.upper() == "I":
+                        listOfDomainDescriptions.append("GRAVEL")
 
                 ## if domain is 'CVDomain_AccessIssues'
                 #if domain_name == 'CVDomain_AccessIssues':
