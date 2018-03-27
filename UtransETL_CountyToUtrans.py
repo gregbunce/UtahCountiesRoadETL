@@ -3,7 +3,7 @@ import sys
 # sys.path.insert(0, '..')
 # import functions from global functions
 from UtransETL_GlobalFunctions import CalcUtransFields, GetUtransFieldSpecs, UpperCoreUtransFields
-from UtransETL_FieldMappingFunctions import Washington, Utah, Davis, Weber, SaltLake, Beaver, BoxElder, Carbon
+from UtransETL_FieldMappingFunctions import Washington, Utah, Davis, Weber, SaltLake, Beaver, BoxElder, Carbon, Wasatch
 import arcpy, os
 from arcpy import env
 import time

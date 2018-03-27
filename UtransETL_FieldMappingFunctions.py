@@ -311,7 +311,6 @@ def Utah(rows):
 
 def Davis(rows):
     # get post direction domains
-    listOfStreetTypes = GetRoadTypeDomains()
     countyNumber = "49011"
 
     for row in rows:
@@ -372,7 +371,7 @@ def Davis(rows):
                     # check if last word is alpha, before we upper it and check if valid street type
                     if davisAliasName_split[-1].isalpha():
                         # check if last word in string is a valid street type
-                        if davisAliasName_split[-1].upper() in listOfStreetTypes:
+                        if davisAliasName_split[-1].upper() in dictOfValidPostTypes:
                             # add the street type to the street type field
                             row.A1_POSTTYPE = davisAliasName_split[-1]
 
@@ -708,15 +707,8 @@ def BoxElder(rows):
         row.PREDIR = row.PRE_DIR[:1]
         row.NAME = row.S_NAME[:30]
 
-        # check if valid POSTTYPE
-        postTypeDomain = GetCodedDomainValue(row.S_TYPE, dictOfValidPostTypes)
-        if postTypeDomain != "":
-            row.POSTTYPE = postTypeDomain
-        elif postTypeDomain == "" and len(row.S_TYPE) > 1:
-            # add the post type they gave to the notes field so we can evaluate it
-            row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.S_TYPE + "; "
-            # add the bad domain value to the text file log
-            AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.S_TYPE))
+        # POSTTYPE
+        ValidateAssign_POSTTYPE(row, row.S_TYPE)
 
         row.POSTDIR = row.SUF_DIR
 
@@ -816,7 +808,7 @@ def Carbon(rows):
                     
                                     # write value to NAME field.
                                     row.NAME = countystreetname
-                                else: # s_sype has a posttype, so use this one instead below
+                                else: # s_type has a posttype, so use this one instead below
                                     # remove this posttype value from the streetname.
                                     countystreetname = countystreetname.rsplit(' ', 1)[0]
                                     postType_fromStreetName = False
@@ -832,15 +824,7 @@ def Carbon(rows):
         
         ## POSTTYPE 
         if postType_fromStreetName == False:
-            # check if valid POSTTYPE
-            postTypeDomain = GetCodedDomainValue(row.S_TYPE, dictOfValidPostTypes)
-            if postTypeDomain != "":
-                row.POSTTYPE = postTypeDomain
-            elif postTypeDomain == "" and len(row.S_TYPE) > 1:
-                # add the post type they gave to the notes field so we can evaluate it
-                row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.S_TYPE + "; "
-                # add the bad domain value to the text file log
-                AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.S_TYPE))
+            ValidateAssign_POSTTYPE(row, row.S_TYPE)
         
         ## POSTDIR
         if row.SUF_DIR in ("N","S","E","W"):
@@ -890,6 +874,43 @@ def Carbon(rows):
             row.POSTDIR = row.AN_POSTDIR
             row.AN_NAME = ""
             row.AN_POSTDIR = ""
+
+        # store the row
+        rows.updateRow(row)
+        del row
+
+
+def Wasatch(rows):
+    for row in rows:
+        # set all fields to empty or zero or none
+        setDefaultValues(row)
+        countyNumber = "49051"
+ 
+        ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
+        row.COUNTY_L = countyNumber
+        row.COUNTY_R = countyNumber    
+          
+        row.FROMADDR_L = row.L_F_ADD
+        row.TOADDR_L = row.L_T_ADD
+        row.FROMADDR_R = row.R_F_ADD
+        row.TOADDR_R = row.R_T_ADD
+        row.PREDIR = row.PRE_DIR[:1]
+        row.NAME = row.S_NAME  
+        row.POSTDIR = row.SUF_DIR[:1]              
+        row.AN_NAME = row.ACS_STREET
+        row.AN_POSTDIR = row.ACS_SUFDIR[:1] 
+
+        ## TRANSFER OVER FIELDS THAT WE RENAMED BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
+        ValidateAssign_STATUS(row, row.STATUS_)
+
+        ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
+        ValidateAssign_POSTTYPE(row, row.S_TYPE)
+        ValidateAssign_DOT_FCLASS(row, row.S_AGFUNC) 
+        ValidateAssign_DOT_SRFTYP(row, row.S_SURF)
+
+        # this one needs more work
+        row.A1_NAME = row.ALIAS_1 #(they have posttypes and such in there)
+
 
         # store the row
         rows.updateRow(row)
@@ -1032,14 +1053,30 @@ def CreateDomainDictionary(domain_name):
                         listOfDomainDescriptions.append("P")
                     if val.upper() == "RETIRED":
                         listOfDomainDescriptions.append("R")
+                    if val.upper() == "CONSTRUCTION":
+                        listOfDomainDescriptions.append("D") # wasatch uses D for "In Develeopment"
+                    #if val.upper() == "RECONSTRUCTION":
+                    #    listOfDomainDescriptions.append("")
 
                 # if domain is 'CVDomain_SurfaceType'
                 if domain_name == 'CVDomain_SurfaceType':
                     # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
-                    if val.upper() == "U":
+                    if val.upper() == "U": # UNKNOWN
                         listOfDomainDescriptions.append("UNDEFINED")
-                    if val.upper() == "I":
+                        listOfDomainDescriptions.append("999")
+                    if val.upper() == "I": # IMPROVED
                         listOfDomainDescriptions.append("GRAVEL")
+                        listOfDomainDescriptions.append("200")
+                    if val.upper() == "P": # PAVED
+                        listOfDomainDescriptions.append("100")
+                    #if val.upper() == "P-ASP": # PAVED ASPHALT
+                    #    listOfDomainDescriptions.append("")
+                    #if val.upper() == "P-CON": # PAVED CONCRETE
+                    #    listOfDomainDescriptions.append("")
+                    if val.upper() == "D": # DIRT
+                        listOfDomainDescriptions.append("300")
+                    #if val.upper() == "N": # NATIVE
+                    #    listOfDomainDescriptions.append("")
 
                 ## if domain is 'CVDomain_AccessIssues'
                 #if domain_name == 'CVDomain_AccessIssues':
@@ -1132,6 +1169,50 @@ def Validate_AN_NAME(an_Name):
     return returnAN_NAME, returnAN_POSTDIR
 
 
+def ValidateAssign_POSTTYPE(row, county_posttype):
+    # check if valid
+    postTypeDomain = GetCodedDomainValue(county_posttype, dictOfValidPostTypes)
+    if postTypeDomain != "": 
+        # is valid
+        row.POSTTYPE = postTypeDomain
+    elif postTypeDomain == "" and len(county_posttype) > 1: 
+        # is not valid
+        # add the post type they gave to the notes field so we can evaluate it
+        row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + county_posttype + "; "
+        # add the bad domain value to the text file log
+        AddBadValueToTextFile(countyNumber, "POSTTYPE", str(county_posttype))
+
+def ValidateAssign_STATUS(row, county_status):
+    statusValue = GetCodedDomainValue(county_status, dictOfValidStatus)
+    if statusValue != "":
+        row.STATUS = statusValue
+    elif statusValue == "" and len(county_status) > 0:
+        # add the post type they gave to the notes field so we can evaluate it
+        row.UTRANS_NOTES = row.UTRANS_NOTES + "STATUS: " + county_status + "; "
+        # add the bad domain value to the text file log
+        AddBadValueToTextFile(countyNumber, "STATUS", str(county_status))
+
+def ValidateAssign_DOT_FCLASS(row, county_fclass):
+    fclassValue = GetCodedDomainValue(county_fclass, dictOfValidFunctionalClass)
+    if fclassValue != "":
+        row.DOT_FCLASS = fclassValue
+    elif fclassValue == "" and len(county_fclass) > 0:
+        # add the dot_fclass they gave to the notes field so we can evaluate it
+        row.UTRANS_NOTES = row.UTRANS_NOTES + "DOT_FCLASS: " + county_fclass + "; "
+        # add the bad domain value to the text file log
+        AddBadValueToTextFile(countyNumber, "DOT_FCLASS", str(county_fclass))
+
+def ValidateAssign_DOT_SRFTYP(row, county_srftype):
+    srftypeValue = GetCodedDomainValue(county_srftype, dictOfValidSurfaceType)
+    if srftypeValue != "":
+        row.DOT_SRFTYP = srftypeValue
+    elif srftypeValue == "" and len(county_srftype) > 0:
+        # add the dot_fclass they gave to the notes field so we can evaluate it
+        row.UTRANS_NOTES = row.UTRANS_NOTES + "DOT_SRFTYP: " + county_srftype + "; "
+        # add the bad domain value to the text file log
+        AddBadValueToTextFile(countyNumber, "DOT_SRFTYP", str(county_srftype))
+
+
 ## global variables that are dependent on function instantiation
 dictOfValidPostTypes = CreateDomainDictionary('CVDomain_StreetType')
 dictOfValidStatus = CreateDomainDictionary('CVDomain_Status')
@@ -1140,6 +1221,7 @@ dictOfValidRoadClass = CreateDomainDictionary('CVDomain_RoadClass')
 dictOfValidSurfaceType = CreateDomainDictionary('CVDomain_SurfaceType')
 dictOfValidOneWay = CreateDomainDictionary('CVDomain_OneWay')
 dictOfValidVerticalLevel = CreateDomainDictionary('CVDomain_VerticalLevel')
+dictOfValidFunctionalClass = CreateDomainDictionary('CVDomain_FunctionalClass')
 #arcpy.AddMessage("  Approved-Domain PostType: " + str(dictOfValidPostTypes))
 #arcpy.AddMessage("  Approved-Domain Status: " + str(dictOfValidStatus))
 #arcpy.AddMessage("  Approved-Domain AccessIssues: " + str(dictOfValidAccessIssues))
@@ -1147,3 +1229,4 @@ dictOfValidVerticalLevel = CreateDomainDictionary('CVDomain_VerticalLevel')
 #arcpy.AddMessage("  Approved-Domain SurfaceType: " + str(dictOfValidSurfaceType))
 #arcpy.AddMessage("  Approved-Domain OneWay: " + str(dictOfValidOneWay))
 #arcpy.AddMessage("  Approved-Domain VerticalLevels: " + str(dictOfValidVerticalLevel))
+#arcpy.AddMessage("  Approved-Domain DOT_FClass: " + str(dictOfValidFunctionalClass))
