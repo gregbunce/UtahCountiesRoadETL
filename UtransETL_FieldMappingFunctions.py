@@ -800,27 +800,30 @@ def Carbon(rows):
                         # write value to NAME field.
                         row.NAME = countystreetname
                     else:
-                        # check if last word in streetname is posttype (if the county posttype field is empty)
-                        postTypeDomain = GetCodedDomainValue(last_word, dictOfValidPostTypes)
-                        if postTypeDomain != "":
-                            # a recognized posttype was found in the streettype, maybe use this as the valid posttype
-                            # check if county's s_type has a value, if not use this one from the streetname.
-                            if row.S_TYPE == "":
-                                # no value in s_type, so use this value.
-                                row.POSTTYPE = postTypeDomain
-                                postType_fromStreetName = True
+                        # check if last word in streetname is posttype, only if it's two characters long (so we don't remove valid road names line canyon, creek, park, etc.)
+                        if len(last_word) == 2:
+                            postTypeDomain = GetCodedDomainValue(last_word, dictOfValidPostTypes)
+                            if postTypeDomain != "":
+                                # a recognized posttype was found in the streettype, maybe use this as the valid posttype
+                                # check if county's s_type has a value, if not use this one from the streetname.
+                                if row.S_TYPE == "":
+                                    # no value in s_type, so use this value.
+                                    row.POSTTYPE = postTypeDomain
+                                    postType_fromStreetName = True
 
-                                # remove this posttype value from the streetname and then assign it.
-                                countystreetname = countystreetname.rsplit(' ', 1)[0]
+                                    # remove this posttype value from the streetname and then assign it.
+                                    countystreetname = countystreetname.rsplit(' ', 1)[0]
                     
-                                # write value to NAME field.
+                                    # write value to NAME field.
+                                    row.NAME = countystreetname
+                                else: # s_sype has a posttype, so use this one instead below
+                                    # remove this posttype value from the streetname.
+                                    countystreetname = countystreetname.rsplit(' ', 1)[0]
+                                    postType_fromStreetName = False
+                                    row.NAME = countystreetname
+                            else: # last word in street name is not a valid posttype   
                                 row.NAME = countystreetname
-                            else: # s_sype has a posttype, so use this one instead below
-                                # remove this posttype value from the streetname.
-                                countystreetname = countystreetname.rsplit(' ', 1)[0]
-                                postType_fromStreetName = False
-                                row.NAME = countystreetname
-                        else: # last word in street name is not a valid posttype   
+                        else: # the last word is not two characters long so just use the whole thing in the NAME field
                             row.NAME = countystreetname
                 else:
                     # the county street name is less than two words
@@ -880,6 +883,13 @@ def Carbon(rows):
                 AddBadValueToTextFile(countyNumber, "DOT_FCLASS", str(row.CLASS))
         
         row.SPEED_LMT = row.SPD_LMT
+
+        ## check if NAME is empty and one of the numeric alias field is not, if so carry those values to the primary road name fields
+        if row.NAME == "" and row.AN_NAME != "":
+            row.NAME = row.AN_NAME
+            row.POSTDIR = row.AN_POSTDIR
+            row.AN_NAME = ""
+            row.AN_POSTDIR = ""
 
         # store the row
         rows.updateRow(row)
