@@ -9,39 +9,147 @@ def Washington(rows):
     for row in rows:
         # set all fields to empty or zero or none
         setDefaultValues(row)
+        
         countyNumber = "49053"
-
+        
         # set county specific fields
+        row.STATE_L = "UT"
+        row.STATE_R = "UT"
         row.COUNTY_L = countyNumber
         row.COUNTY_R = countyNumber
-        row.FROMADDR_L = row.L_F_ADD
-        row.TOADDR_L = row.L_T_ADD
-        row.FROMADDR_R = row.R_F_ADD
-        row.TOADDR_R = row.R_T_ADD
-        row.PREDIR = row.PRE_DIR[:1]
-        row.NAME = row.S_NAME.upper()
 
-        # check if valid post type
-        postTypeDomain = GetCodedDomainValue(row.S_TYPE, dictOfValidPostTypes)
+
+        # set fields that we don't have the same name for
+        # Washington County uses both the POSTDIR AND SUFFIXDIR fields > POSTDIR for alpha roads names and SUFFIXDIR for numeric road names
+        row.UPDATED = row.LAST_UPDATE
+        row.CREATED = row.CREATED_DATE
+        # row.EDITOR = row.LAST_EDITOR
+
+        if row.POSTDIR_ in ("N", "NORTH", "S", "SOUTH", "E", "EAST", "W", "WEST"):
+            row.POSTDIR = row.POSTDIR_[:1]        
+        if row.SUFFIXDIR in ("N", "NORTH", "S", "SOUTH", "E", "EAST", "W", "WEST"):
+            row.POSTDIR = row.SUFFIXDIR[:1]
+
+        ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
+        # transfer values from same name fields that were renamed with an underscore (this allows us to enforce our domains via the validation code here) 
+        row.CARTOCODE = row.CARTOCODE_
+        row.FULLNAME = row.FULLNAME_
+        row.FROMADDR_L = row.FROMADDR_L_
+        row.TOADDR_L = row.TOADDR_L_
+        row.FROMADDR_R = row.FROMADDR_R_
+        row.TOADDR_R = row.TOADDR_R_
+        row.PARITY_L = row.PARITY_L_
+        row.PARITY_R = row.PARITY_R_
+        row.PREDIR = row.PREDIR_[:1]
+        row.NAME = row.NAME_
+        row.AN_NAME = row.AN_NAME_
+        row.AN_POSTDIR = row.AN_POSTDIR_
+        row.A1_NAME = row.A1_NAME_
+        row.A1_POSTTYPE = row.A1_POSTTYPE_
+        row.A1_POSTDIR = row.A1_POSTDIR_
+        row.A2_PREDIR = row.A2_PREDIR_
+        row.A2_NAME = row.A2_NAME_
+        row.A2_POSTTYPE = row.A2_POSTTYPE_
+        row.A2_POSTDIR = row.A2_POSTDIR_
+        row.ADDRSYS_L = row.ADDRSYS_L_
+        row.ADDRSYS_R = row.ADDRSYS_R_
+        row.ZIPCODE_L = row.ZIPCODE_L_
+        row.ZIPCODE_R = row.ZIPCODE_R_
+        row.INCMUNI_L = row.INCMUNI_L_
+        row.INCMUNI_R = row.INCMUNI_R_
+        row.UNINCCOM_L = row.UNINCCOM_L_
+        row.UNINCCOM_R = row.UNINCCOM_R_
+        row.VERT_LEVEL = row.VERT_LEVEL_
+        row.SPEED_LMT = row.SPEED_LMT_
+        row.ACCESSCODE = row.ACCESSCODE_
+        row.DOT_HWYNAM = row.DOT_HWYNAM_
+        row.DOT_RTNAME = row.DOT_RTNAME_
+        row.DOT_RTPART = row.DOT_RTPART_
+        row.DOT_F_MILE = row.DOT_F_MILE_
+        row.DOT_T_MILE = row.DOT_T_MILE_
+        row.DOT_FCLASS = row.DOT_FCLASS_
+        row.DOT_SRFTYP = row.DOT_SRFTYP_
+        row.DOT_CLASS = row.DOT_CLASS_
+        row.DOT_OWN_L = row.DOT_OWN_L_
+        row.DOT_OWN_R = row.DOT_OWN_R_
+        row.DOT_AADT = row.DOT_AADT_
+        row.DOT_AADTYR = row.DOT_AADTYR_
+        row.BIKE_L = row.BIKE_L_
+        row.BIKE_R = row.BIKE_R_
+        row.BIKE_PLN_L = row.BIKE_PLN_L_
+        row.BIKE_PLN_R = row.BIKE_PLN_R_
+        row.BIKE_NOTES = row.BIKE_NOTES_
+        row.UNIQUE_ID = row.UNIQUE_ID_
+        row.LOCAL_UID = row.LOCAL_UID_
+        row.UTAHRD_UID = row.UTAHRD_UID_
+        row.SOURCE = row.SOURCE_
+        row.EFFECTIVE = row.EFFECTIVE_
+        row.EXPIRE = row.EXPIRE_
+        row.CUSTOMTAGS = row.CUSTOMTAGS_
+
+        ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
+        # validate POSTTYPE value
+        postTypeDomain = GetCodedDomainValue(row.POSTTYPE_, dictOfValidPostTypes)
         if postTypeDomain != "":
             row.POSTTYPE = postTypeDomain
-        elif postTypeDomain == "" and len(row.S_TYPE) > 1:  
-            # add the post type they gave to the notes field so we can evaluate it
-            row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.S_TYPE + "; "
-            # add the bad domain value to the text file log
-            AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.STREETTYPE))
+        elif postTypeDomain == "" and row.POSTTYPE_ != None: 
+            if len(row.POSTTYPE_) > 1:  
+                if not row.POSTTYPE_.isspace():
+                    # add the post type they gave to the notes field so we can evaluate it
+                    row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.POSTTYPE_ + "; "
+                    # add the bad domain value to the text file log
+                    AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.POSTTYPE_))
 
-        row.POSTDIR = row.SUF_DIR
-        row.AN_NAME = row.ACS_NAME
-        row.AN_POSTDIR = row.ACS_SUF
-        row.A1_NAME = row.ALIAS1
-        row.A1_POSTTYPE = row.A1_POSTTYPE
-        row.A2_NAME = row.ALIAS2
-        row.A2_POSTTYPE = row.ALIAS2_TYP
-        row.ONEWAY = row.ONE_WAY
-        row.SPEED_LMT = row.SPD_LMT
-        row.DOT_SRFTYP = row.S_SURF
-        row.SOURCE = row.SOURCE
+        # validate STATUS value
+        statusDomain = GetCodedDomainValue(row.STATUS_, dictOfValidStatus)
+        if statusDomain != "":
+            row.STATUS = statusDomain
+        elif statusDomain == "" and row.STATUS_ != None: 
+            if len(row.STATUS_) > 1:  
+                # add the post type they gave to the notes field so we can evaluate it
+                row.UTRANS_NOTES = row.UTRANS_NOTES + "STATUS: " + row.STATUS_ + "; "
+                # add the bad domain value to the text file log
+                AddBadValueToTextFile(countyNumber, "STATUS", str(row.STATUS_))
+
+        # validate ONEWAY value (vecc doesn't have a domain on this field, but their length is limited to one character)
+        onewayDomain = GetCodedDomainValue(row.ONEWAY_, dictOfValidOneWay)
+        if onewayDomain != "":
+            row.ONEWAY = onewayDomain
+        elif onewayDomain == "" and row.ONEWAY_ != None: 
+            if len(row.ONEWAY_) > 1:  
+                # add the post type they gave to the notes field so we can evaluate it
+                row.UTRANS_NOTES = row.UTRANS_NOTES + "ONEWAY: " + row.ONEWAY_ + "; "
+                # add the bad domain value to the text file log
+                AddBadValueToTextFile(countyNumber, "ONEWAY", str(row.ONEWAY_))
+
+
+        # clear the A1_NAME AND A1_POSTYPE fields if the same data is in AN_NAME
+        if (row.A1_NAME_ != ' ' or row.A1_NAME_ != None or row.A1_NAME_ is not None) and (row.AN_NAME_ != ' ' or row.AN_NAME_ != None or row.AN_NAME_ is not None):
+            a1_name = str(row.A1_NAME_) # the numeric street name and post type, and sometimes post dir
+            an_name = str(row.AN_NAME_) # just the numeric street name
+            # check if street name is contained in the A1_NAME field
+            arcpy.AddMessage(a1_name + " " + an_name)
+            if a1_name != '' and an_name != '':
+                if str(an_name) in str(a1_name):
+                    # clear out the A1_NAME fields
+                    row.A1_PREDIR = ""
+                    row.A1_NAME = ""
+                    row.A1_POSTTYPE = ""
+                    row.A1_POSTDIR = ""
+  
+         # clear the A2_NAME AND A2_POSTYPE fields if the same data is in AN_NAME
+        if (row.A2_NAME_ != ' ' or row.A2_NAME_ != None or row.A2_NAME_ is not None) and (row.AN_NAME_ != ' ' or row.AN_NAME_ != None or row.AN_NAME_ is not None):
+            a2_name = str(row.A2_NAME_) # the numeric street name and post type, and sometimes post dir
+            an_name = str(row.AN_NAME_) # just the numeric street name
+            # check if street name is contained in the A2_NAME field
+            arcpy.AddMessage(a2_name + " " + an_name)
+            if a2_name != '' and an_name != '':
+                if an_name in a2_name:
+                    # clear out the A1_NAME fields
+                    row.A2_PREDIR = ""
+                    row.A2_NAME = ""
+                    row.A2_POSTTYPE = ""
+                    row.A2_POSTDIR = ""
         
         # store the row
         rows.updateRow(row)  

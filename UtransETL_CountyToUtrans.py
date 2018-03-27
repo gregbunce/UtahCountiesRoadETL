@@ -66,7 +66,7 @@ for field in utransFieldSpecs:
 
 # get roadtype domain values in list
 current_step += 1
-arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Get domain values for street types from utah data model...")
+arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Get valid domain values from utah data model...")
 #listOfStreetTypes = GetRoadTypeDomains("K:/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb")
 
 # loop through all the fields and calc over values.
