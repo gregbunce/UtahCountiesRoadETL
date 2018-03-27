@@ -128,7 +128,6 @@ def Washington(rows):
             a1_name = str(row.A1_NAME_) # the numeric street name and post type, and sometimes post dir
             an_name = str(row.AN_NAME_) # just the numeric street name
             # check if street name is contained in the A1_NAME field
-            arcpy.AddMessage(a1_name + " " + an_name)
             if a1_name != '' and an_name != '':
                 if str(an_name) in str(a1_name):
                     # clear out the A1_NAME fields
@@ -142,7 +141,6 @@ def Washington(rows):
             a2_name = str(row.A2_NAME_) # the numeric street name and post type, and sometimes post dir
             an_name = str(row.AN_NAME_) # just the numeric street name
             # check if street name is contained in the A2_NAME field
-            arcpy.AddMessage(a2_name + " " + an_name)
             if a2_name != '' and an_name != '':
                 if an_name in a2_name:
                     # clear out the A1_NAME fields
@@ -601,7 +599,6 @@ def SaltLake(rows):
             a1_name = str(row.A1_NAME_) # the numeric street name and post type, and sometimes post dir
             an_name = str(row.AN_NAME_) # just the numeric street name
             # check if street name is contained in the A1_NAME field
-            arcpy.AddMessage(a1_name + " " + an_name)
             if a1_name != '' and an_name != '':
                 if str(an_name) in str(a1_name):
                     # clear out the A1_NAME fields
@@ -615,7 +612,6 @@ def SaltLake(rows):
             a2_name = str(row.A2_NAME_) # the numeric street name and post type, and sometimes post dir
             an_name = str(row.AN_NAME_) # just the numeric street name
             # check if street name is contained in the A2_NAME field
-            arcpy.AddMessage(a2_name + " " + an_name)
             if a2_name != '' and an_name != '':
                 if an_name in a2_name:
                     # clear out the A1_NAME fields
@@ -791,6 +787,8 @@ def Carbon(rows):
         countystreetname = row.S_NAME
         if countystreetname != "":
             if not countystreetname.isspace():
+                row.NAME = countystreetname
+                
                 countystreetname_split = countystreetname.split()
                 # make sure there's more than one word
                 if len(countystreetname_split) > 1:
@@ -803,25 +801,27 @@ def Carbon(rows):
                         row.NAME = countystreetname
                     else:
                         # check if last word in streetname is posttype (if the county posttype field is empty)
-                        countyPostType = row.S_TYPE
-                        if not countyPostType.isspace():
-                            if countyPostType != "":
-                                postTypeDomain = GetCodedDomainValue(last_word, dictOfValidPostTypes)
-                                if postTypeDomain != "":
-                                    # a recognized posttype was found in the streettype, maybe use this as the valid posttype
-                                    # check if county's s_type has a value, if not use this one from the streetname.
-                                    if row.S_TYPE == "":
-                                        # no value in s_type, so use this value.
-                                        row.POSTTYPE = postTypeDomain
-                                        postType_fromStreetName = True
+                        postTypeDomain = GetCodedDomainValue(last_word, dictOfValidPostTypes)
+                        if postTypeDomain != "":
+                            # a recognized posttype was found in the streettype, maybe use this as the valid posttype
+                            # check if county's s_type has a value, if not use this one from the streetname.
+                            if row.S_TYPE == "":
+                                # no value in s_type, so use this value.
+                                row.POSTTYPE = postTypeDomain
+                                postType_fromStreetName = True
 
-                                        # remove this posttype value from the streetname and then assign it.
-                                        countystreetname = countystreetname.rsplit(' ', 1)[0]
+                                # remove this posttype value from the streetname and then assign it.
+                                countystreetname = countystreetname.rsplit(' ', 1)[0]
                     
-                                        # write value to NAME field.
-                                        row.NAME = countystreetname
-                                else:
-                                    row.NAME = countystreetname
+                                # write value to NAME field.
+                                row.NAME = countystreetname
+                            else: # s_sype has a posttype, so use this one instead below
+                                # remove this posttype value from the streetname.
+                                countystreetname = countystreetname.rsplit(' ', 1)[0]
+                                postType_fromStreetName = False
+                                row.NAME = countystreetname
+                        else: # last word in street name is not a valid posttype   
+                            row.NAME = countystreetname
                 else:
                     # the county street name is less than two words
                     row.NAME = countystreetname
