@@ -347,7 +347,7 @@ def Davis(rows):
             # get alias name as string
             davisAliasName = row.RoadAliasN
 
-            # check if there's a least one word in the string
+            # check if there's a least one letter in the string
             if len(davisAliasName) > 0:
                 # parse out the string into array, so we can check for sufdir or street type
                 davisAliasName_split = davisAliasName.split(" ")
@@ -708,7 +708,7 @@ def BoxElder(rows):
         row.NAME = row.S_NAME[:30]
 
         # POSTTYPE
-        ValidateAssign_POSTTYPE(row, row.S_TYPE)
+        ValidateAssign_POSTTYPE(row, row.S_TYPE, countyNumber)
 
         row.POSTDIR = row.SUF_DIR
 
@@ -824,7 +824,7 @@ def Carbon(rows):
         
         ## POSTTYPE 
         if postType_fromStreetName == False:
-            ValidateAssign_POSTTYPE(row, row.S_TYPE)
+            ValidateAssign_POSTTYPE(row, row.S_TYPE, countyNumber)
         
         ## POSTDIR
         if row.SUF_DIR in ("N","S","E","W"):
@@ -901,17 +901,33 @@ def Wasatch(rows):
         row.AN_POSTDIR = row.ACS_SUFDIR[:1] 
 
         ## TRANSFER OVER FIELDS THAT WE RENAMED BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
-        ValidateAssign_STATUS(row, row.STATUS_)
+        ValidateAssign_STATUS(row, row.STATUS_, countyNumber)
 
         ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
-        ValidateAssign_POSTTYPE(row, row.S_TYPE)
-        ValidateAssign_DOT_FCLASS(row, row.S_AGFUNC) 
-        ValidateAssign_DOT_SRFTYP(row, row.S_SURF)
+        ValidateAssign_POSTTYPE(row, row.S_TYPE, countyNumber)
+        ValidateAssign_DOT_FCLASS(row, row.S_AGFUNC, countyNumber) 
+        ValidateAssign_DOT_SRFTYP(row, row.S_SURF, countyNumber)
 
-        # this one needs more work
-        row.A1_NAME = row.ALIAS_1 #(they have posttypes and such in there)
+        # check if we need to parse the ALIAS_1 field (they have predir, postdir, and posttypes in the field)
+        if row.ALIAS_1 is not None or row.ALIAS_1 != "":
+            is_valid_parse, pre_dir, street_name, post_type, post_dir = ParseFullAddress(row.ALIAS_1)
 
-
+            if is_valid_parse == True:
+                # it WAS a valid parse
+                if street_name.isdigit():
+                    # the street name is numeric
+                    row.AN_NAME = street_name
+                    row.AN_POSTDIR = post_dir
+                else:
+                    # the streetname is alpha
+                    row.A1_PREDIR = pre_dir
+                    row.A1_NAME = street_name
+                    row.A1_POSTTYPE = post_type
+                    row.A1_POSTDIR = post_dir
+            else:
+                # it was NOT a valid parse
+                row.A1_NAME = row.ALIAS_1
+                        
         # store the row
         rows.updateRow(row)
         del row
@@ -1113,7 +1129,10 @@ def GetCodedDomainValue(valueToCheck, dictionaryToCheck):
     if valueToCheck == None or valueToCheck is None or valueToCheck == " ":
         valueToCheck = ""
     else:
-        valueToCheck = valueToCheck.upper()
+        if type(valueToCheck) is int:
+            valueToCheck = str(valueToCheck)
+        else:
+            valueToCheck = valueToCheck.upper()
     for key, value in dictionaryToCheck.iteritems():
         if valueToCheck == "":
             return ""
@@ -1169,7 +1188,78 @@ def Validate_AN_NAME(an_Name):
     return returnAN_NAME, returnAN_POSTDIR
 
 
-def ValidateAssign_POSTTYPE(row, county_posttype):
+# parse out full address - ie: "N 1300 S" or "1300 S" or "W Broadway RD" or "Broadway RD" 
+# if it doesn't parse out based on one of these formats just retrun the original value
+# it is assumed that full_address parameter has a value and is not None or "" or .isspace()
+def ParseFullAddress(full_address):
+    # call this function this way to get all values:
+    # is_valid_parse, pre_dir, street_name, post_type, post_dir = ParseFullAddress(full_address)
+
+    _full_address = full_address
+    _is_valid_parsed = False
+    _predir = ""
+    _streetname = ""
+    _posttype = ""
+    _postdir = ""
+    __has_predir = False
+    __has_postype = False
+    __has_postdir = False
+
+    # parse string into array
+    full_address_split = full_address.split(" ")
+    word_count = len(full_address_split)
+
+    if word_count > 1:
+        # check first word and see if predirection
+        if full_address_split[0] in ("N", "S", "E", "W"):
+            _predir = full_address_split[0]
+            __has_predir = True
+
+        # check last word and see if it's a valid posttype (only check if for posttype if last word is two characters long so we don't trim off valid streetname such as Canyon, Creek, Park, etc.)
+        last_word = full_address_split[-1]
+        if len(last_word) == 2:
+            # test if posttype
+            _posttype = GetCodedDomainValue(full_address_split[-1], dictOfValidPostTypes)
+            if _posttype != "":
+                __has_postype = True
+        else:
+            # test if postdir
+            if last_word in ("N", "S", "E", "W"):
+                _postdir = last_word
+                __has_postdir = True
+                        
+        # get street name value from full_address variable, if present
+        if __has_postdir == True or __has_postype == True:
+             # remove the last word from full_address
+             _full_address = _full_address.rsplit(' ', 1)[0]
+        if __has_predir == True:
+            # remove the first word from full_address 
+            _full_address = _full_address.split(' ', 1)[1]
+
+        _full_address = _full_address.strip()
+        
+        # set name and confirm it's parsed
+        if __has_postdir == True or __has_postype == True or __has_predir == True:
+            # check if there's a street name now that the predir, or posttype, or postdir has been removed
+            if _full_address != "":
+                _streetname = _full_address
+                _is_valid_parsed = True
+            else:
+                _is_valid_parsed = False 
+        else:
+            _is_valid_parsed = False
+
+    else:
+        # just one word string so return empty parsed values
+        return _is_valid_parsed, _predir, _streetname, _posttype, _postdir
+
+    # return tuple
+    return _is_valid_parsed, _predir, _streetname, _posttype, _postdir
+
+
+
+# validate and assign values to POSTTYPE
+def ValidateAssign_POSTTYPE(row, county_posttype, countyNumber):
     # check if valid
     postTypeDomain = GetCodedDomainValue(county_posttype, dictOfValidPostTypes)
     if postTypeDomain != "": 
@@ -1182,7 +1272,8 @@ def ValidateAssign_POSTTYPE(row, county_posttype):
         # add the bad domain value to the text file log
         AddBadValueToTextFile(countyNumber, "POSTTYPE", str(county_posttype))
 
-def ValidateAssign_STATUS(row, county_status):
+# validate and assign values to STATUS
+def ValidateAssign_STATUS(row, county_status, countyNumber):
     statusValue = GetCodedDomainValue(county_status, dictOfValidStatus)
     if statusValue != "":
         row.STATUS = statusValue
@@ -1192,17 +1283,21 @@ def ValidateAssign_STATUS(row, county_status):
         # add the bad domain value to the text file log
         AddBadValueToTextFile(countyNumber, "STATUS", str(county_status))
 
-def ValidateAssign_DOT_FCLASS(row, county_fclass):
-    fclassValue = GetCodedDomainValue(county_fclass, dictOfValidFunctionalClass)
+# validate and assign values to DOT_FCLASS
+def ValidateAssign_DOT_FCLASS(row, county_fclass, countyNumber):
+    # convert the value to stirng, in case it was an int value
+    _county_fclass = str(county_fclass)
+    fclassValue = GetCodedDomainValue(_county_fclass, dictOfValidFunctionalClass)
     if fclassValue != "":
         row.DOT_FCLASS = fclassValue
-    elif fclassValue == "" and len(county_fclass) > 0:
+    elif fclassValue == "" and len(_county_fclass) > 0:
         # add the dot_fclass they gave to the notes field so we can evaluate it
-        row.UTRANS_NOTES = row.UTRANS_NOTES + "DOT_FCLASS: " + county_fclass + "; "
+        row.UTRANS_NOTES = row.UTRANS_NOTES + "DOT_FCLASS: " + _county_fclass + "; "
         # add the bad domain value to the text file log
-        AddBadValueToTextFile(countyNumber, "DOT_FCLASS", str(county_fclass))
+        AddBadValueToTextFile(countyNumber, "DOT_FCLASS", _county_fclass)
 
-def ValidateAssign_DOT_SRFTYP(row, county_srftype):
+# validate and assign values to DOT_SRFTYP
+def ValidateAssign_DOT_SRFTYP(row, county_srftype, countyNumber):
     srftypeValue = GetCodedDomainValue(county_srftype, dictOfValidSurfaceType)
     if srftypeValue != "":
         row.DOT_SRFTYP = srftypeValue
