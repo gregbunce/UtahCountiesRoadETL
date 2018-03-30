@@ -1077,6 +1077,7 @@ def CreateDomainDictionary(domain_name):
                 # if domain is 'CVDomain_SurfaceType'
                 if domain_name == 'CVDomain_SurfaceType':
                     # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
+                    # the nuberic values are from the older data model - which some counties are still using
                     if val.upper() == "U": # UNKNOWN
                         listOfDomainDescriptions.append("UNDEFINED")
                         listOfDomainDescriptions.append("999")
@@ -1093,6 +1094,28 @@ def CreateDomainDictionary(domain_name):
                         listOfDomainDescriptions.append("300")
                     #if val.upper() == "N": # NATIVE
                     #    listOfDomainDescriptions.append("")
+
+                # if domain is 'CVDomain_FunctionalClass'
+                if domain_name == 'CVDomain_FunctionalClass':
+                    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
+                    # the nuberic values are from the older data model - which some counties are still using (see Wasatch County data for many of these values, Domain = ST_Agfunc)
+                    if val.upper() == "INTERSTATE":
+                        listOfDomainDescriptions.append("11")
+                    #if val.upper() == "OTHER FREEWAY":
+                    #    listOfDomainDescriptions.append("")
+                    if val.upper() == "PRINCIPAL ARTERIAL":
+                        listOfDomainDescriptions.append("10")
+                    #if val.upper() == "MINOR ARTERIAL":
+                    #    listOfDomainDescriptions.append("")
+                    if val.upper() == "MAJOR COLLECTOR":
+                        listOfDomainDescriptions.append("21")
+                    if val.upper() == "MINOR ARTERIAL":
+                        listOfDomainDescriptions.append("22")
+                    if val.upper() == "LOCAL":
+                        listOfDomainDescriptions.append("30")
+                        listOfDomainDescriptions.append("32")
+                        listOfDomainDescriptions.append("33")
+
 
                 ## if domain is 'CVDomain_AccessIssues'
                 #if domain_name == 'CVDomain_AccessIssues':
@@ -1298,14 +1321,16 @@ def ValidateAssign_DOT_FCLASS(row, county_fclass, countyNumber):
 
 # validate and assign values to DOT_SRFTYP
 def ValidateAssign_DOT_SRFTYP(row, county_srftype, countyNumber):
-    srftypeValue = GetCodedDomainValue(county_srftype, dictOfValidSurfaceType)
+    # convert the value to stirng, in case it was an int value
+    _county_srftype =str(county_srftype)
+    srftypeValue = GetCodedDomainValue(_county_srftype, dictOfValidSurfaceType)
     if srftypeValue != "":
         row.DOT_SRFTYP = srftypeValue
     elif srftypeValue == "" and len(county_srftype) > 0:
         # add the dot_fclass they gave to the notes field so we can evaluate it
-        row.UTRANS_NOTES = row.UTRANS_NOTES + "DOT_SRFTYP: " + county_srftype + "; "
+        row.UTRANS_NOTES = row.UTRANS_NOTES + "DOT_SRFTYP: " + _county_srftype + "; "
         # add the bad domain value to the text file log
-        AddBadValueToTextFile(countyNumber, "DOT_SRFTYP", str(county_srftype))
+        AddBadValueToTextFile(countyNumber, "DOT_SRFTYP", _county_srftype)
 
 
 ## global variables that are dependent on function instantiation
@@ -1324,4 +1349,4 @@ dictOfValidFunctionalClass = CreateDomainDictionary('CVDomain_FunctionalClass')
 #arcpy.AddMessage("  Approved-Domain SurfaceType: " + str(dictOfValidSurfaceType))
 #arcpy.AddMessage("  Approved-Domain OneWay: " + str(dictOfValidOneWay))
 #arcpy.AddMessage("  Approved-Domain VerticalLevels: " + str(dictOfValidVerticalLevel))
-#arcpy.AddMessage("  Approved-Domain DOT_FClass: " + str(dictOfValidFunctionalClass))
+arcpy.AddMessage("  Approved-Domain DOT_FClass: " + str(dictOfValidFunctionalClass))
