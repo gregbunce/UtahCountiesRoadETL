@@ -182,17 +182,18 @@ def Utah(rows):
             # if it begins with a digit, then check if it ends with a North, South, East, or West - if so export that to the sufdir field
             str_roadname = row.ROADNAME.strip()
 
-            if str_roadname != None or str_roadname != " ":
+            if str_roadname != None or str_roadname != "":
                 if len(str_roadname) > 0:
                     if str_roadname[0].isdigit():
+                        # it's an numeric numbered road name
                         # parse out the string to check if sufdir exists
                         str_roadname_split = str_roadname.split(" ")
 
-                        #get the last work in the array
+                        #get the last word in the array
                         if str_roadname_split[-1] == "NORTH" or str_roadname_split[-1] == "SOUTH" or str_roadname_split[-1] == "EAST" or str_roadname_split[-1] == "WEST":
                             POSTDIR_FROM_ROADNAME = str(str_roadname_split[-1]).strip()
 
-                            # check if first work in split is number
+                            # check if first word in split is number
                             if str_roadname_split[0].isdigit():
                                 row.NAME = str_roadname_split[0].strip()
                             else:
@@ -200,26 +201,13 @@ def Utah(rows):
                         else:
                             row.NAME = row.ROADNAME[:30].upper()
                     else:
-                        # it's not a digit, it's alpha roadname
+                        # it's alpha road name
                         row.NAME = row.ROADNAME[:30].upper()
 
-        # check if valid post type
-        postTypeDomain = GetCodedDomainValue(row.ROADTYPE, dictOfValidPostTypes)
-        if postTypeDomain != "":
-            row.POSTTYPE = postTypeDomain
-        elif postTypeDomain == "" and len(row.ROADTYPE) > 1:  
-            # add the post type they gave to the notes field so we can evaluate it
-            row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.ROADTYPE + "; "
-            # add the bad domain value to the text file log
-            AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.STREETTYPE))
+        # validiate POSTTYPE
+        ValidateAssign_POSTTYPE(row, row.ROADTYPE, countyNumber)
 
-            # check if it's an acs road to see if we can ommit the streettype value that they often add
-            if str_roadname_split != None:
-                # use the first character to pass into the sufdir
-                if str_roadname_split[0].isdigit():
-                    row.POSTTYPE = ""
-
-        # check if the sufdir was extracted from the roadname
+        # assign POSTDIR
         if row.ROADPOSTDIR != None or POSTDIR_FROM_ROADNAME != None:
             if POSTDIR_FROM_ROADNAME != None:
                 # use the first character to pass into the sufdir
@@ -227,12 +215,13 @@ def Utah(rows):
             else:
                 row.POSTDIR = row.ROADPOSTDIR.upper()
 
-        # check the altroadname field values and see if they placed an acs value in there, if so move it to the acs fields
-        if row.ALTROADNAME != None or row.ALTROADNAME != " ":
+
+        # check the altroadname field values and see if they placed an acs value in there, if so move it to the acs alias fields
+        if row.ALTROADNAME != None or row.ALTROADNAME != "" or row.ALTROADNAME != " ":
             # if it begins with a digit, then check if it ends with a North, South, East, or West - if so export that to the sufdir field
             str_altroadname1 = row.ALTROADNAME.strip()
 
-            if str_altroadname1 != None or str_altroadname1 != " ":
+            if str_altroadname1 != None or str_altroadname1 != "" or str_altroadname1 != " ":
                 if len(str_altroadname1) > 0:
                     if str_altroadname1[0].isdigit():
                         # parse out the string to check if sufdir exists
@@ -254,8 +243,14 @@ def Utah(rows):
                         # it's not a digit, it's alpha roadname
                         row.A1_NAME = row.ALTROADNAME.upper()
 
-        if row.ALTROADTYPE != None:
-            row.A1_POSTTYPE = row.ALTROADTYPE.upper()
+        if row.ALTROADTYPE != None or row.ALTROADTYPE != "" or row.ALTROADTYPE != " ":
+            postTypeDomain = GetCodedDomainValue(row.ALTROADTYPE, dictOfValidPostTypes)
+            if postTypeDomain != "":
+                # it's valid
+                row.ALTROADTYPE = postTypeDomain
+
+            #ValidateAssign_POSTTYPE(row,row.ALTROADTYPE,countyNumber)
+            #row.A1_POSTTYPE = row.ALTROADTYPE.upper()
 
         # check the altroadname2 field values and see if they placed an acs value in there, if so move it to the acs fields
         if row.ALTROADNAME2 != None or row.ALTROADNAME2 != " " or row.ALTROADNAME2 != "" or row.ALTROADNAME2 is not None:
@@ -285,8 +280,9 @@ def Utah(rows):
                         # it's not a digit, it's alpha roadname
                         row.A2_NAME = row.ALTROADNAME2.upper()
 
-        if row.ALTROADTYPE2 != None:
-            row.A1_POSTTYPE = row.ALTROADTYPE2
+        # if row.ALTROADTYPE2 != None:
+            # row.A1_POSTTYPE = row.ALTROADTYPE2
+
         if ACS_FROM_ALTROADNAME2 != None:
             row.AN_NAME = ACS_FROM_ALTROADNAME2
             # remove the value in the alias1type field
@@ -295,6 +291,7 @@ def Utah(rows):
             row.AN_POSTDIR = POSTDIR_FROM_ALTROADNAME2[0]
             # remove the value in the alias1type field
             row.A1_POSTTYPE = ""
+        
         if ACS_FROM_ALTROADNAME != None:
             row.AN_NAME = ACS_FROM_ALTROADNAME
             # remove the value in the alias1type field
@@ -302,6 +299,25 @@ def Utah(rows):
         if POSTDIR_FROM_ALTROADNAME != None:
             row.AN_POSTDIR = POSTDIR_FROM_ALTROADNAME[0]
             # remove the value in the alias1type field
+            row.A1_POSTTYPE = ""
+
+        if row.ALTROADTYPE != None or row.ALTROADTYPE != "" or row.ALTROADTYPE != " ":
+            altname = row.ALTROADTYPE
+            altname_split = altname.split(" ")
+            if len(altname_split) > 0:
+                if not altname_split[0].isdigit():
+                    # check if valid
+                    postTypeDomain = GetCodedDomainValue(altname_split[0], dictOfValidPostTypes)
+                    if postTypeDomain != "":
+                        # it's valid
+                        row.A1_POSTTYPE = postTypeDomain
+
+        # remove posttype if numeric street name
+        if row.NAME.isdigit():
+            row.POSTTYPE = ""
+
+        # remove the posttype if the 
+        if row.A1_NAME is None or row.A1_NAME == "":
             row.A1_POSTTYPE = ""
 
         # store the row
@@ -1285,10 +1301,10 @@ def ParseFullAddress(full_address):
 def ValidateAssign_POSTTYPE(row, county_posttype, countyNumber):
     # check if valid
     postTypeDomain = GetCodedDomainValue(county_posttype, dictOfValidPostTypes)
-    if postTypeDomain != "": 
+    if postTypeDomain != "":
         # is valid
         row.POSTTYPE = postTypeDomain
-    elif postTypeDomain == "" and len(county_posttype) > 1: 
+    elif postTypeDomain == "" and len(county_posttype) > 1:
         # is not valid
         # add the post type they gave to the notes field so we can evaluate it
         row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + county_posttype + "; "
@@ -1349,4 +1365,4 @@ dictOfValidFunctionalClass = CreateDomainDictionary('CVDomain_FunctionalClass')
 #arcpy.AddMessage("  Approved-Domain SurfaceType: " + str(dictOfValidSurfaceType))
 #arcpy.AddMessage("  Approved-Domain OneWay: " + str(dictOfValidOneWay))
 #arcpy.AddMessage("  Approved-Domain VerticalLevels: " + str(dictOfValidVerticalLevel))
-arcpy.AddMessage("  Approved-Domain DOT_FClass: " + str(dictOfValidFunctionalClass))
+#arcpy.AddMessage("  Approved-Domain DOT_FClass: " + str(dictOfValidFunctionalClass))
