@@ -904,8 +904,7 @@ def Wasatch(rows):
  
         ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
         row.COUNTY_L = countyNumber
-        row.COUNTY_R = countyNumber    
-          
+        row.COUNTY_R = countyNumber
         row.FROMADDR_L = row.L_F_ADD
         row.TOADDR_L = row.L_T_ADD
         row.FROMADDR_R = row.R_F_ADD
@@ -947,6 +946,104 @@ def Wasatch(rows):
         # store the row
         rows.updateRow(row)
         del row
+
+
+def Duchesne(rows):
+    for row in rows: 
+        # set all fields to empty or zero or none
+        setDefaultValues(row)
+        countyNumber = "49013"
+        
+        ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
+        row.COUNTY_L = countyNumber
+        row.COUNTY_R = countyNumber   
+        if row.L_F_ADD != "":
+            row.FROMADDR_L = row.L_F_ADD
+        if row.L_T_ADD != "":
+            row.TOADDR_L = row.L_T_ADD
+        if row.R_F_ADD != "":     
+            row.FROMADDR_R = row.R_F_ADD
+        if row.R_T_ADD != "":
+            row.TOADDR_R = row.R_T_ADD
+        row.PREDIR = row.PREDIR_[:1]
+        row.NAME = row.STREETNAME[:30]
+        row.POSTDIR = row.SUFDIR
+        row.AN_NAME = row.ACSNAME
+        row.AN_POSTDIR = row.ACSSUF
+        row.A1_PREDIR = ""
+        # row.A1_NAME = row.ALIAS1
+        row.A1_POSTTYPE = row.ALIAS1TYP
+        row.A1_POSTDIR = ""
+        row.A2_PREDIR = ""
+        # row.A2_NAME = row.ALIAS2
+        row.A2_POSTTYPE = row.ALIAS2TYP
+        row.A2_POSTDIR = ""
+        row.DOT_SRFTYP = row.SURFTYPE
+        row.DOT_CLASS = row.CLASS
+        row.VERT_LEVEL = row.VERTLEVEL
+        row.SPEED_LMT = row.SPEED
+        row.LOCAL_UID = row.CO_UNIQUE
+
+        ## TRANSFER OVER FIELDS THAT WE RENAMED WITH AN UNDERSCORE BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
+        row.ONEWAY = row.ONEWAY_
+
+        ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
+        ValidateAssign_POSTTYPE(row, row.STREETTYPE, countyNumber)
+        #ValidateAssign_DOT_FCLASS(row, row.S_AGFUNC, countyNumber)
+        ValidateAssign_DOT_SRFTYP(row, row.SURFTYPE, countyNumber)
+        ValidateAssign_STATUS(row, row.STATUS, countyNumber)
+        
+        # check if we need to parse the ALIAS1 field (they have predir, postdir, and posttypes in the field)
+        if row.ALIAS1 is not None or row.ALIAS1 != "":
+            is_valid_parse, pre_dir, street_name, post_type, post_dir = ParseFullAddress(row.ALIAS1)
+
+            if is_valid_parse == True:
+                # it WAS a valid parse
+                if street_name.isdigit():
+                    # the street name is numeric
+                    if row.AN_NAME == "":
+                        row.AN_NAME = street_name
+                        row.AN_POSTDIR = post_dir
+                else:
+                    # the streetname is alpha
+                    row.A1_PREDIR = pre_dir
+                    row.A1_NAME = street_name
+                    row.A1_POSTTYPE = post_type
+                    row.A1_POSTDIR = post_dir
+            else:
+                # it was NOT a valid parse
+                row.A1_NAME = row.ALIAS1
+
+        # check if we need to parse the ALIAS2 field (they have predir, postdir, and posttypes in the field)
+        if row.ALIAS2 is not None or row.ALIAS2 != "":
+            is_valid_parse, pre_dir, street_name, post_type, post_dir = ParseFullAddress(row.ALIAS2)
+
+            if is_valid_parse == True:
+                # it WAS a valid parse
+                if street_name.isdigit():
+                    # the street name is numeric
+                    if row.AN_NAME == "":
+                        row.AN_NAME = street_name
+                        row.AN_POSTDIR = post_dir
+                else:
+                    # the streetname is alpha
+                    row.A2_PREDIR = pre_dir
+                    row.A2_NAME = street_name
+                    row.A2_POSTTYPE = post_type
+                    row.A2_POSTDIR = post_dir
+            else:
+                # it was NOT a valid parse
+                row.A1_NAME = row.ALIAS2
+
+        # check if the alias1type and alias2type fields have valid posttypes, if so overwrite what was assigned from the fullname parser above
+        ValidateAssign_POSTTYPE(row, row.ALIAS1TYPE, countyNumber)
+        ValidateAssign_POSTTYPE(row, row.ALIAS2TYPE, countyNumber)
+
+        # store the row
+        rows.updateRow(row)
+        del row
+
+
 
 
 ######################################################################
