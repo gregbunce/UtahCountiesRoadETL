@@ -1,7 +1,7 @@
 import arcpy
 from datetime import date
 import os.path
-from UtransETL_GlobalFunctions import ValidateAndAssign_FieldValue, setDefaultValues, removePostTypeIfNumeric, removePostDirIfAlpha, CreateDomainDictionary, GetCodedDomainValue, AddBadValueToTextFile, Validate_AN_NAME, ParseFullAddress, ParseAndAssign_FullAddress
+from UtransETL_GlobalFunctions import ValidateAndAssign_FieldValue, setDefaultValues, removePostTypeIfNumeric, removePostDirIfAlpha, CreateDomainDictionary, GetCodedDomainValue, AddBadValueToTextFile, Validate_AN_NAME, ParseFullAddress, ParseAndAssign_FullAddress, FieldHasValue, HasValidDirection
 
 ## global scope variables -- see bottom of file for those dependent on fucntion data, aka: variable is assigned after the functions have been instantiated
 #NextGenFGDB = "K:/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb"
@@ -1049,11 +1049,69 @@ def Iron(rows):
         ValidateAndAssign_FieldValue(row, "DOT_SRFTYP", row.SURFTYPE, countyNumber, dictOfValidSurfaceType)
         ValidateAndAssign_FieldValue(row, "STATUS", row.STATUS_, countyNumber, dictOfValidStatus)
         ValidateAndAssign_FieldValue(row, "DOT_CLASS", row.CLASS, countyNumber, dictOfValidRoadClass)
+        
 
         # store the row
         rows.updateRow(row)
         del row
 
+
+def Summit(rows):
+    for row in rows: 
+        # set all fields to empty or zero or none
+        setDefaultValues(row)
+        countyNumber = "49043"
+        
+        ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
+        row.COUNTY_L = countyNumber
+        row.COUNTY_R = countyNumber   
+        if row.FROMLEFT != "":
+            row.FROMADDR_L = row.FROMLEFT
+        if row.TOLEFT != "":
+            row.TOADDR_L = row.TOLEFT
+        if row.FROMRIGHT != "":     
+            row.FROMADDR_R = row.FROMRIGHT
+        if row.TORIGHT != "":
+            row.TOADDR_R = row.TORIGHT
+        if HasValidDirection(row, "PREFIX_DIR"):
+            row.PREDIR = row.PREFIX_DIR[:1]
+        if FieldHasValue(row, "STREET"):
+            row.NAME = row.STREET[:30]
+        if HasValidDirection(row,"POST_DIR"):
+            row.POSTDIR = row.POST_DIR[:1]
+        
+        ## TRANSFER OVER FIELDS THAT WE RENAMED WITH AN APPENDED UNDERSCORE (FIELDNAME_) BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
+
+        ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
+        ValidateAndAssign_FieldValue(row, "POSTTYPE", row.SUFF_TYPE, countyNumber, dictOfValidPostTypes)
+        ValidateAndAssign_FieldValue(row, "ONEWAY", row.ONEWAY_, countyNumber, dictOfValidOneWay)
+        ValidateAndAssign_FieldValue(row, "STATUS", row.STATUS_, countyNumber, dictOfValidStatus)
+
+        # add the pre_type value to the street name if one exists (summit puts the highway type here)
+        if FieldHasValue(row, "PRE_TYPE"):
+            row.NAME = str(row.PRE_TYPE) + " " + str(row.NAME)
+            row.NAME = row.NAME.strip()
+        
+        # check if there's an alias name: if OTHER_NAME is different from STREET
+        if FieldHasValue(row, "OTHER_NAME"):
+             # check if the fisrt value/word and if they are the same, then assume it's not an alias name, if different then pass the OTHER_NAME into the alias1 fulladdress parser
+             _other_name = row.OTHER_NAME
+             _street = row.STREET
+             _other_name_split = _other_name.split(" ")
+             _street_split = _street.split(" ")
+             if len(_other_name_split) > 0:
+                _alias_first_word = _other_name_split[0]
+                _alias_first_word = str(_alias_first_word).upper()
+             if len(_street_split) > 0:
+                _primary_first_word = _street_split[0]
+                _primary_first_word = str(_primary_first_word).upper()
+                   
+             if _alias_first_word != _primary_first_word:
+                ParseAndAssign_FullAddress(row, "OTHER_NAME", False, True, False)
+
+        # store the row
+        rows.updateRow(row)
+        del row
 
 ######################################################################
 #### GENERAL (NON-FIELD COUNTY MAPPING) FUNCTIONS BELOW THIS LINE ####

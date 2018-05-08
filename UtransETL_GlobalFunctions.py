@@ -555,7 +555,8 @@ def ParseFullAddress(full_address):
 
 # validate and assing field values using the field name and dictionary of valid field values
 def ValidateAndAssign_FieldValue(row, utrans_field_name, county_field_value, county_number, dict_of_valid_values):
-    if county_field_value == "" or county_field_value is None or county_field_value.isspace():
+    """ example: (row, "POSTTYPE", row.STREETTYPE, countyNumber, dictOfValidPostTypes) """
+    if county_field_value == "" or county_field_value is None:
         # do something
         county_field_value = ""
     else:
@@ -578,51 +579,67 @@ def ValidateAndAssign_FieldValue(row, utrans_field_name, county_field_value, cou
 
 # parse and assign values for an address that might be concatinated
 def ParseAndAssign_FullAddress(row, field_name_to_parse, bool_primary=False, bool_alias1=False, bool_alias2=False):
-        # check if we need to parse the field (they have predir, postdir, and posttypes in the field)
-        if row.getValue(field_name_to_parse) is not None or row.getValue(field_name_to_parse) != "":
-            _original_field_value = row.getValue(field_name_to_parse)
-            is_valid_parse, pre_dir, street_name, post_type, post_dir = ParseFullAddress(row.getValue(field_name_to_parse))
+    """ example: (row, "ALIAS1", False, True, False) """
+    # check if we need to parse the field (they have predir, postdir, and posttypes in the field)
+    #if row.getValue(field_name_to_parse) is not None or row.getValue(field_name_to_parse) != "":
+    if FieldHasValue(row, field_name_to_parse):
+        _original_field_value = row.getValue(field_name_to_parse)
+        is_valid_parse, pre_dir, street_name, post_type, post_dir = ParseFullAddress(row.getValue(field_name_to_parse))
 
-            if is_valid_parse == True:
-                # it WAS a valid parse
-                if bool_primary:
-                    # we're parsing primary fields
-                    row.setValue("PREDIR", pre_dir)
-                    row.setValue("NAME", street_name)
-                    row.setValue("POSTTYPE", post_type)
-                    row.setValue("POSTDIR", post_dir)
-                else:
-                    # we're parsing alias fields, so incorporate a check for numeric values
-                    if street_name.isdigit():
-                        # the street name is numeric
-                        # check if there are existing values in the alias numeric field
-                        if row.AN_NAME == "" or row.AN_NAME is None or row.AN_NAME.isspace():
-                            # there are no existing values in the alias numeric field
-                            row.AN_NAME = street_name
-                            row.AN_POSTDIR = post_dir
-                        else:
-                            # there are existing values in the alias numeric fields so put the values in the alpha numeric field
-                            if bool_alias1:
-                                row.setValue("A1_NAME", _original_field_value)
-                            if bool_alias2:
-                                row.setValue("A2_NAME", _original_field_value)
-                    else:
-                        # the streetname is alpha
-                        if bool_alias1:
-                            row.setValue("A1_PREDIR", pre_dir)
-                            row.setValue("A1_NAME", street_name)
-                            row.setValue("A1_POSTTYPE", post_type)
-                            row.setValue("A1_POSTDIR", post_dir)
-                        if bool_alias2:
-                            row.setValue("A2_PREDIR", pre_dir)
-                            row.setValue("A2_NAME", street_name)
-                            row.setValue("A2_POSTTYPE", post_type)
-                            row.setValue("A2_POSTDIR", post_dir)
+        if is_valid_parse == True:
+            # it WAS a valid parse
+            if bool_primary:
+                # we're parsing primary fields
+                row.setValue("PREDIR", pre_dir)
+                row.setValue("NAME", street_name)
+                row.setValue("POSTTYPE", post_type)
+                row.setValue("POSTDIR", post_dir)
             else:
-                # it was NOT a valid parse, so use the original text for the field value
-                if bool_primary:
-                    row.setValue("NAME", _original_field_value)
-                if bool_alias1:
-                    row.setValue("A1_NAME", _original_field_value)
-                if bool_alias2:
-                    row.setValue("A2_NAME", _original_field_value)
+                # we're parsing alias fields, so incorporate a check for numeric values
+                if street_name.isdigit():
+                    # the street name is numeric
+                    # check if there are existing values in the alias numeric field
+                    if row.AN_NAME == "" or row.AN_NAME is None or row.AN_NAME.isspace():
+                        # there are no existing values in the alias numeric field
+                        row.AN_NAME = street_name
+                        row.AN_POSTDIR = post_dir
+                    else:
+                        # there are existing values in the alias numeric fields so put the values in the alpha numeric field
+                        if bool_alias1:
+                            row.setValue("A1_NAME", _original_field_value)
+                        if bool_alias2:
+                            row.setValue("A2_NAME", _original_field_value)
+                else:
+                    # the streetname is alpha
+                    if bool_alias1:
+                        row.setValue("A1_PREDIR", pre_dir)
+                        row.setValue("A1_NAME", street_name)
+                        row.setValue("A1_POSTTYPE", post_type)
+                        row.setValue("A1_POSTDIR", post_dir)
+                    if bool_alias2:
+                        row.setValue("A2_PREDIR", pre_dir)
+                        row.setValue("A2_NAME", street_name)
+                        row.setValue("A2_POSTTYPE", post_type)
+                        row.setValue("A2_POSTDIR", post_dir)
+        else:
+            # it was NOT a valid parse, so use the original text for the field value
+            if bool_primary:
+                row.setValue("NAME", _original_field_value)
+            if bool_alias1:
+                row.setValue("A1_NAME", _original_field_value)
+            if bool_alias2:
+                row.setValue("A2_NAME", _original_field_value)
+
+
+def FieldHasValue(row, field_name):
+    if row.getValue(field_name) == "" or row.getValue(field_name) is None or row.getValue(field_name).isspace():
+        return False
+    else:
+        return True
+
+def HasValidDirection(row, field_name):
+    if FieldHasValue(row, field_name):
+        if row.getValue(field_name).upper() in ("N", "S", "E", "W", "NORTH", "SOUTH", "EAST", "WEST"):
+            return True
+        else:
+            return False

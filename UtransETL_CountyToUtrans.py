@@ -3,11 +3,12 @@ import sys
 # sys.path.insert(0, '..')
 # import functions from global functions
 from UtransETL_GlobalFunctions import CalcUtransFields, GetUtransFieldSpecs, UpperCoreUtransFields
-from UtransETL_FieldMappingFunctions import Washington, Utah, Davis, Weber, SaltLake, Beaver, BoxElder, Carbon, Wasatch, Duchesne, Iron
+from UtransETL_FieldMappingFunctions import Washington, Utah, Davis, Weber, SaltLake, Beaver, BoxElder, Carbon, Wasatch, Duchesne, Iron, Summit
 import arcpy, os
 from arcpy import env
 import time
 from datetime import date
+from datetime import datetime
 
 # get county name
 countyName = arcpy.GetParameterAsText(1)
@@ -134,13 +135,14 @@ arcpy.MakeFeatureLayer_management(r"Database Connections\DC_agrc@SGID10@sgid.agr
 arcpy.MakeFeatureLayer_management(outputFeatureClass, 'countyETL_lyr')
 
 arcpy.SelectLayerByLocation_management('countyETL_lyr', 'intersect', "counties_lyr")
-arcpy.CopyFeatures_management('countyETL_lyr', dirname + "\\" + countyName + "ETL_" + strDate)
+arcpy.CopyFeatures_management('countyETL_lyr', dirname + "\\" + countyName + "ETL_" + strDate + "_" + datetime.now().strftime('%H%M'))
 
 # Execute Delete the Utah road layer will all the segments, including segments outside the county
 arcpy.Delete_management(dirname + "\\" + countyName + "Temp")
 
 # alter the alias name
 finalFeatureClassOutput = dirname + "\\" + countyName + "ETL_" + strDate
+
 # add alias name to the feature class for use in the ArcMap Utrans Editor (was outputFeatureClass)
 arcpy.AlterAliasName(finalFeatureClassOutput, "COUNTY_STREETS")
 
