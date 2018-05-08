@@ -135,13 +135,14 @@ arcpy.MakeFeatureLayer_management(r"Database Connections\DC_agrc@SGID10@sgid.agr
 arcpy.MakeFeatureLayer_management(outputFeatureClass, 'countyETL_lyr')
 
 arcpy.SelectLayerByLocation_management('countyETL_lyr', 'intersect', "counties_lyr")
-arcpy.CopyFeatures_management('countyETL_lyr', dirname + "\\" + countyName + "ETL_" + strDate + "_" + datetime.now().strftime('%H%M'))
+strTime = datetime.now().strftime('%H%M')
+arcpy.CopyFeatures_management('countyETL_lyr', dirname + "\\" + countyName + "ETL_" + strDate + "_" + strTime)
 
 # Execute Delete the Utah road layer will all the segments, including segments outside the county
 arcpy.Delete_management(dirname + "\\" + countyName + "Temp")
 
 # alter the alias name
-finalFeatureClassOutput = dirname + "\\" + countyName + "ETL_" + strDate
+finalFeatureClassOutput = dirname + "\\" + countyName + "ETL_" + strDate + "_" + strTime
 
 # add alias name to the feature class for use in the ArcMap Utrans Editor (was outputFeatureClass)
 arcpy.AlterAliasName(finalFeatureClassOutput, "COUNTY_STREETS")
