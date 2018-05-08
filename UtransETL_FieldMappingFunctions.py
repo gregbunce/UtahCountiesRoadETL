@@ -988,7 +988,7 @@ def Duchesne(rows):
 
         ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
         ValidateAndAssign_FieldValue(row, "POSTTYPE", row.STREETTYPE, countyNumber, dictOfValidPostTypes)
-        ValidateAndAssign_FieldValue(row, "ONEWAY", row.ONEWAY_, countyNumber, dictOfValidOneWay)
+        # ValidateAndAssign_FieldValue(row, "ONEWAY", row.ONEWAY_, countyNumber, dictOfValidOneWay)
         ValidateAndAssign_FieldValue(row, "DOT_SRFTYP", row.SURFTYPE, countyNumber, dictOfValidSurfaceType)
         ValidateAndAssign_FieldValue(row, "STATUS", row.STATUS_, countyNumber, dictOfValidStatus)
         ValidateAndAssign_FieldValue(row, "DOT_CLASS", row.CLASS, countyNumber, dictOfValidRoadClass)
