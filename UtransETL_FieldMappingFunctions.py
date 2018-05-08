@@ -966,9 +966,11 @@ def Duchesne(rows):
             row.FROMADDR_R = row.R_F_ADD
         if row.R_T_ADD != "":
             row.TOADDR_R = row.R_T_ADD
-        row.PREDIR = row.PREDIR_[:1]
+        if HasValidDirection(row,"PREDIR_"):
+            row.PREDIR = row.PREDIR_[:1]
         row.NAME = row.STREETNAME[:30]
-        row.POSTDIR = row.SUFDIR
+        if HasValidDirection(row, "SUFDIR"):
+            row.POSTDIR = row.SUFDIR[:1]
         row.AN_NAME = row.ACSNAME
         row.AN_POSTDIR = row.ACSSUF
         row.A1_PREDIR = ""
@@ -1022,11 +1024,14 @@ def Iron(rows):
             row.FROMADDR_R = row.R_F_ADD
         if row.R_T_ADD != "":
             row.TOADDR_R = row.R_T_ADD
-        row.PREDIR = row.PREDIR_[:1]
+        if HasValidDirection(row,"PREDIR_"):
+            row.PREDIR = row.PREDIR_[:1]
         row.NAME = row.STREETNAME[:30]
-        row.POSTDIR = row.SUFDIR
+        if HasValidDirection(row,"SUFDIR"):
+            row.POSTDIR = row.SUFDIR
         row.AN_NAME = row.ACSNAME
-        row.AN_POSTDIR = row.ACSSUF
+        if HasValidDirection(row,"ACSSUF"):
+            row.AN_POSTDIR = row.ACSSUF[:1]
         row.A1_PREDIR = ""
         row.A1_NAME = row.ALIAS1
         row.A1_POSTTYPE = row.ALIAS1TYPE
