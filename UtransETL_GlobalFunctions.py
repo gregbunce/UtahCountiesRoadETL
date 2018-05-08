@@ -514,7 +514,7 @@ def ParseFullAddress(full_address):
 
         # check last word and see if it's a valid posttype (only check if for posttype if last word is two characters long so we don't trim off valid streetname such as Canyon, Creek, Park, etc.)
         last_word = full_address_split[-1]
-        if len(last_word) == 2:
+        if len(last_word) == 2 or last_word.upper() == "AVE":
             # test if posttype
             _posttype = GetCodedDomainValue(full_address_split[-1], dictOfValidPostTypes)
             if _posttype != "":
@@ -581,6 +581,7 @@ def ValidateAndAssign_FieldValue(row, utrans_field_name, county_field_value, cou
 def ParseAndAssign_FullAddress(row, field_name_to_parse, bool_primary=False, bool_alias1=False, bool_alias2=False):
         # check if we need to parse the field (they have predir, postdir, and posttypes in the field)
         if row.getValue(field_name_to_parse) is not None or row.getValue(field_name_to_parse) != "":
+            _original_field_value = row.getValue(field_name_to_parse)
             is_valid_parse, pre_dir, street_name, post_type, post_dir = ParseFullAddress(row.getValue(field_name_to_parse))
 
             if is_valid_parse == True:
@@ -595,9 +596,17 @@ def ParseAndAssign_FullAddress(row, field_name_to_parse, bool_primary=False, boo
                     # we're parsing alias fields, so incorporate a check for numeric values
                     if street_name.isdigit():
                         # the street name is numeric
-                        if row.AN_NAME == "":
+                        # check if there are existing values in the alias numeric field
+                        if row.AN_NAME == "" or row.AN_NAME is None or row.AN_NAME.isspace():
+                            # there are no existing values in the alias numeric field
                             row.AN_NAME = street_name
                             row.AN_POSTDIR = post_dir
+                        else:
+                            # there are existing values in the alias numeric fields so put the values in the alpha numeric field
+                            if bool_alias1:
+                                row.setValue("A1_NAME", _original_field_value)
+                            if bool_alias2:
+                                row.setValue("A2_NAME", _original_field_value)
                     else:
                         # the streetname is alpha
                         if bool_alias1:
@@ -613,8 +622,8 @@ def ParseAndAssign_FullAddress(row, field_name_to_parse, bool_primary=False, boo
             else:
                 # it was NOT a valid parse, so use the original text for the field value
                 if bool_primary:
-                    row.setValue("NAME", row.getValue(field_name_to_parse))
+                    row.setValue("NAME", _original_field_value)
                 if bool_alias1:
-                    row.setValue("A1_NAME", row.getValue(field_name_to_parse))
+                    row.setValue("A1_NAME", _original_field_value)
                 if bool_alias2:
-                    row.setValue("A2_NAME", row.getValue(field_name_to_parse))
+                    row.setValue("A2_NAME", _original_field_value)
