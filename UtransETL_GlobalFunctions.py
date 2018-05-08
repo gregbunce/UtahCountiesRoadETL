@@ -208,7 +208,6 @@ def UpperCoreUtransFields (rows):
 
 
 #### THESE FUNCTIONS USED IN THE FIELD MAPPINGS SCRIPT ####
-
 def setDefaultValues(row):
         row.STATE_L = "UT"
         row.STATE_R = "UT"
@@ -564,7 +563,7 @@ def ValidateAndAssign_FieldValue(row, utrans_field_name, county_field_value, cou
         _county_field_value =str(county_field_value)
 
         # check for valid value in dictionary
-        _validated_field_value = GetCodedDomainValue(_county_field_value, dict_of_valid_values)
+        _validated_field_value = GetCodedDomainValue(_county_field_value.strip(), dict_of_valid_values)
 
         if _validated_field_value != "":
             # has valid value
