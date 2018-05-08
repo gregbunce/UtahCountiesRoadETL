@@ -572,7 +572,7 @@ def ValidateAndAssign_FieldValue(row, utrans_field_name, county_field_value, cou
         elif _validated_field_value == "" and len(_county_field_value) > 0:
             # does not have valid value
             # add the dot_fclass they gave to the notes field so we can evaluate it
-            row.setValue("UTRANS_NOTES", str(row.UTRANS_NOTES) + utrans_field_name + ": " + _county_field_value + "; ")
+            row.setValue("UTRANS_NOTES", str(row.getValue("UTRANS_NOTES")) + utrans_field_name + ": " + _county_field_value + "; ")
             # add the bad domain value to the text file log
             AddBadValueToTextFile(county_number, utrans_field_name, _county_field_value)   
              
