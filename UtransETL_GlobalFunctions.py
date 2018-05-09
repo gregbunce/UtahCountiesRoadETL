@@ -206,29 +206,38 @@ def UpperCoreUtransFields (rows):
         rows.updateRow(row)
     del row
 
-# remove apostophes, etc
-def RemoveSpecialCharacters(row):
-    _original_name_value = row.NAME
-    _original_a1_name_value = row.A1_NAME
-    _original_a2_name_value = row.A2_NAME
-    _new_name_value
-    _new_a1_name_value
-    _new_a2_name_value
+# remove special characters... apostophes, etc
+def RemoveSpecialCharacters(rows):
+    for row in rows:
+        _original_name_value = row.getValue("NAME")
+        _original_a1_name_value = row.getValue("A1_NAME")
+        _original_a2_name_value = row.getValue("A2_NAME")
 
-    # check NAME
-    if not _original_name_value.isdigit() and _original_name_value.contains("'"):
-        _new_name_value = _original_name_value.replace("'", "")
-        row.NAME = _new_name_value
+        _new_name_value = ""
+        _new_a1_name_value = ""
+        _new_a2_name_value = ""
+
+        # check NAME
+        if HasFieldValue(row.NAME):
+            if not _original_name_value.isdigit() and "'" in _original_name_value:
+                _new_name_value = _original_name_value.replace("'", "")
+                row.NAME = _new_name_value
     
-    # check A1_NAME
-    if not _original_a1_name_value.isdigit() and _original_a1_name_value.contains("'"):
-        _new_a1_name_value = _original_a1_name_value.replace("'", "")
-        row.A1_NAME = _new_a1_name_value
+        # check A1_NAME
+        if HasFieldValue(row.A1_NAME):
+            if not _original_a1_name_value.isdigit() and "'" in _original_a1_name_value:
+                _new_a1_name_value = _original_a1_name_value.replace("'", "")
+                row.A1_NAME = _new_a1_name_value
 
-    # check A2_NAME
-    if not _original_a2_name_value.isdigit() and _original_a2_name_value.contains("'"):
-        _new_a2_name_value = _original_a2_name_value.replace("'", "")
-        row.A2_NAME = _new_a2_name_value
+        # check A2_NAME
+        if HasFieldValue(row.A2_NAME):
+            if not _original_a2_name_value.isdigit() and "'" in _original_a2_name_value:
+                _new_a2_name_value = _original_a2_name_value.replace("'", "")
+                row.A2_NAME = _new_a2_name_value
+
+        rows.updateRow(row)
+    del row
+
 
 
 #### THESE FUNCTIONS USED IN THE FIELD MAPPINGS SCRIPT ####
@@ -665,18 +674,25 @@ def ParseAndAssign_FullAddress(row, county_field_value, field_name_to_parse, boo
 
 def HasFieldValue(field_value):
     """ example: (row.STATUS) """
-    if field_value.isdigit():
-        # it's an int
-        if field_value == "" or field_value is None:       
-            return False
-        else:
-            return True
+    if field_value is None:
+        # the value is of NoneType
+        return False
     else:
-        # it's not an int
-        if field_value == "" or field_value is None or field_value.isspace():       
-            return False
+        _str_field_value = str(field_value)
+
+        # value is not of NoneType
+        if _str_field_value.isdigit():
+            # it's an int
+            if _str_field_value == "":
+                return False
+            else:
+                return True
         else:
-            return True
+            # it's not an int
+            if _str_field_value == "" or _str_field_value is None or _str_field_value.isspace():       
+                return False
+            else:
+                return True
 
 def HasValidDirection(field_value):
     """ example: (row.STATUS) """
