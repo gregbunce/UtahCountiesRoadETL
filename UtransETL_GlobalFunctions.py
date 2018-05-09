@@ -556,11 +556,19 @@ def ParseFullAddress(full_address):
 # validate and assing field values using the field name and dictionary of valid field values
 def ValidateAndAssign_FieldValue(row, utrans_field_name, county_field_value, county_number, dict_of_valid_values):
     """ example: (row, "POSTTYPE", row.STREETTYPE, countyNumber, dictOfValidPostTypes) """
-    if county_field_value == "" or county_field_value is None:
-        # do something
-        county_field_value = ""
-    else:
-        # convert the raw county field value to stirng, in case it was an int value (the valid dictionary values are all string)
+    # get county field name
+    #_test = locals()
+    #arcpy.AddMessage(_test)
+    #_county_field_name = _test.split(".")
+    #arcpy.AddMessage(_county_field_name)
+
+    if HasFieldValue(county_field_value):
+        #if county_field_value == "" or county_field_value is None:
+            # do something
+            #county_field_value = ""
+        #else:
+            # convert the raw county field value to stirng, in case it was an int value (the valid dictionary values are all string)
+
         _county_field_value =str(county_field_value)
 
         # check for valid value in dictionary
@@ -572,17 +580,17 @@ def ValidateAndAssign_FieldValue(row, utrans_field_name, county_field_value, cou
         elif _validated_field_value == "" and len(_county_field_value) > 0:
             # does not have valid value
             # add the dot_fclass they gave to the notes field so we can evaluate it
-            row.setValue("UTRANS_NOTES", str(row.getValue("UTRANS_NOTES")) + utrans_field_name + ": " + _county_field_value + "; ")
+            row.setValue("UTRANS_NOTES", row.getValue("UTRANS_NOTES") + utrans_field_name + ": " + _county_field_value + "; ")
             # add the bad domain value to the text file log
             AddBadValueToTextFile(county_number, utrans_field_name, _county_field_value)   
              
 
 # parse and assign values for an address that might be concatinated
-def ParseAndAssign_FullAddress(row, field_name_to_parse, bool_primary=False, bool_alias1=False, bool_alias2=False):
-    """ example: (row, "ALIAS1", False, True, False) """
+def ParseAndAssign_FullAddress(row, county_field_value, field_name_to_parse, bool_primary=False, bool_alias1=False, bool_alias2=False):
+    """ example: (row, row.ALIAS1, "ALIAS1", False, True, False) """
     # check if we need to parse the field (they have predir, postdir, and posttypes in the field)
     #if row.getValue(field_name_to_parse) is not None or row.getValue(field_name_to_parse) != "":
-    if FieldHasValue(row, field_name_to_parse):
+    if HasFieldValue(county_field_value):
         _original_field_value = row.getValue(field_name_to_parse)
         is_valid_parse, pre_dir, street_name, post_type, post_dir = ParseFullAddress(row.getValue(field_name_to_parse))
 
@@ -631,15 +639,18 @@ def ParseAndAssign_FullAddress(row, field_name_to_parse, bool_primary=False, boo
                 row.setValue("A2_NAME", _original_field_value)
 
 
-def FieldHasValue(row, field_name):
-    if row.getValue(field_name) == "" or row.getValue(field_name) is None or row.getValue(field_name).isspace():
+def HasFieldValue(field_value):
+    """ example: (row.STATUS) """
+    if field_value == "" or field_value is None or field_value.isspace():       
         return False
     else:
         return True
 
-def HasValidDirection(row, field_name):
-    if FieldHasValue(row, field_name):
-        if row.getValue(field_name).upper() in ("N", "S", "E", "W", "NORTH", "SOUTH", "EAST", "WEST"):
+
+def HasValidDirection(field_value):
+    """ example: (row.STATUS) """
+    if HasFieldValue(field_value):
+        if field_value in ("N", "S", "E", "W", "NORTH", "SOUTH", "EAST", "WEST"):
             return True
         else:
             return False

@@ -1,7 +1,7 @@
 import arcpy
 from datetime import date
 import os.path
-from UtransETL_GlobalFunctions import ValidateAndAssign_FieldValue, setDefaultValues, removePostTypeIfNumeric, removePostDirIfAlpha, CreateDomainDictionary, GetCodedDomainValue, AddBadValueToTextFile, Validate_AN_NAME, ParseFullAddress, ParseAndAssign_FullAddress, FieldHasValue, HasValidDirection
+from UtransETL_GlobalFunctions import ValidateAndAssign_FieldValue, setDefaultValues, removePostTypeIfNumeric, removePostDirIfAlpha, CreateDomainDictionary, GetCodedDomainValue, AddBadValueToTextFile, Validate_AN_NAME, ParseFullAddress, ParseAndAssign_FullAddress, HasFieldValue, HasValidDirection
 
 ## global scope variables -- see bottom of file for those dependent on fucntion data, aka: variable is assigned after the functions have been instantiated
 #NextGenFGDB = "K:/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb"
@@ -966,10 +966,10 @@ def Duchesne(rows):
             row.FROMADDR_R = row.R_F_ADD
         if row.R_T_ADD != "":
             row.TOADDR_R = row.R_T_ADD
-        if HasValidDirection(row,"PREDIR_"):
+        if HasValidDirection(row.PREDIR_):
             row.PREDIR = row.PREDIR_[:1]
         row.NAME = row.STREETNAME[:30]
-        if HasValidDirection(row, "SUFDIR"):
+        if HasValidDirection(row.SUFDIR):
             row.POSTDIR = row.SUFDIR[:1]
         row.AN_NAME = row.ACSNAME
         row.AN_POSTDIR = row.ACSSUF
@@ -988,20 +988,21 @@ def Duchesne(rows):
 
         ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
         ValidateAndAssign_FieldValue(row, "POSTTYPE", row.STREETTYPE, countyNumber, dictOfValidPostTypes)
-        # ValidateAndAssign_FieldValue(row, "ONEWAY", row.ONEWAY_, countyNumber, dictOfValidOneWay)
+        ValidateAndAssign_FieldValue(row, "ONEWAY", row.ONEWAY_, countyNumber, dictOfValidOneWay)
         ValidateAndAssign_FieldValue(row, "DOT_SRFTYP", row.SURFTYPE, countyNumber, dictOfValidSurfaceType)
         ValidateAndAssign_FieldValue(row, "STATUS", row.STATUS_, countyNumber, dictOfValidStatus)
         ValidateAndAssign_FieldValue(row, "DOT_CLASS", row.CLASS, countyNumber, dictOfValidRoadClass)
 
         # check if we need to parse the ALIAS1 field (they have predir, postdir, and posttypes in the field - as well as numeric alias road names)
-        ParseAndAssign_FullAddress(row, "ALIAS1", False, True, False)
+        ParseAndAssign_FullAddress(row, row.ALIAS1, "ALIAS1", False, True, False)
         # check if we need to parse the ALIAS2 field (they have predir, postdir, and posttypes in the field - as well as numeric alias road names)
-        ParseAndAssign_FullAddress(row, "ALIAS2", False, False, True)
+        ParseAndAssign_FullAddress(row, row.ALIAS2, "ALIAS2", False, False, True)
 
         # check if the alias1type and alias2type fields have valid posttypes, if so overwrite what was assigned from the fullname parser above
         ValidateAndAssign_FieldValue(row, "A1_POSTTYPE", row.ALIAS1TYPE, countyNumber, dictOfValidPostTypes)
         ValidateAndAssign_FieldValue(row, "A2_POSTTYPE", row.ALIAS2TYPE, countyNumber, dictOfValidPostTypes)
 
+        arcpy.AddMessage(str(row.UTRANS_NOTES))
         # store the row
         rows.updateRow(row)
         del row
@@ -1024,13 +1025,13 @@ def Iron(rows):
             row.FROMADDR_R = row.R_F_ADD
         if row.R_T_ADD != "":
             row.TOADDR_R = row.R_T_ADD
-        if HasValidDirection(row,"PREDIR_"):
+        if HasValidDirection(row.PREDIR_):
             row.PREDIR = row.PREDIR_[:1]
         row.NAME = row.STREETNAME[:30]
-        if HasValidDirection(row,"SUFDIR"):
+        if HasValidDirection(row.SUFDIR):
             row.POSTDIR = row.SUFDIR
         row.AN_NAME = row.ACSNAME
-        if HasValidDirection(row,"ACSSUF"):
+        if HasValidDirection(row.ACSSUF):
             row.AN_POSTDIR = row.ACSSUF[:1]
         row.A1_PREDIR = ""
         row.A1_NAME = row.ALIAS1
@@ -1078,11 +1079,11 @@ def Summit(rows):
             row.FROMADDR_R = row.FROMRIGHT
         if row.TORIGHT != "":
             row.TOADDR_R = row.TORIGHT
-        if HasValidDirection(row, "PREFIX_DIR"):
+        if HasValidDirection(row.PREFIX_DIR):
             row.PREDIR = row.PREFIX_DIR[:1]
-        if FieldHasValue(row, "STREET"):
+        if HasFieldValue(row.STREET):
             row.NAME = row.STREET[:30]
-        if HasValidDirection(row,"POST_DIR"):
+        if HasValidDirection(row.POST_DIR):
             row.POSTDIR = row.POST_DIR[:1]
         
         ## TRANSFER OVER FIELDS THAT WE RENAMED WITH AN APPENDED UNDERSCORE (FIELDNAME_) BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
@@ -1093,12 +1094,12 @@ def Summit(rows):
         ValidateAndAssign_FieldValue(row, "STATUS", row.STATUS_, countyNumber, dictOfValidStatus)
 
         # add the pre_type value to the street name if one exists (summit puts the highway type here)
-        if FieldHasValue(row, "PRE_TYPE"):
+        if HasFieldValue(row.PRE_TYPE):
             row.NAME = str(row.PRE_TYPE) + " " + str(row.NAME)
             row.NAME = row.NAME.strip()
         
         # check if there's an alias name: if OTHER_NAME is different from STREET
-        if FieldHasValue(row, "OTHER_NAME"):
+        if HasFieldValue(row.OTHER_NAME):
              # check if the fisrt value/word and if they are the same, then assume it's not an alias name, if different then pass the OTHER_NAME into the alias1 fulladdress parser
              _other_name = row.OTHER_NAME
              _street = row.STREET
@@ -1112,7 +1113,7 @@ def Summit(rows):
                 _primary_first_word = str(_primary_first_word).upper()
                    
              if _alias_first_word != _primary_first_word:
-                ParseAndAssign_FullAddress(row, "OTHER_NAME", False, True, False)
+                ParseAndAssign_FullAddress(row, row.OTHER_NAME, "OTHER_NAME", False, True, False)
 
         # store the row
         rows.updateRow(row)
