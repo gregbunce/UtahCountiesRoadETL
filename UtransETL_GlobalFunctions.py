@@ -238,6 +238,7 @@ def RemoveSpecialCharacters(rows):
         rows.updateRow(row)
     del row
 
+# apply agrc highway formatting to county's, if different
 def FormatToAgrcHighwayNamingConvention(rows):
     for row in rows:
         _original_name_value = row.getValue("NAME")
@@ -245,7 +246,7 @@ def FormatToAgrcHighwayNamingConvention(rows):
         _highway_name = ""
         _highway_number = ""
 
-        # check NAME
+        # check NAME field for highway attributes
         if HasFieldValue(row.NAME):
             if not _original_name_value.isdigit():
                 _original_name_value = _original_name_value.upper()
@@ -265,8 +266,6 @@ def FormatToAgrcHighwayNamingConvention(rows):
 
                             # recalc DOT_HWYNAM
                             row.DOT_HWYNAM = str(_highway_name) + " " + str(_highway_number)
-
-
         rows.updateRow(row)
     del row
 
