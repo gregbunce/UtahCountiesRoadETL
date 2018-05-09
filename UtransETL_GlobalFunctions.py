@@ -238,6 +238,37 @@ def RemoveSpecialCharacters(rows):
         rows.updateRow(row)
     del row
 
+def FormatToAgrcHighwayNamingConvention(rows):
+    for row in rows:
+        _original_name_value = row.getValue("NAME")
+        _new_name_value = ""
+        _highway_name = ""
+        _highway_number = ""
+
+        # check NAME
+        if HasFieldValue(row.NAME):
+            if not _original_name_value.isdigit():
+                _original_name_value = _original_name_value.upper()
+
+                if "US" in _original_name_value or "SR" in _original_name_value or "HWY" in _original_name_value:
+                    # see if we can split the name on a numeric value
+                    _highway_name = _original_name_value.rstrip('0123456789')
+                    _highway_number = _original_name_value[len(_highway_name):]
+                
+                    if _highway_name != "" and _highway_number != "":
+                        _highway_name = _highway_name.strip()
+                        if _highway_name in ("US", "SR", "HWY") and _highway_number.isdigit():
+                            _new_name_value = "HIGHWAY " + str(_highway_number)
+                            # recalc NAME
+                            row.NAME = _new_name_value
+                            row.POSTTYPE = ""
+
+                            # recalc DOT_HWYNAM
+                            row.DOT_HWYNAM = str(_highway_name) + " " + str(_highway_number)
+
+
+        rows.updateRow(row)
+    del row
 
 
 #### THESE FUNCTIONS USED IN THE FIELD MAPPINGS SCRIPT ####

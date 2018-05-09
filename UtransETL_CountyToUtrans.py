@@ -2,7 +2,7 @@ import sys
 # go up a level in directory structure
 # sys.path.insert(0, '..')
 # import functions from global functions
-from UtransETL_GlobalFunctions import CalcUtransFields, GetUtransFieldSpecs, UpperCoreUtransFields, RemoveSpecialCharacters
+from UtransETL_GlobalFunctions import CalcUtransFields, GetUtransFieldSpecs, UpperCoreUtransFields, RemoveSpecialCharacters, FormatToAgrcHighwayNamingConvention
 from UtransETL_FieldMappingFunctions import Washington, Utah, Davis, Weber, SaltLake, Beaver, BoxElder, Carbon, Wasatch, Duchesne, Iron, Summit
 import arcpy, os
 from arcpy import env
@@ -14,7 +14,7 @@ from datetime import datetime
 countyName = arcpy.GetParameterAsText(1)
 
 # create print message variables
-total_steps = 14
+total_steps = 15
 current_step = 0
 
 # get the date
@@ -60,14 +60,14 @@ for field in utransFieldSpecs:
     else:
         # field is there so rename it (add underscore after field name so we know it's the county's field when field mapping)
         new_field_name = str(field[0]) + "_"
-        arcpy.AddMessage("  renamed " + field[0] + " to " + new_field_name)
+        arcpy.AddMessage("  renamed county's " + field[0] + " field to " + new_field_name)
         arcpy.AlterField_management(countySourceTEMP, field[0], new_field_name, new_field_name)
         # add utrans-based-domain one
         arcpy.AddField_management(*(countySourceTEMP,) + field)
 
 # get roadtype domain values in list
 current_step += 1
-arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Get valid domain values from utah data model...")
+arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Getting valid domain values from utah data model...")
 #listOfStreetTypes = GetRoadTypeDomains("K:/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb")
 
 # loop through all the fields and calc over values.
@@ -82,28 +82,35 @@ arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] F
 
 # append county temp schema with UTNGDM
 current_step += 1
-arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Append county-temp values to Utrans Data Model feature class.")
+arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Appending county-temp values to Utrans Data Model feature class.")
 arcpy.Append_management (countySourceTEMP, outputFeatureClass, "NO_TEST", "", "")
 
 # delete spaces in UTDM, and calculate county name values
 current_step += 1
-arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Convert null to empty string or zeros...")
+arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Converting null to empty string or zeros...")
 rows = arcpy.UpdateCursor(outputFeatureClass)
 CalcUtransFields(rows)
 del rows
 
 # upper case some of the core utrans fields
 current_step += 1
-arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Uppercase core utrans fields...")
+arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Uppercasing core utrans fields...")
 rows = arcpy.UpdateCursor(outputFeatureClass)
 UpperCoreUtransFields(rows)
 del rows
 
 # remove special characters apostrophes, if present in NAME, A1_NAME, and A2_NAME fields
 current_step += 1
-arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Remove special characters in road name fields...")
+arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Removing special characters in road name fields...")
 rows = arcpy.UpdateCursor(outputFeatureClass)
 RemoveSpecialCharacters(rows)
+del rows
+
+# format the county's highway name convention to match agrcs
+current_step += 1
+arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Formatting highway names to match AGRC's convention...")
+rows = arcpy.UpdateCursor(outputFeatureClass)
+FormatToAgrcHighwayNamingConvention(rows)
 del rows
 
 ## remove the street type if a numeric street name
@@ -116,12 +123,12 @@ arcpy.Delete_management (countySourceTEMP, "")
 
 # remove curves from the the data in our schema
 current_step += 1
-arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Begin removing curves, if any...")
+arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Removing curves, if any...")
 arcpy.Densify_edit(outputFeatureClass, "ANGLE","", "", "")
 
 # enusre that vertices are not too close, causing errors for the roads and highways system that does not allow vertices within 1 meter - this tool also removes bezier curves and arc segments, converting them to strait lines so I don't think we need the densify tool above, but let's keep it for now.
 current_step += 1
-arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Generalize the line features...")
+arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Generalizing the line features...")
 arcpy.Generalize_edit(outputFeatureClass, "2 Meters")
 
 # remove any segments that are not within the county
