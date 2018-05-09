@@ -2,7 +2,7 @@ import sys
 # go up a level in directory structure
 # sys.path.insert(0, '..')
 # import functions from global functions
-from UtransETL_GlobalFunctions import CalcUtransFields, GetUtransFieldSpecs, UpperCoreUtransFields
+from UtransETL_GlobalFunctions import CalcUtransFields, GetUtransFieldSpecs, UpperCoreUtransFields, RemoveSpecialCharacters
 from UtransETL_FieldMappingFunctions import Washington, Utah, Davis, Weber, SaltLake, Beaver, BoxElder, Carbon, Wasatch, Duchesne, Iron, Summit
 import arcpy, os
 from arcpy import env
@@ -14,7 +14,7 @@ from datetime import datetime
 countyName = arcpy.GetParameterAsText(1)
 
 # create print message variables
-total_steps = 13
+total_steps = 14
 current_step = 0
 
 # get the date
@@ -97,6 +97,13 @@ current_step += 1
 arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Uppercase core utrans fields...")
 rows = arcpy.UpdateCursor(outputFeatureClass)
 UpperCoreUtransFields(rows)
+del rows
+
+# remove special characters apostrophes, if present in NAME, A1_NAME, and A2_NAME fields
+current_step += 1
+arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Remove special characters in road name fields...")
+rows = arcpy.UpdateCursor(outputFeatureClass)
+RemoveSpecialCharacters(rows)
 del rows
 
 ## remove the street type if a numeric street name

@@ -1002,7 +1002,6 @@ def Duchesne(rows):
         ValidateAndAssign_FieldValue(row, "A1_POSTTYPE", row.ALIAS1TYPE, countyNumber, dictOfValidPostTypes)
         ValidateAndAssign_FieldValue(row, "A2_POSTTYPE", row.ALIAS2TYPE, countyNumber, dictOfValidPostTypes)
 
-        arcpy.AddMessage(str(row.UTRANS_NOTES))
         # store the row
         rows.updateRow(row)
         del row
