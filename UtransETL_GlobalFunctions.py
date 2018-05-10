@@ -731,3 +731,34 @@ def HasValidDirection(field_value):
             return True
         else:
             return False
+
+def VertLevel_TranslateOldDomainToNewDomain(row, old_vert_domain_value, county_number):
+    """ example: (row, row.VERTLEVEL, countyNumber) """
+    # NEW DOMAIN VALUES 
+    # 0: Ground/Lowest
+    # 1: Overpassing Level 1
+    # 2: Overpassing Level 2
+    # 3: Overpassing Level 3
+
+    # OLD DOMAIN VALUES
+    # 1: Road feature does not cross over another road feature
+    # 2: Road feature crosses over another road feature
+    # 3: Road feature crosses over and/or under two or more road features
+
+    _old_domain_val = str(old_vert_domain_value)
+    _old_domain_val = _old_domain_val.strip()
+
+    if HasFieldValue(_old_domain_val):
+        if _old_domain_val == "1":
+            row.VERT_LEVEL = "0"
+        elif _old_domain_val == "2":
+            row.VERT_LEVEL = "1"
+        elif _old_domain_val == "3":
+            row.VERT_LEVEL = "2"
+        else:
+            # does not have valid value
+            # add the vertical level they gave to the notes field so we can evaluate it
+            row.setValue("UTRANS_NOTES", row.getValue("UTRANS_NOTES") + "VERT_LEVEL" + ": " + _old_domain_val + "; ")
+            # add the bad domain value to the text file log
+            AddBadValueToTextFile(county_number, "VERT_LEVEL", _old_domain_val)     
+

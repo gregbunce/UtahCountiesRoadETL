@@ -113,12 +113,7 @@ rows = arcpy.UpdateCursor(outputFeatureClass)
 FormatToAgrcHighwayNamingConvention(rows)
 del rows
 
-## remove the street type if a numeric street name
-#arcpy.AddMessage("Remove PostType if numeric street name...")
-#rows = arcpy.UpdateCursor(outputFeatureClass)
-#removePostTypeIfNumeric(rows)
-#del rows
-
+# delete the temp/scratch layer
 arcpy.Delete_management (countySourceTEMP, "")
 
 # remove curves from the the data in our schema

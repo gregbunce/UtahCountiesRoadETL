@@ -1,11 +1,12 @@
 import arcpy
 from datetime import date
 import os.path
-from UtransETL_GlobalFunctions import ValidateAndAssign_FieldValue, setDefaultValues, removePostTypeIfNumeric, removePostDirIfAlpha, CreateDomainDictionary, GetCodedDomainValue, AddBadValueToTextFile, Validate_AN_NAME, ParseFullAddress, ParseAndAssign_FullAddress, HasFieldValue, HasValidDirection
+from UtransETL_GlobalFunctions import ValidateAndAssign_FieldValue, setDefaultValues, removePostTypeIfNumeric, removePostDirIfAlpha, CreateDomainDictionary, GetCodedDomainValue, AddBadValueToTextFile, Validate_AN_NAME, ParseFullAddress, ParseAndAssign_FullAddress, HasFieldValue, HasValidDirection, VertLevel_TranslateOldDomainToNewDomain
 
 ## global scope variables -- see bottom of file for those dependent on fucntion data, aka: variable is assigned after the functions have been instantiated
 #NextGenFGDB = "K:/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb"
 
+# MODIFY THIS FUNCTION TO INCORPORATE NEW HELPER FUNCTIONS #
 def Washington(rows):
     for row in rows:
         # set all fields to empty or zero or none
@@ -154,7 +155,7 @@ def Washington(rows):
         rows.updateRow(row)  
         del row
 
-
+# MODIFY THIS FUNCTION TO INCORPORATE NEW HELPER FUNCTIONS #
 def Utah(rows):
     for row in rows:
         # variables
@@ -325,7 +326,7 @@ def Utah(rows):
         rows.updateRow(row)  
         del row
 
-
+# MODIFY THIS FUNCTION TO INCORPORATE NEW HELPER FUNCTIONS #
 def Davis(rows):
     # get post direction domains
     countyNumber = "49011"
@@ -410,7 +411,7 @@ def Davis(rows):
         rows.updateRow(row)
         del row
 
-
+# MODIFY THIS FUNCTION TO INCORPORATE NEW HELPER FUNCTIONS #
 def Weber(rows):
     for row in rows:
         # set all fields to empty or zero or none
@@ -504,7 +505,7 @@ def Weber(rows):
         rows.updateRow(row)
         del row
 
-
+# MODIFY THIS FUNCTION TO INCORPORATE NEW HELPER FUNCTIONS #
 def SaltLake(rows):
     for row in rows:
         countyNumber = "49035"
@@ -640,36 +641,28 @@ def SaltLake(rows):
         rows.updateRow(row)
         del row
 
-
+# MODIFY THIS FUNCTION TO INCORPORATE NEW HELPER FUNCTIONS #
 def Beaver(rows):
     for row in rows:
         # set all fields to empty or zero or none
         setDefaultValues(row)
         countyNumber = "49001"
 
-        # set county specific fields
+        ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
         row.COUNTY_L = countyNumber
         row.COUNTY_R = countyNumber        
         row.FROMADDR_L = row.L_F_ADD
         row.TOADDR_L = row.L_T_ADD
         row.FROMADDR_R = row.R_F_ADD
         row.TOADDR_R = row.R_T_ADD
-        row.PREDIR = row.PREDIR_[:1]
+        if HasValidDirection(row.PREDIR_):
+            row.PREDIR = row.PREDIR_[:1]
         row.NAME = row.STREETNAME[:30]
-
-        # check if valid post type
-        postTypeDomain = GetCodedDomainValue(row.STREETTYPE, dictOfValidPostTypes)
-        if postTypeDomain != "":
-            row.POSTTYPE = postTypeDomain
-        elif postTypeDomain == "" and len(row.STREETTYPE) > 1:  
-            # add the post type they gave to the notes field so we can evaluate it
-            row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.STREETTYPE + "; "
-            # add the bad domain value to the text file log
-            AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.STREETTYPE))
-
-        row.POSTDIR = row.SUFDIR
+        if HasValidDirection(row.SUFDIR):
+            row.POSTDIR = row.SUFDIR
         row.AN_NAME = row.ACSNAME
-        row.AN_POSTDIR = row.ACSSUF
+        if HasValidDirection(row.ACSSUF):
+            row.AN_POSTDIR = row.ACSSUF
         row.A1_PREDIR = ""
         row.A1_NAME = row.ALIAS1
         row.A1_POSTTYPE = row.ALIAS1TYP
@@ -678,35 +671,29 @@ def Beaver(rows):
         row.A2_NAME = row.ALIAS2
         row.A2_POSTTYPE = row.ALIAS2TYP
         row.A2_POSTDIR = ""
-        row.DOT_SRFTYP = row.SURFTYPE
-        row.DOT_FCLASS = row.CLASS
-        row.VERT_LEVEL = row.VERTLEVEL
         row.SPEED_LMT = row.SPEED
         row.LOCAL_UID = row.CO_UNIQUE
 
-        # check for status valid values
-        statusValue = GetCodedDomainValue(row.STATUS_, dictOfValidStatus)
-        if statusValue != "":
-            row.STATUS = statusValue
-        elif statusValue == "" and len(row.STATUS_) > 0:
-            # add the post type they gave to the notes field so we can evaluate it
-            row.UTRANS_NOTES = row.UTRANS_NOTES + "STATUS: " + row.STATUS_ + "; "
-            # add the bad domain value to the text file log
-            AddBadValueToTextFile(countyNumber, "STATUS", str(row.STATUS_))
+        ## TRANSFER OVER FIELDS THAT WE RENAMED WITH AN APPENDED UNDERSCORE (FIELDNAME_) BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
 
-        ## remove PostDir if street name is alpha
-        #if removePostDirIfAlpha(row) == True:
-        #    row.POSTDIR = ""
-
+        ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
+        ValidateAndAssign_FieldValue(row, "STATUS", row.STATUS_, countyNumber, dictOfValidStatus)
+        ValidateAndAssign_FieldValue(row, "POSTTYPE", row.STREETTYPE, countyNumber, dictOfValidPostTypes)
+        ValidateAndAssign_FieldValue(row, "DOT_SRFTYP", row.SURFTYPE, countyNumber, dictOfValidSurfaceType)
+        ValidateAndAssign_FieldValue(row, "DOT_CLASS", row.CLASS, countyNumber, dictOfValidRoadClass) 
+             
         # remove PostType is street name is numeric
         if removePostTypeIfNumeric(row) == True:
             row.POSTTYPE = ""
+        
+        # translate vertical level to our new domain values
+        VertLevel_TranslateOldDomainToNewDomain(row, row.VERTLEVEL, countyNumber)
 
         # store the row
         rows.updateRow(row)
         del row
 
-
+# MODIFY THIS FUNCTION TO INCORPORATE NEW HELPER FUNCTIONS #
 def BoxElder(rows):
     for row in rows:
         # set all fields to empty or zero or none
@@ -758,7 +745,9 @@ def BoxElder(rows):
                 # add the bad domain value to the text file log
                 AddBadValueToTextFile(countyNumber, "DOT_FCLASS", str(row.CLASS))
         
-        row.VERT_LEVEL = row.VERTLEVEL
+        # translate vertical level to our new domain values
+        VertLevel_TranslateOldDomainToNewDomain(row, row.VERTLEVEL, countyNumber)
+
         row.SPEED_LMT = row.SPD_LMT
         row.LOCAL_UID = row.CO_UNIQUE
         row.ONEWAY = row.ONE_WAY
@@ -772,7 +761,7 @@ def BoxElder(rows):
         rows.updateRow(row)
         del row
 
-
+# MODIFY THIS FUNCTION TO INCORPORATE NEW HELPER FUNCTIONS #
 def Carbon(rows):
     for row in rows:
         # set all fields to empty or zero or none
@@ -896,7 +885,7 @@ def Carbon(rows):
         rows.updateRow(row)
         del row
 
-
+# MODIFY THIS FUNCTION TO INCORPORATE NEW HELPER FUNCTIONS #
 def Wasatch(rows):
     for row in rows:
         # set all fields to empty or zero or none
@@ -979,7 +968,6 @@ def Duchesne(rows):
         row.A2_PREDIR = ""
         row.A2_POSTTYPE = row.ALIAS2TYPE
         row.A2_POSTDIR = ""
-        row.VERT_LEVEL = row.VERTLEVEL
         row.SPEED_LMT = row.SPEED
         row.LOCAL_UID = row.COUNIQUE
 
@@ -1001,6 +989,9 @@ def Duchesne(rows):
         # check if the alias1type and alias2type fields have valid posttypes, if so overwrite what was assigned from the fullname parser above
         ValidateAndAssign_FieldValue(row, "A1_POSTTYPE", row.ALIAS1TYPE, countyNumber, dictOfValidPostTypes)
         ValidateAndAssign_FieldValue(row, "A2_POSTTYPE", row.ALIAS2TYPE, countyNumber, dictOfValidPostTypes)
+
+        # translate vertical level to our new domain values
+        VertLevel_TranslateOldDomainToNewDomain(row, row.VERTLEVEL, countyNumber)
 
         # store the row
         rows.updateRow(row)
@@ -1040,7 +1031,6 @@ def Iron(rows):
         row.A2_NAME = row.ALIAS2
         row.A2_POSTTYPE = row.ALIAS2TYPE
         row.A2_POSTDIR = ""
-        row.VERT_LEVEL = row.VERTLEVEL
         row.SPEED_LMT = row.SPEED
         row.LOCAL_UID = row.COUNIQUE
 
@@ -1055,6 +1045,8 @@ def Iron(rows):
         ValidateAndAssign_FieldValue(row, "STATUS", row.STATUS_, countyNumber, dictOfValidStatus)
         ValidateAndAssign_FieldValue(row, "DOT_CLASS", row.CLASS, countyNumber, dictOfValidRoadClass)
         
+        # translate vertical level to our new domain values
+        VertLevel_TranslateOldDomainToNewDomain(row, row.VERTLEVEL, countyNumber)
 
         # store the row
         rows.updateRow(row)
