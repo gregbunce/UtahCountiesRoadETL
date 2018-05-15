@@ -885,7 +885,7 @@ def Carbon(rows):
         rows.updateRow(row)
         del row
 
-# MODIFY THIS FUNCTION TO INCORPORATE NEW HELPER FUNCTIONS #
+
 def Wasatch(rows):
     for row in rows:
         # set all fields to empty or zero or none
@@ -906,12 +906,12 @@ def Wasatch(rows):
         row.AN_POSTDIR = row.ACS_SUFDIR[:1] 
 
         ## TRANSFER OVER FIELDS THAT WE RENAMED BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
-        ValidateAssign_STATUS(row, row.STATUS_, countyNumber)
+        # ValidateAssign_STATUS(row, row.STATUS_, countyNumber)
 
         ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
-        ValidateAssign_POSTTYPE(row, row.S_TYPE, countyNumber)
-        ValidateAssign_DOT_FCLASS(row, row.S_AGFUNC, countyNumber) 
-        ValidateAssign_DOT_SRFTYP(row, row.S_SURF, countyNumber)
+        ValidateAndAssign_FieldValue(row, "POSTTYPE", row.S_TYPE, countyNumber, dictOfValidPostTypes)
+        ValidateAndAssign_FieldValue(row, "DOT_FCLASS", row.S_AGFUNC, countyNumber, dictOfValidFunctionalClass)
+        ValidateAndAssign_FieldValue(row, "DOT_SRFTYP", row.S_SURF, countyNumber, dictOfValidSurfaceType)
 
         # check if we need to parse the ALIAS_1 field (they have predir, postdir, and posttypes in the field)
         if row.ALIAS_1 is not None or row.ALIAS_1 != "":
