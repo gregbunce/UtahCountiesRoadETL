@@ -251,6 +251,7 @@ def FormatToAgrcHighwayNamingConvention(rows):
             if not _original_name_value.isdigit():
                 _original_name_value = _original_name_value.upper()
 
+                # check if state or us route, if so then reformat
                 if "US" in _original_name_value or "SR" in _original_name_value or "HWY" in _original_name_value:
                     # see if we can split the name on a numeric value
                     _highway_name = _original_name_value.rstrip('0123456789')
@@ -263,11 +264,22 @@ def FormatToAgrcHighwayNamingConvention(rows):
                             # recalc NAME
                             row.NAME = _new_name_value
                             row.POSTTYPE = ""
-
                             # recalc DOT_HWYNAM
                             row.DOT_HWYNAM = str(_highway_name) + " " + str(_highway_number)
+                # check if interstate, if so then reformat
+                elif (_original_name_value in ('I70', 'I80', 'I15', 'I84')):
+                      # split on 'I' and then add the '-'
+                      _highway_interstate = _original_name_value.split('I')
+                      _highway_interstate_reformatted = ""
+                      if len(_highway_interstate) > 1:
+                          if _highway_interstate[0] == "I" and _highway_interstate[1].isdigit(): 
+                            _highway_interstate_reformatted = _highway_interstate[0] + "-" + _highway_interstate[1]
+                            # recalc NAME
+                            row.NAME = _highway_interstate_reformatted
+                            row.POSTTYPE = ""
         rows.updateRow(row)
     del row
+
 
 
 #### THESE FUNCTIONS USED IN THE FIELD MAPPINGS SCRIPT ####
@@ -545,7 +557,7 @@ def Validate_AN_NAME(an_Name):
                         returnAN_POSTDIR = an_POSTDIR
     return returnAN_NAME, returnAN_POSTDIR
 
-
+# ParseFullAddress is an internal function that is typically called ParseAndAssign_FullAddres function
 # parse out full address - ie: "N 1300 S" or "1300 S" or "W Broadway RD" or "Broadway RD" 
 # if it doesn't parse out based on one of these formats just retrun the original value
 # it is assumed that full_address parameter has a value and is not None or "" or .isspace()

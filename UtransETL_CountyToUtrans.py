@@ -3,7 +3,7 @@ import sys
 # sys.path.insert(0, '..')
 # import functions from global functions
 from UtransETL_GlobalFunctions import CalcUtransFields, GetUtransFieldSpecs, UpperCoreUtransFields, RemoveSpecialCharacters, FormatToAgrcHighwayNamingConvention
-from UtransETL_FieldMappingFunctions import Washington, Utah, Davis, Weber, SaltLake, Beaver, BoxElder, Carbon, Wasatch, Duchesne, Iron, Summit
+from UtransETL_FieldMappingFunctions import Washington, Utah, Davis, Weber, SaltLake, Beaver, BoxElder, Carbon, Wasatch, Duchesne, Iron, Summit, Tooele
 import arcpy, os
 from arcpy import env
 import time

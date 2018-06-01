@@ -1110,6 +1110,44 @@ def Summit(rows):
         rows.updateRow(row)
         del row
 
+
+def Tooele(rows):
+    for row in rows: 
+        # set all fields to empty or zero or none
+        setDefaultValues(row)
+        countyNumber = "49045"
+        
+        ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
+        row.COUNTY_L = countyNumber
+        row.COUNTY_R = countyNumber   
+        if row.FromLeft != "":
+            row.FROMADDR_L = row.FromLeft
+        if row.ToLeft != "":
+            row.TOADDR_L = row.ToLeft
+        if row.FromRight != "":     
+            row.FROMADDR_R = row.FromRight
+        if row.ToRight != "":
+            row.TOADDR_R = row.ToRight
+        if HasFieldValue(row.S_UNIQUE):
+            row.LOCAL_UID = row.S_UNIQUE
+        if HasFieldValue(row.NOTE_):
+            row.CUSTOMTAGS = row.NOTE_        
+
+        ## TRANSFER OVER FIELDS THAT WE RENAMED WITH AN APPENDED UNDERSCORE (FIELDNAME_) BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
+
+        ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
+        ParseAndAssign_FullAddress(row, row.SP_Street, "SP_Street", True, False, False)
+        ParseAndAssign_FullAddress(row, row.SP_Alias_1, "SP_Alias_1", False, True, False)
+        ParseAndAssign_FullAddress(row, row.SP_Alias_2, "SP_Alias_2", False, False, True)
+        #ValidateAndAssign_FieldValue(row, "POSTTYPE", row.TYPE_, countyNumber, dictOfValidPostTypes)
+        ValidateAndAssign_FieldValue(row, "DOT_CLASS", row.CLASS, countyNumber, dictOfValidRoadClass)
+        ValidateAndAssign_FieldValue(row, "STATUS", row.CONSTRUCTI, countyNumber, dictOfValidStatus)
+
+    
+
+        # store the row
+        rows.updateRow(row)
+        del row
 ######################################################################
 #### GENERAL (NON-FIELD COUNTY MAPPING) FUNCTIONS BELOW THIS LINE ####
 
