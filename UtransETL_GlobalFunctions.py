@@ -4,6 +4,7 @@ from datetime import date
 
 # global scope variables -- see bottom of file for those dependent on fucntion data, aka: variable is assigned after the functions have been instantiated
 NextGenFGDB = "K:/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb"
+officialPostTypeDomains = []
 
 ### THESE FUNCTIONS ARE USED IN THE COUNTY TO UTRANS SCRIPT ###
 # this function recalcs the listed fields to empty string if ' ', == None, or is None
@@ -630,10 +631,10 @@ def ParseFullAddress(full_address):
             __has_predir = True
 
 
-        # check last word and see if it's a valid posttype (only check if for posttype if last word is two characters long so we don't trim off valid streetname such as Canyon, Creek, Park, etc.)
+        # check last word and see if it's a valid posttype (only check if for posttype if last word is four characters long so we don't trim off valid streetname such as Canyon, Creek, Park, etc.)
         last_word = full_address_split[-1]
         last_word = last_word.strip()
-        if len(last_word) == 2 or last_word.upper() == "AVE" or last_word.upper() == "WAY" or last_word.upper() == "BLVD":
+        if last_word in officialPostTypeDomains:
             # test if posttype
             _posttype = GetCodedDomainValue(full_address_split[-1], dictOfValidPostTypes)
             if _posttype != "":
@@ -841,3 +842,18 @@ def VertLevel_TranslateOldDomainToNewDomain(row, old_vert_domain_value, county_n
             # add the bad domain value to the text file log
             AddBadValueToTextFile(county_number, "VERT_LEVEL", _old_domain_val)     
 
+
+# get a list of coded domain values for posttype field for the full name parser function (used when parsing the full address)
+def GetOfficalPOSTTYPE_domainValues():
+    listOfDomainValues = []
+    domains = arcpy.da.ListDomains(NextGenFGDB)
+
+    for domain in domains:
+        if domain.name == 'CVDomain_StreetType':
+            coded_values = domain.codedValues
+            for val, desc in coded_values.items():
+                #print(val)
+                listOfDomainValues.append(val)
+    return listOfDomainValues
+# call the function and create the list
+officialPostTypeDomains = GetOfficalPOSTTYPE_domainValues()

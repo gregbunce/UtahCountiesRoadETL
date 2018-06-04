@@ -1139,11 +1139,14 @@ def Tooele(rows):
         ParseAndAssign_FullAddress(row, row.SP_Street, "SP_Street", True, False, False)
         ParseAndAssign_FullAddress(row, row.SP_Alias_1, "SP_Alias_1", False, True, False)
         ParseAndAssign_FullAddress(row, row.SP_Alias_2, "SP_Alias_2", False, False, True)
-        #ValidateAndAssign_FieldValue(row, "POSTTYPE", row.TYPE_, countyNumber, dictOfValidPostTypes)
-        ValidateAndAssign_FieldValue(row, "DOT_CLASS", row.CLASS, countyNumber, dictOfValidRoadClass)
+        
         ValidateAndAssign_FieldValue(row, "STATUS", row.CONSTRUCTI, countyNumber, dictOfValidStatus)
-
-    
+        
+        # remove "Road" from class before validating... tooele does A Road; B Road; C Road
+        if HasFieldValue(row.CLASS):
+            _class = row.CLASS
+            _class = _class.replace(" Road", "")
+            ValidateAndAssign_FieldValue(row, "DOT_CLASS", _class, countyNumber, dictOfValidRoadClass)
 
         # store the row
         rows.updateRow(row)
