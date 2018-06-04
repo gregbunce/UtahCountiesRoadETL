@@ -281,6 +281,40 @@ def FormatToAgrcHighwayNamingConvention(rows):
     del row
 
 
+# Check the values in the A1 and A2 fields and if numeric then move to AN fields
+def MoveNumericA1orA2ToANfield(rows):
+    for row in rows:
+        aliasFieldsList = ["A1_", "A2_"]
+
+        # loop through the alias road name fields
+        for aliasField in aliasFieldsList:
+            if HasFieldValue(row.getValue(aliasField + "NAME")):
+                _roadName = ""
+                _roadName = str(row.getValue(aliasField + "NAME"))
+                _postdir = ""
+                _postdir = row.getValue(aliasField + "POSTDIR")
+                 
+                if _roadName.isdigit():
+                    # it's digit so move the values to alias numeric fields
+                    row.setValue("AN_NAME", _roadName)
+                    row.setValue("AN_POSTDIR", _postdir)
+
+                    # clear-out the alias alpha fields
+                    if aliasField == "A1_":
+                        row.A1_PREDIR = ""
+                        row.A1_NAME = ""
+                        row.A1_POSTTYPE = ""
+                    else:
+                        row.A2_PREDIR = ""
+                        row.A2_NAME = ""
+                        row.A2_POSTTYPE = ""
+
+                # save the changes to the row
+                rows.updateRow(row)
+    del row
+
+
+
 
 #### THESE FUNCTIONS USED IN THE FIELD MAPPINGS SCRIPT ####
 def setDefaultValues(row):
@@ -566,6 +600,7 @@ def ParseFullAddress(full_address):
     # call this function this way to get all values:
     # is_valid_parse, pre_dir, street_name, post_type, post_dir = ParseFullAddress(full_address)
 
+    full_address = full_address.strip()
     _full_address = full_address
     _is_valid_parsed = False
     _predir = ""
@@ -573,7 +608,7 @@ def ParseFullAddress(full_address):
     _streetname = ""
     _posttype = ""
     _postdir = ""
-    _postdirFullSpelling = "" 
+    _postdirFullSpelling = ""
     _checkForStreetName = ""
     __has_predir = False
     __has_postype = False

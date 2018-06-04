@@ -2,7 +2,7 @@ import sys
 # go up a level in directory structure
 # sys.path.insert(0, '..')
 # import functions from global functions
-from UtransETL_GlobalFunctions import CalcUtransFields, GetUtransFieldSpecs, UpperCoreUtransFields, RemoveSpecialCharacters, FormatToAgrcHighwayNamingConvention
+from UtransETL_GlobalFunctions import CalcUtransFields, GetUtransFieldSpecs, UpperCoreUtransFields, RemoveSpecialCharacters, FormatToAgrcHighwayNamingConvention, MoveNumericA1orA2ToANfield
 from UtransETL_FieldMappingFunctions import Washington, Utah, Davis, Weber, SaltLake, Beaver, BoxElder, Carbon, Wasatch, Duchesne, Iron, Summit, Tooele
 import arcpy, os
 from arcpy import env
@@ -14,7 +14,7 @@ from datetime import datetime
 countyName = arcpy.GetParameterAsText(1)
 
 # create print message variables
-total_steps = 15
+total_steps = 16
 current_step = 0
 
 # get the date
@@ -111,6 +111,13 @@ current_step += 1
 arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Formatting highway names to match AGRC's convention...")
 rows = arcpy.UpdateCursor(outputFeatureClass)
 FormatToAgrcHighwayNamingConvention(rows)
+del rows
+
+# move numeric alias values from A1 or A2 to AN fields
+current_step += 1
+arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Moving numeric alias values from A1 and A2 to AN fields...")
+rows = arcpy.UpdateCursor(outputFeatureClass)
+MoveNumericA1orA2ToANfield(rows)
 del rows
 
 # delete the temp/scratch layer
