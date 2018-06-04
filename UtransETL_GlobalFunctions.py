@@ -558,7 +558,7 @@ def Validate_AN_NAME(an_Name):
     return returnAN_NAME, returnAN_POSTDIR
 
 # ParseFullAddress is an internal function that is typically called ParseAndAssign_FullAddres function
-# parse out full address - ie: "N 1300 S" or "1300 S" or "W Broadway RD" or "Broadway RD" 
+# parse out full address - ie: "N 1300 S" or "1300 S" or "W Broadway RD" or "Broadway RD"
 # if it doesn't parse out based on one of these formats just retrun the original value
 # it is assumed that full_address parameter has a value and is not None or "" or .isspace()
 def ParseFullAddress(full_address):
@@ -569,9 +569,12 @@ def ParseFullAddress(full_address):
     _full_address = full_address
     _is_valid_parsed = False
     _predir = ""
+    _predirFullSpelling = ""
     _streetname = ""
     _posttype = ""
     _postdir = ""
+    _postdirFullSpelling = "" 
+    _checkForStreetName = ""
     __has_predir = False
     __has_postype = False
     __has_postdir = False
@@ -582,21 +585,31 @@ def ParseFullAddress(full_address):
 
     if word_count > 1:
         # check first word and see if predirection
-        if full_address_split[0] in ("N", "S", "E", "W"):
-            _predir = full_address_split[0]
+        first_word = full_address_split[0]
+        first_word = first_word.strip()
+        if first_word in ("N", "S", "E", "W"):
+            _predir = first_word
             __has_predir = True
+        elif first_word in ("NORTH", "SOUTH", "EAST", "WEST"):
+            _predirFullSpelling = first_word
+            __has_predir = True
+
 
         # check last word and see if it's a valid posttype (only check if for posttype if last word is two characters long so we don't trim off valid streetname such as Canyon, Creek, Park, etc.)
         last_word = full_address_split[-1]
-        if len(last_word) == 2 or last_word.upper() == "AVE":
+        last_word = last_word.strip()
+        if len(last_word) == 2 or last_word.upper() == "AVE" or last_word.upper() == "WAY" or last_word.upper() == "BLVD":
             # test if posttype
             _posttype = GetCodedDomainValue(full_address_split[-1], dictOfValidPostTypes)
             if _posttype != "":
                 __has_postype = True
-        else:
+        elif last_word in ("N", "S", "E", "W", "NORTH", "SOUTH", "EAST", "WEST"):
             # test if postdir
             if last_word in ("N", "S", "E", "W"):
                 _postdir = last_word
+                __has_postdir = True
+            elif last_word in ("NORTH", "SOUTH", "EAST", "WEST"):
+                _postdirFullSpelling = last_word
                 __has_postdir = True
                         
         # get street name value from full_address variable, if present
@@ -604,19 +617,38 @@ def ParseFullAddress(full_address):
              # remove the last word from full_address
              _full_address = _full_address.rsplit(' ', 1)[0]
         if __has_predir == True:
-            # remove the first word from full_address 
-            _full_address = _full_address.split(' ', 1)[1]
+            # remove the first word from full_address  
+            # but first, check if there's anything left to split on (i was getting errors when the orig value was "E ST".. then after the last word was removed about it was "E")
+            if ' ' in _full_address:
+                _full_address = _full_address.split(' ', 1)[1]
+            else:
+                # there's not enough words in the array to parse correctly, just return the original value
+                _full_address = ""
 
         _full_address = _full_address.strip()
-        
+
+        if _full_address != "":
+            _checkForStreetName = str(_full_address)
+
+        # check if it's a numeric streetname
+        if _checkForStreetName.isdigit():
+            # see if predir is full spelling, if so only use first character
+            _streetname = _checkForStreetName
+            if _predirFullSpelling != "":
+                _predir = _predirFullSpelling[:1]
+            if _postdirFullSpelling != "":
+                _postdir = _postdirFullSpelling[:1]
+        else:
+            _streetname = _checkForStreetName                    
+
         # set name and confirm it's parsed
         if __has_postdir == True or __has_postype == True or __has_predir == True:
             # check if there's a street name now that the predir, or posttype, or postdir has been removed
-            if _full_address != "":
-                _streetname = _full_address
+            if _streetname != "":
+                #_streetname = _full_address
                 _is_valid_parsed = True
             else:
-                _is_valid_parsed = False 
+                _is_valid_parsed = False
         else:
             _is_valid_parsed = False
 
@@ -627,38 +659,6 @@ def ParseFullAddress(full_address):
     # return tuple
     return _is_valid_parsed, _predir, _streetname, _posttype, _postdir
 
-
-# validate and assing field values using the field name and dictionary of valid field values
-def ValidateAndAssign_FieldValue(row, utrans_field_name, county_field_value, county_number, dict_of_valid_values):
-    """ example: (row, "POSTTYPE", row.STREETTYPE, countyNumber, dictOfValidPostTypes) """
-    # get county field name
-    #_test = locals()
-    #arcpy.AddMessage(_test)
-    #_county_field_name = _test.split(".")
-    #arcpy.AddMessage(_county_field_name)
-
-    if HasFieldValue(county_field_value):
-        #if county_field_value == "" or county_field_value is None:
-            # do something
-            #county_field_value = ""
-        #else:
-            # convert the raw county field value to stirng, in case it was an int value (the valid dictionary values are all string)
-
-        _county_field_value =str(county_field_value)
-
-        # check for valid value in dictionary
-        _validated_field_value = GetCodedDomainValue(_county_field_value.strip(), dict_of_valid_values)
-
-        if _validated_field_value != "":
-            # has valid value
-            row.setValue(utrans_field_name, _validated_field_value)
-        elif _validated_field_value == "" and len(_county_field_value) > 0:
-            # does not have valid value
-            # add the dot_fclass they gave to the notes field so we can evaluate it
-            row.setValue("UTRANS_NOTES", row.getValue("UTRANS_NOTES") + utrans_field_name + ": " + _county_field_value + "; ")
-            # add the bad domain value to the text file log
-            AddBadValueToTextFile(county_number, utrans_field_name, _county_field_value)   
-             
 
 # parse and assign values for an address that might be concatinated
 def ParseAndAssign_FullAddress(row, county_field_value, field_name_to_parse, bool_primary=False, bool_alias1=False, bool_alias2=False):
@@ -712,6 +712,38 @@ def ParseAndAssign_FullAddress(row, county_field_value, field_name_to_parse, boo
                 row.setValue("A1_NAME", _original_field_value)
             if bool_alias2:
                 row.setValue("A2_NAME", _original_field_value)
+
+
+# validate and assing field values using the field name and dictionary of valid field values
+def ValidateAndAssign_FieldValue(row, utrans_field_name, county_field_value, county_number, dict_of_valid_values):
+    """ example: (row, "POSTTYPE", row.STREETTYPE, countyNumber, dictOfValidPostTypes) """
+    # get county field name
+    #_test = locals()
+    #arcpy.AddMessage(_test)
+    #_county_field_name = _test.split(".")
+    #arcpy.AddMessage(_county_field_name)
+
+    if HasFieldValue(county_field_value):
+        #if county_field_value == "" or county_field_value is None:
+            # do something
+            #county_field_value = ""
+        #else:
+            # convert the raw county field value to stirng, in case it was an int value (the valid dictionary values are all string)
+
+        _county_field_value =str(county_field_value)
+
+        # check for valid value in dictionary
+        _validated_field_value = GetCodedDomainValue(_county_field_value.strip(), dict_of_valid_values)
+
+        if _validated_field_value != "":
+            # has valid value
+            row.setValue(utrans_field_name, _validated_field_value)
+        elif _validated_field_value == "" and len(_county_field_value) > 0:
+            # does not have valid value
+            # add the dot_fclass they gave to the notes field so we can evaluate it
+            row.setValue("UTRANS_NOTES", row.getValue("UTRANS_NOTES") + utrans_field_name + ": " + _county_field_value + "; ")
+            # add the bad domain value to the text file log
+            AddBadValueToTextFile(county_number, utrans_field_name, _county_field_value)
 
 
 def HasFieldValue(field_value):
