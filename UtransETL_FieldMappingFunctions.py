@@ -577,38 +577,46 @@ def SaltLake(rows):
         row.CUSTOMTAGS = row.CUSTOMTAGS_
 
         ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
-        # validate POSTTYPE value
-        postTypeDomain = GetCodedDomainValue(row.POSTTYPE_, dictOfValidPostTypes)
-        if postTypeDomain != "":
-            row.POSTTYPE = postTypeDomain
-        elif postTypeDomain == "" and row.POSTTYPE_ != None: 
-            if len(row.POSTTYPE_) > 1:  
-                # add the post type they gave to the notes field so we can evaluate it
-                row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.POSTTYPE_ + "; "
-                # add the bad domain value to the text file log
-                AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.POSTTYPE_))
+        ValidateAndAssign_FieldValue(row, "POSTTYPE", row.POSTTYPE_, countyNumber, dictOfValidPostTypes)
+        ValidateAndAssign_FieldValue(row, "STATUS", row.STATUS_, countyNumber, dictOfValidStatus)
+        ValidateAndAssign_FieldValue(row, "ONEWAY", row.ONEWAY_, countyNumber, dictOfValidOneWay)
+        #ValidateAndAssign_FieldValue(row, "DOT_SRFTYP", row.SURFTYPE, countyNumber, dictOfValidSurfaceType)
+        #ValidateAndAssign_FieldValue(row, "DOT_CLASS", row.CLASS, countyNumber, dictOfValidRoadClass)
 
-        # validate STATUS value
-        statusDomain = GetCodedDomainValue(row.STATUS_, dictOfValidStatus)
-        if statusDomain != "":
-            row.STATUS = statusDomain
-        elif statusDomain == "" and row.STATUS_ != None: 
-            if len(row.STATUS_) > 1:  
-                # add the post type they gave to the notes field so we can evaluate it
-                row.UTRANS_NOTES = row.UTRANS_NOTES + "STATUS: " + row.STATUS_ + "; "
-                # add the bad domain value to the text file log
-                AddBadValueToTextFile(countyNumber, "STATUS", str(row.STATUS_))
 
-        # validate ONEWAY value (vecc doesn't have a domain on this field, but their length is limited to one character)
-        onewayDomain = GetCodedDomainValue(row.ONEWAY_, dictOfValidOneWay)
-        if onewayDomain != "":
-            row.ONEWAY = onewayDomain
-        elif onewayDomain == "" and row.ONEWAY_ != None: 
-            if len(row.ONEWAY_) > 1:  
-                # add the post type they gave to the notes field so we can evaluate it
-                row.UTRANS_NOTES = row.UTRANS_NOTES + "ONEWAY: " + row.ONEWAY_ + "; "
-                # add the bad domain value to the text file log
-                AddBadValueToTextFile(countyNumber, "ONEWAY", str(row.ONEWAY_))
+        #postTypeDomain = GetCodedDomainValue(row.POSTTYPE_, dictOfValidPostTypes)
+        #if postTypeDomain != "":
+        #    row.POSTTYPE = postTypeDomain
+        #elif postTypeDomain == "" and row.POSTTYPE_ != None: 
+        #    if len(row.POSTTYPE_) > 1:  
+        #        # add the post type they gave to the notes field so we can evaluate it
+        #        row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.POSTTYPE_ + "; "
+        #        # add the bad domain value to the text file log
+        #        AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.POSTTYPE_))
+
+        ## validate STATUS value
+        #ValidateAndAssign_FieldValue(row, "STATUS", row.STATUS_, countyNumber, dictOfValidStatus)
+
+        #statusDomain = GetCodedDomainValue(row.STATUS_, dictOfValidStatus)
+        #if statusDomain != "":
+        #    row.STATUS = statusDomain
+        #elif statusDomain == "" and row.STATUS_ != None: 
+        #    if len(row.STATUS_) > 1:  
+        #        # add the post type they gave to the notes field so we can evaluate it
+        #        row.UTRANS_NOTES = row.UTRANS_NOTES + "STATUS: " + row.STATUS_ + "; "
+        #        # add the bad domain value to the text file log
+        #        AddBadValueToTextFile(countyNumber, "STATUS", str(row.STATUS_))
+
+        ## validate ONEWAY value (vecc doesn't have a domain on this field, but their length is limited to one character)
+        #onewayDomain = GetCodedDomainValue(row.ONEWAY_, dictOfValidOneWay)
+        #if onewayDomain != "":
+        #    row.ONEWAY = onewayDomain
+        #elif onewayDomain == "" and row.ONEWAY_ != None: 
+        #    if len(row.ONEWAY_) > 1:  
+        #        # add the post type they gave to the notes field so we can evaluate it
+        #        row.UTRANS_NOTES = row.UTRANS_NOTES + "ONEWAY: " + row.ONEWAY_ + "; "
+        #        # add the bad domain value to the text file log
+        #        AddBadValueToTextFile(countyNumber, "ONEWAY", str(row.ONEWAY_))
 
 
         # clear the A1_NAME AND A1_POSTYPE fields if the same data is in AN_NAME
