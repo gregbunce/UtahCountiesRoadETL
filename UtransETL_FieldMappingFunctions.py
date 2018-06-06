@@ -538,8 +538,10 @@ def SaltLake(rows):
         row.A2_NAME = row.A2_NAME_
         row.A2_POSTTYPE = row.A2_POSTTYPE_
         row.A2_POSTDIR = row.A2_POSTDIR_
-        row.ADDRSYS_L = row.ADDRSYS_L_
-        row.ADDRSYS_R = row.ADDRSYS_R_
+        if HasFieldValue(row.ADDRSYS_L_):
+            row.ADDRSYS_L = row.ADDRSYS_L_
+        if HasFieldValue(row.ADDRSYS_R_):
+            row.ADDRSYS_R = row.ADDRSYS_R_
         row.ZIPCODE_L = row.ZIPCODE_L_
         row.ZIPCODE_R = row.ZIPCODE_R_
         row.INCMUNI_L = row.INCMUNI_L_

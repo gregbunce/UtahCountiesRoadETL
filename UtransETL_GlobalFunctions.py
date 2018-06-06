@@ -10,69 +10,75 @@ officialPostTypeDomains = []
 # this function recalcs the listed fields to empty string if ' ', == None, or is None
 def CalcUtransFields (rows):
     for row in rows:
-        if row.ADDRSYS_L.isspace() or row.ADDRSYS_L == None or row.ADDRSYS_L is None:
+
+        #arrayOfStringFields = [ADDRSYS_L,ADDRSYS_R,CARTOCODE,FULLNAME,PREDIR,NAME,POSTTYPE,POSTDIR,A1_PREDIR,A1_NAME,A1_POSTTYPE,A1_POSTDIR,A2_PREDIR,A2_NAME,A2_POSTTYPE,A2_POSTDIR,AN_NAME,AN_POSTDIR,QUADRANT_L,QUADRANT_R,POSTCOMM_L,POSTCOMM_R,DOT_CLASS,DOT_FCLASS,DOT_HWYNAM,DOT_RTNAME,DOT_RTPART,UTRANS_NOTES,LOCAL_UID,STATUS,ACCESSCODE]
+        #for stringField in arrayOfStringFields:
+        #    if row.item == ' ' or row.item == None or row.item is None:
+        #        row.item = ""
+
+        if row.ADDRSYS_L == ' ' or row.ADDRSYS_L == None or row.ADDRSYS_L is None:
             row.ADDRSYS_L = ""
-        if row.ADDRSYS_R.isspace() or row.ADDRSYS_R == None or row.ADDRSYS_R is None:
+        if row.ADDRSYS_R == ' ' or row.ADDRSYS_R == None or row.ADDRSYS_R is None:
             row.ADDRSYS_R = ""
-        if row.CARTOCODE.isspace() or row.CARTOCODE == None or row.CARTOCODE is None:
+        if row.CARTOCODE == ' ' or row.CARTOCODE == None or row.CARTOCODE is None:
             row.CARTOCODE = ""
-        if row.FULLNAME.isspace() or row.FULLNAME == None or row.FULLNAME is None:
+        if row.FULLNAME == ' ' or row.FULLNAME == None or row.FULLNAME is None:
             row.FULLNAME = ""
-        if row.PREDIR.isspace() or row.PREDIR == None or row.PREDIR is None:
+        if row.PREDIR == ' ' or row.PREDIR == None or row.PREDIR is None:
             row.PREDIR = ""
-        if row.NAME.isspace() or row.NAME == None or row.NAME is None:
+        if row.NAME == ' ' or row.NAME == None or row.NAME is None:
             row.NAME = ""
-        if row.POSTTYPE.isspace() or row.POSTTYPE == None or row.POSTTYPE is None:
+        if row.POSTTYPE == ' ' or row.POSTTYPE == None or row.POSTTYPE is None:
             row.POSTTYPE = ""
-        if row.POSTDIR.isspace() or row.POSTDIR == None or row.POSTDIR is None:
+        if row.POSTDIR == ' ' or row.POSTDIR == None or row.POSTDIR is None:
             row.POSTDIR = ""
-        if row.A1_PREDIR.isspace() or row.A1_PREDIR == None or row.A1_PREDIR is None:
+        if row.A1_PREDIR == ' 'or row.A1_PREDIR == None or row.A1_PREDIR is None:
             row.A1_PREDIR = ""
-        if row.A1_NAME.isspace() or row.A1_NAME == None or row.A1_NAME is None:
+        if row.A1_NAME == ' ' or row.A1_NAME == None or row.A1_NAME is None:
             row.A1_NAME = ""
-        if row.A1_POSTTYPE.isspace() or row.A1_POSTTYPE == None or row.A1_POSTTYPE is None:
+        if row.A1_POSTTYPE == ' ' or row.A1_POSTTYPE == None or row.A1_POSTTYPE is None:
             row.A1_POSTTYPE = ""
-        if row.A1_POSTDIR.isspace() or row.A1_POSTDIR == None or row.A1_POSTDIR is None:
+        if row.A1_POSTDIR == ' ' or row.A1_POSTDIR == None or row.A1_POSTDIR is None:
             row.A1_POSTDIR = ""
-        if row.A2_PREDIR.isspace() or row.A2_PREDIR == None or row.A2_PREDIR is None:
+        if row.A2_PREDIR == ' ' or row.A2_PREDIR == None or row.A2_PREDIR is None:
             row.A2_PREDIR = ""
-        if row.A2_NAME.isspace() or row.A2_NAME == None or row.A2_NAME is None:
+        if row.A2_NAME == ' ' or row.A2_NAME == None or row.A2_NAME is None:
             row.A2_NAME = ""
-        if row.A2_POSTTYPE.isspace() or row.A2_POSTTYPE == None or row.A2_POSTTYPE is None:
+        if row.A2_POSTTYPE == ' ' or row.A2_POSTTYPE == None or row.A2_POSTTYPE is None:
             row.A2_POSTTYPE = ""
-        if row.A2_POSTDIR.isspace() or row.A2_POSTDIR == None or row.A2_POSTDIR is None:
+        if row.A2_POSTDIR == ' ' or row.A2_POSTDIR == None or row.A2_POSTDIR is None:
             row.A2_POSTDIR = ""
-        if row.AN_NAME.isspace() or row.AN_NAME == None or row.AN_NAME is None:
+        if row.AN_NAME == ' ' or row.AN_NAME == None or row.AN_NAME is None:
             row.AN_NAME = ""
-        if row.AN_POSTDIR.isspace() or row.AN_POSTDIR == None or row.AN_POSTDIR is None:
+        if row.AN_POSTDIR == ' ' or row.AN_POSTDIR == None or row.AN_POSTDIR is None:
             row.AN_POSTDIR = ""
-        if row.QUADRANT_L.isspace() or row.QUADRANT_L == None or row.QUADRANT_L is None:
+        if row.QUADRANT_L == ' ' or row.QUADRANT_L == None or row.QUADRANT_L is None:
             row.QUADRANT_L = ""
-        if row.QUADRANT_R.isspace() or row.QUADRANT_R == None or row.QUADRANT_R is None:
+        if row.QUADRANT_R == ' ' or row.QUADRANT_R == None or row.QUADRANT_R is None:
             row.QUADRANT_R = ""
-        if row.POSTCOMM_L.isspace() or row.POSTCOMM_L == None or row.POSTCOMM_L is None:
+        if row.POSTCOMM_L == ' ' or row.POSTCOMM_L == None or row.POSTCOMM_L is None:
             row.POSTCOMM_L = ""
-        if row.POSTCOMM_R.isspace() or row.POSTCOMM_R == None or row.POSTCOMM_R is None:
+        if row.POSTCOMM_R == ' ' or row.POSTCOMM_R == None or row.POSTCOMM_R is None:
             row.POSTCOMM_R = ""
-        if row.DOT_CLASS.isspace() or row.DOT_CLASS == None or row.DOT_CLASS is None:
+        if row.DOT_CLASS == ' ' or row.DOT_CLASS == None or row.DOT_CLASS is None:
             row.DOT_CLASS = ""
-        if row.DOT_FCLASS.isspace() or row.DOT_FCLASS == None or row.DOT_FCLASS is None:
+        if row.DOT_FCLASS == ' ' or row.DOT_FCLASS == None or row.DOT_FCLASS is None:
             row.DOT_FCLASS = ""
-        if row.DOT_HWYNAM.isspace() or row.DOT_HWYNAM == None or row.DOT_HWYNAM is None:
+        if row.DOT_HWYNAM == ' ' or row.DOT_HWYNAM == None or row.DOT_HWYNAM is None:
             row.DOT_HWYNAM = ""
-        if row.DOT_RTNAME.isspace() or row.DOT_RTNAME == None or row.DOT_RTNAME is None:
+        if row.DOT_RTNAME == ' ' or row.DOT_RTNAME == None or row.DOT_RTNAME is None:
             row.DOT_RTNAME = ""
-        if row.DOT_RTPART.isspace() or row.DOT_RTPART == None or row.DOT_RTPART is None:
+        if row.DOT_RTPART == ' ' or row.DOT_RTPART == None or row.DOT_RTPART is None:
             row.DOT_RTPART = ""
-        if row.SOURCE.isspace() or row.SOURCE == None or row.SOURCE is None:
+        if row.SOURCE == ' ' or row.SOURCE == None or row.SOURCE is None:
             row.SOURCE = ""
-        if row.UTRANS_NOTES.isspace() or row.UTRANS_NOTES == None or row.UTRANS_NOTES is None:
+        if row.UTRANS_NOTES == ' ' or row.UTRANS_NOTES == None or row.UTRANS_NOTES is None:
             row.UTRANS_NOTES = ""
-        if row.LOCAL_UID.isspace() or row.LOCAL_UID == None or row.LOCAL_UID is None:
+        if row.LOCAL_UID == ' ' or row.LOCAL_UID == None or row.LOCAL_UID is None:
             row.LOCAL_UID = ""
-        if row.STATUS.isspace() or row.STATUS == None or row.STATUS is None:
+        if row.STATUS == ' ' or row.STATUS == None or row.STATUS is None:
             row.STATUS = ""
-        if row.ACCESSCODE.isspace() or row.ACCESSCODE == None or row.ACCESSCODE is None:
+        if row.ACCESSCODE == ' ' or row.ACCESSCODE == None or row.ACCESSCODE is None:
             row.ACCESSCODE = ""
         if row.FROMADDR_L is None:
             row.FROMADDR_L = 0
