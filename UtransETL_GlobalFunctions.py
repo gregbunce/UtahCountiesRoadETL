@@ -504,6 +504,12 @@ def CreateDomainDictionary(domain_name):
                         listOfDomainDescriptions.append("32")
                         listOfDomainDescriptions.append("33")
 
+                # if domain is 'CVDomain_VerticalLevel'
+                if domain_name == 'CVDomain_VerticalLevel':
+                    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
+                    if val.upper() == "0":
+                        listOfDomainDescriptions.append("Ground Level") # MorganCo Uses this
+
 
                 ## if domain is 'CVDomain_AccessIssues'
                 #if domain_name == 'CVDomain_AccessIssues':
@@ -519,12 +525,6 @@ def CreateDomainDictionary(domain_name):
 
                 ## if domain is 'CVDomain_OneWay'
                 #if domain_name == 'CVDomain_OneWay':
-                #    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
-                #    if val.upper() == "":
-                #        listOfDomainDescriptions.append("")
-
-                ## if domain is 'CVDomain_VerticalLevel'
-                #if domain_name == 'CVDomain_VerticalLevel':
                 #    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
                 #    if val.upper() == "":
                 #        listOfDomainDescriptions.append("")
@@ -640,6 +640,8 @@ def ParseFullAddress(full_address):
         # check last word and see if it's a valid posttype (only check if for posttype if last word is four characters long so we don't trim off valid streetname such as Canyon, Creek, Park, etc.)
         last_word = full_address_split[-1]
         last_word = last_word.strip()
+        last_word = last_word.upper()
+
         if last_word in officialPostTypeDomains:
             # test if posttype
             _posttype = GetCodedDomainValue(full_address_split[-1], dictOfValidPostTypes)

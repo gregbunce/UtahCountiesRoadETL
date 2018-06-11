@@ -1121,6 +1121,38 @@ def Summit(rows):
         del row
 
 
+def Morgan(rows):
+    for row in rows: 
+        # set all fields to empty or zero or none
+        setDefaultValues(row)
+        countyNumber = "49029"
+        
+        ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
+        row.COUNTY_L = countyNumber
+        row.COUNTY_R = countyNumber   
+        if row.FROMLEFT != "":
+            row.FROMADDR_L = row.FROMLEFT
+        if row.TOLEFT != "":
+            row.TOADDR_L = row.TOLEFT
+        if row.FROMRIGHT != "":     
+            row.FROMADDR_R = row.FROMRIGHT
+        if row.TORIGHT != "":
+            row.TOADDR_R = row.TORIGHT
+
+        ## TRANSFER OVER FIELDS THAT WE RENAMED WITH AN APPENDED UNDERSCORE (FIELDNAME_) BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
+        
+        ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
+        ParseAndAssign_FullAddress(row, row.FULLNAME_, "FULLNAME_", True, False, False)
+
+        ValidateAndAssign_FieldValue(row, "ONEWAY", row.ONEWAYDIR, countyNumber, dictOfValidOneWay)
+        ValidateAndAssign_FieldValue(row, "DOT_CLASS", row.ROADCLASS, countyNumber, dictOfValidRoadClass)
+        ValidateAndAssign_FieldValue(row, "VERT_LEVEL", row.ROADLEVEL, countyNumber, dictOfValidVerticalLevel)
+        
+        # store the row
+        rows.updateRow(row)
+        del row
+
+
 def Tooele(rows):
     for row in rows: 
         # set all fields to empty or zero or none
@@ -1161,6 +1193,9 @@ def Tooele(rows):
         # store the row
         rows.updateRow(row)
         del row
+
+
+
 ######################################################################
 #### GENERAL (NON-FIELD COUNTY MAPPING) FUNCTIONS BELOW THIS LINE ####
 
