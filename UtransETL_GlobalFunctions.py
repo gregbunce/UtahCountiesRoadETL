@@ -432,32 +432,35 @@ def CreateDomainDictionary(domain_name):
                 # create a list for the dictionary of coded value and description
                 listOfDomainDescriptions = []
 
+                # convert val string
+                domainVal = str(val)
+
                 # check if domain val is same as description, if so only add one to list
-                if val.upper() == desc.upper():
-                    listOfDomainDescriptions.append(val.upper().strip())
+                if domainVal.upper() == desc.upper():
+                    listOfDomainDescriptions.append(domainVal.upper().strip())
                 else:
-                    listOfDomainDescriptions.append(val.upper().strip())
+                    listOfDomainDescriptions.append(domainVal.upper().strip())
                     listOfDomainDescriptions.append(desc.upper().strip())
 
                 # ADD CUSTOM VALUES TO DICTIONARY #
                 # if domain is 'CVDomain_StreetType'
                 if domain_name == 'CVDomain_StreetType':
                     # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
-                    if val == "WAY":
+                    if domainVal == "WAY":
                         listOfDomainDescriptions.append("WY")
-                    if val == "PKWY":
+                    if domainVal == "PKWY":
                         listOfDomainDescriptions.append("PKY")
 
                 # if domain is 'CVDomain_Status'
                 if domain_name == 'CVDomain_Status':
                     # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
-                    if val.upper() == "ACTIVE":
+                    if domainVal.upper() == "ACTIVE":
                         listOfDomainDescriptions.append("A")
-                    if val.upper() == "PLANNED":
+                    if domainVal.upper() == "PLANNED":
                         listOfDomainDescriptions.append("P")
-                    if val.upper() == "RETIRED":
+                    if domainVal.upper() == "RETIRED":
                         listOfDomainDescriptions.append("R")
-                    if val.upper() == "CONSTRUCTION":
+                    if domainVal.upper() == "CONSTRUCTION":
                         listOfDomainDescriptions.append("D") # wasatch uses D for "In Develeopment"
                     #if val.upper() == "RECONSTRUCTION":
                     #    listOfDomainDescriptions.append("")
@@ -466,19 +469,19 @@ def CreateDomainDictionary(domain_name):
                 if domain_name == 'CVDomain_SurfaceType':
                     # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
                     # the nuberic values are from the older data model - which some counties are still using
-                    if val.upper() == "U": # UNKNOWN
+                    if domainVal.upper() == "U": # UNKNOWN
                         listOfDomainDescriptions.append("UNDEFINED")
                         listOfDomainDescriptions.append("999")
-                    if val.upper() == "I": # IMPROVED
+                    if domainVal.upper() == "I": # IMPROVED
                         listOfDomainDescriptions.append("GRAVEL")
                         listOfDomainDescriptions.append("200")
-                    if val.upper() == "P": # PAVED
+                    if domainVal.upper() == "P": # PAVED
                         listOfDomainDescriptions.append("100")
-                    #if val.upper() == "P-ASP": # PAVED ASPHALT
-                    #    listOfDomainDescriptions.append("")
+                    if domainVal.upper() == "P-ASP": # PAVED ASPHALT
+                        listOfDomainDescriptions.append("PAVED_ASPHALT")
                     #if val.upper() == "P-CON": # PAVED CONCRETE
                     #    listOfDomainDescriptions.append("")
-                    if val.upper() == "D": # DIRT
+                    if domainVal.upper() == "D": # DIRT
                         listOfDomainDescriptions.append("300")
                     #if val.upper() == "N": # NATIVE
                     #    listOfDomainDescriptions.append("")
@@ -487,19 +490,19 @@ def CreateDomainDictionary(domain_name):
                 if domain_name == 'CVDomain_FunctionalClass':
                     # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
                     # the nuberic values are from the older data model - which some counties are still using (see Wasatch County data for many of these values, Domain = ST_Agfunc)
-                    if val.upper() == "INTERSTATE":
+                    if domainVal.upper() == "INTERSTATE":
                         listOfDomainDescriptions.append("11")
                     #if val.upper() == "OTHER FREEWAY":
                     #    listOfDomainDescriptions.append("")
-                    if val.upper() == "PRINCIPAL ARTERIAL":
+                    if domainVal.upper() == "PRINCIPAL ARTERIAL":
                         listOfDomainDescriptions.append("10")
                     #if val.upper() == "MINOR ARTERIAL":
                     #    listOfDomainDescriptions.append("")
-                    if val.upper() == "MAJOR COLLECTOR":
+                    if domainVal.upper() == "MAJOR COLLECTOR":
                         listOfDomainDescriptions.append("21")
-                    if val.upper() == "MINOR ARTERIAL":
+                    if domainVal.upper() == "MINOR ARTERIAL":
                         listOfDomainDescriptions.append("22")
-                    if val.upper() == "LOCAL":
+                    if domainVal.upper() == "LOCAL":
                         listOfDomainDescriptions.append("30")
                         listOfDomainDescriptions.append("32")
                         listOfDomainDescriptions.append("33")
@@ -507,7 +510,7 @@ def CreateDomainDictionary(domain_name):
                 # if domain is 'CVDomain_VerticalLevel'
                 if domain_name == 'CVDomain_VerticalLevel':
                     # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
-                    if val.upper() == "0":
+                    if domainVal.upper() == "0":
                         listOfDomainDescriptions.append("Ground Level") # MorganCo Uses this
 
 
@@ -530,7 +533,7 @@ def CreateDomainDictionary(domain_name):
                 #        listOfDomainDescriptions.append("")
 
                 # add value and descripiton to the dictionary 
-                dictOfDomainsValuesDescriptions[val] = listOfDomainDescriptions
+                dictOfDomainsValuesDescriptions[domainVal] = listOfDomainDescriptions
 
     return dictOfDomainsValuesDescriptions
 

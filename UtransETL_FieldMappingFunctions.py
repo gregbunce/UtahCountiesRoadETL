@@ -1195,6 +1195,89 @@ def Tooele(rows):
         del row
 
 
+def Cache(rows):
+    for row in rows: 
+        # set all fields to empty or zero or none
+        setDefaultValues(row)
+        countyNumber = "49005"
+        
+        ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
+        row.COUNTY_L = countyNumber
+        row.COUNTY_R = countyNumber   
+        if row.FAL != "":
+            row.FROMADDR_L = row.FAL
+        if row.TAL != "":
+            row.TOADDR_L = row.TAL
+        if row.FAR != "":
+            row.FROMADDR_R = row.FAR
+        if row.TAR != "":
+            row.TOADDR_R = row.TAR
+
+        ## TRANSFER OVER FIELDS THAT WE RENAMED WITH AN APPENDED UNDERSCORE (FIELDNAME_) BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
+        
+        ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
+        ParseAndAssign_FullAddress(row, row.STNAME, "STNAME", True, False, False)
+        ParseAndAssign_FullAddress(row, row.ALIAS, "ALIAS", False, True, False)
+        ParseAndAssign_FullAddress(row, row.ALIAS2, "ALIAS2", False, False, True)
+        
+        # store the row
+        rows.updateRow(row)
+        del row
+
+
+def Daggett(rows):
+    for row in rows: 
+        # set all fields to empty or zero or none
+        setDefaultValues(row)
+        countyNumber = "49009"
+        
+        ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
+        row.COUNTY_L = countyNumber
+        row.COUNTY_R = countyNumber   
+        if row.L_F_ADD != "":
+            row.FROMADDR_L = row.L_F_ADD
+        if row.L_T_ADD != "":
+            row.TOADDR_L = row.L_T_ADD
+        if row.R_F_ADD != "":     
+            row.FROMADDR_R = row.R_F_ADD
+        if row.R_T_ADD != "":
+            row.TOADDR_R = row.R_T_ADD
+        if row.S_NAME != "":
+            row.NAME = row.S_NAME
+        if row.ALIAS2 != "":
+            row.A2_NAME = row.ALIAS2       
+        if HasValidDirection(row.PRE_DIR):
+            row.PREDIR = row.PRE_DIR[:1]
+        if HasValidDirection(row.SUF_DIR):
+            row.POSTDIR = row.SUF_DIR[:1]
+        if HasFieldValue(row.CO_UNIQUE):
+            row.LOCAL_UID = row.CO_UNIQUE
+                
+
+        ## TRANSFER OVER FIELDS THAT WE RENAMED WITH AN APPENDED UNDERSCORE (FIELDNAME_) BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
+        ValidateAndAssign_FieldValue(row, "STATUS", row.STATUS_, countyNumber, dictOfValidStatus)        
+
+        ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
+        ValidateAndAssign_FieldValue(row, "POSTTYPE", row.S_TYPE, countyNumber, dictOfValidPostTypes)
+        ValidateAndAssign_FieldValue(row, "A2_POSTTYPE", row.ALIAS2_TYP, countyNumber, dictOfValidPostTypes)
+        ValidateAndAssign_FieldValue(row, "DOT_CLASS", row.CLASS, countyNumber, dictOfValidRoadClass)
+        ValidateAndAssign_FieldValue(row, "STATUS", row.S_STATUS, countyNumber, dictOfValidStatus) # this is another status field, so i figured we'd bring in the values, too.
+        ValidateAndAssign_FieldValue(row, "ONEWAY", row.ONE_WAY, countyNumber, dictOfValidOneWay)
+        ValidateAndAssign_FieldValue(row, "DOT_SRFTYP", row.S_SURF2, countyNumber, dictOfValidSurfaceType)
+
+        # transfer SPEED_LMT value if it's not zero and if it's valid
+        if row.SPD_LMT != 0:
+            ValidateAndAssign_FieldValue(row, "SPEED_LMT", row.SPD_LMT, countyNumber, dictOfValidSpeedLmt)
+
+        ParseAndAssign_FullAddress(row, row.ALIAS1, "ALIAS1", False, True, False)
+        ParseAndAssign_FullAddress(row, row.ALIAS2, "ALIAS2", False, False, True)
+        ParseAndAssign_FullAddress(row, row.ACS_ALIAS, "ACS_ALIAS", False, True, False)
+        
+        # store the row
+        rows.updateRow(row)
+        del row
+
+
 
 ######################################################################
 #### GENERAL (NON-FIELD COUNTY MAPPING) FUNCTIONS BELOW THIS LINE ####
@@ -1261,6 +1344,7 @@ dictOfValidSurfaceType = CreateDomainDictionary('CVDomain_SurfaceType')
 dictOfValidOneWay = CreateDomainDictionary('CVDomain_OneWay')
 dictOfValidVerticalLevel = CreateDomainDictionary('CVDomain_VerticalLevel')
 dictOfValidFunctionalClass = CreateDomainDictionary('CVDomain_FunctionalClass')
+dictOfValidSpeedLmt = CreateDomainDictionary('CVDomain_Speed')
 #arcpy.AddMessage("  Approved-Domain PostType: " + str(dictOfValidPostTypes))
 #arcpy.AddMessage("  Approved-Domain Status: " + str(dictOfValidStatus))
 #arcpy.AddMessage("  Approved-Domain AccessIssues: " + str(dictOfValidAccessIssues))
