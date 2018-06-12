@@ -747,13 +747,13 @@ def BoxElder(rows):
         # check if valid CLASS
         classDomain = GetCodedDomainValue(row.CLASS, dictOfValidRoadClass)
         if classDomain != "":
-            row.DOT_FCLASS = classDomain
+            row.DOT_CLASS = classDomain
         elif classDomain == "" and row.CLASS is not None:
             if not row.CLASS.isspace():
                 # add the CLASS they gave to the notes field so we can evaluate it
-                row.UTRANS_NOTES = row.UTRANS_NOTES + "DOT_FCLASS: " + row.CLASS + "; "
+                row.UTRANS_NOTES = row.UTRANS_NOTES + "DOT_CLASS: " + row.CLASS + "; "
                 # add the bad domain value to the text file log
-                AddBadValueToTextFile(countyNumber, "DOT_FCLASS", str(row.CLASS))
+                AddBadValueToTextFile(countyNumber, "DOT_CLASS", str(row.CLASS))
         
         # translate vertical level to our new domain values
         VertLevel_TranslateOldDomainToNewDomain(row, row.VERTLEVEL, countyNumber)
@@ -874,13 +874,13 @@ def Carbon(rows):
         # CLASS - check if valid value
         classDomain = GetCodedDomainValue(row.CLASS, dictOfValidRoadClass)
         if classDomain != "":
-            row.DOT_FCLASS = classDomain
+            row.DOT_CLASS = classDomain
         elif classDomain == "" and row.CLASS is not None:
             if not row.CLASS.isspace():
                 # add the CLASS they gave to the notes field so we can evaluate it
-                row.UTRANS_NOTES = row.UTRANS_NOTES + "DOT_FCLASS: " + row.CLASS + "; "
+                row.UTRANS_NOTES = row.UTRANS_NOTES + "DOT_CLASS: " + row.CLASS + "; "
                 # add the bad domain value to the text file log
-                AddBadValueToTextFile(countyNumber, "DOT_FCLASS", str(row.CLASS))
+                AddBadValueToTextFile(countyNumber, "DOT_CLASS", str(row.CLASS))
         
         row.SPEED_LMT = row.SPD_LMT
 

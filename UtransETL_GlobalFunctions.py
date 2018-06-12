@@ -514,23 +514,35 @@ def CreateDomainDictionary(domain_name):
                         listOfDomainDescriptions.append("Ground Level") # MorganCo Uses this
 
 
-                ## if domain is 'CVDomain_AccessIssues'
-                #if domain_name == 'CVDomain_AccessIssues':
-                #    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
-                #    if val.upper() == "":
-                #        listOfDomainDescriptions.append("")
+                # if domain is 'CVDomain_AccessIssues'
+                if domain_name == 'CVDomain_AccessIssues':
+                    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
+                    if val.upper() == "A":
+                        listOfDomainDescriptions.append("AUTHORIZED ONLY")
+                    if val.upper() == "F":
+                        listOfDomainDescriptions.append("4WD AND/OR HIGH CLEARANCE MAY BE REQUIRED")
+                    if val.upper() == "G":
+                        listOfDomainDescriptions.append("GATED")
+                    if val.upper() == "S":
+                        listOfDomainDescriptions.append("SEASONAL")
+                    if val.upper() == "T":
+                        listOfDomainDescriptions.append("TUNNEL")
 
-                ## if domain is 'CVDomain_RoadClass'
-                #if domain_name == 'CVDomain_RoadClass':
-                #    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
-                #    if val.upper() == "":
-                #        listOfDomainDescriptions.append("")
+                # if domain is 'CVDomain_RoadClass'
+                if domain_name == 'CVDomain_RoadClass':
+                    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
+                    if val.upper() == "P":
+                        listOfDomainDescriptions.append("X") # old data model for "Private or Restricted"
 
-                ## if domain is 'CVDomain_OneWay'
-                #if domain_name == 'CVDomain_OneWay':
-                #    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
-                #    if val.upper() == "":
-                #        listOfDomainDescriptions.append("")
+                # if domain is 'CVDomain_OneWay'
+                if domain_name == 'CVDomain_OneWay':
+                    # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
+                    if val.upper() == "0":
+                        listOfDomainDescriptions.append("TWO WAY")
+                    if val.upper() == "1":
+                        listOfDomainDescriptions.append("ONE WAY DIRECTION OF ARC")
+                    if val.upper() == "2":
+                        listOfDomainDescriptions.append("ONE WAY OPPOSITE DIRECTION OF ARC")
 
                 # add value and descripiton to the dictionary 
                 dictOfDomainsValuesDescriptions[domainVal] = listOfDomainDescriptions
