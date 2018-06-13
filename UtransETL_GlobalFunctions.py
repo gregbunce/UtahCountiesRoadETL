@@ -410,8 +410,9 @@ def setDefaultValues(row):
 
 # remove the post type if the street name is numeric
 def removePostTypeIfNumeric(row):
-    if row.NAME[0].isdigit():
-        return True
+    if HasFieldValue(row.NAME):
+        if row.NAME[0].isdigit():
+            return True
 
 # remove the post dir if the street name is alpha
 def removePostDirIfAlpha(row):
