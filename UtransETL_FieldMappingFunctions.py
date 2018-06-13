@@ -1248,12 +1248,9 @@ def Daggett(rows):
             row.A2_NAME = row.ALIAS2       
         if HasValidDirection(row.PRE_DIR):
             row.PREDIR = row.PRE_DIR[:1]
-        if HasValidDirection(row.SUF_DIR):
-            row.POSTDIR = row.SUF_DIR[:1]
         if HasFieldValue(row.CO_UNIQUE):
             row.LOCAL_UID = row.CO_UNIQUE
                 
-
         ## TRANSFER OVER FIELDS THAT WE RENAMED WITH AN APPENDED UNDERSCORE (FIELDNAME_) BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
         ValidateAndAssign_FieldValue(row, "STATUS", row.STATUS_, countyNumber, dictOfValidStatus)        
 
@@ -1269,10 +1266,16 @@ def Daggett(rows):
         if row.SPD_LMT != 0:
             ValidateAndAssign_FieldValue(row, "SPEED_LMT", row.SPD_LMT, countyNumber, dictOfValidSpeedLmt)
 
+        # parse fulladdresses for primary, alias1 and alias2
         ParseAndAssign_FullAddress(row, row.ALIAS1, "ALIAS1", False, True, False)
         ParseAndAssign_FullAddress(row, row.ALIAS2, "ALIAS2", False, False, True)
         ParseAndAssign_FullAddress(row, row.ACS_ALIAS, "ACS_ALIAS", False, True, False)
         
+        # Daggett does something odd in that they use the SUF_DIR field as thought it's the ACS_SUF field, so only use these SUF_DIR values if there's not a value in the ACS_ALIAS field
+        if not (HasFieldValue(row.ACS_ALIAS)):
+            if HasValidDirection(row.SUF_DIR):
+                row.POSTDIR = row.SUF_DIR[:1]
+
         # store the row
         rows.updateRow(row)
         del row
