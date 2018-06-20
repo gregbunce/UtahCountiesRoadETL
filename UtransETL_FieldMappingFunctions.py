@@ -1191,6 +1191,7 @@ def Tooele(rows):
             _class = _class.replace(" Road", "")
             ValidateAndAssign_FieldValue(row, "DOT_CLASS", _class, countyNumber, dictOfValidRoadClass)
 
+        # remove rows that are private, etc in CLASS
         if HasFieldValue(row.CLASS):
             classValue = row.CLASS.upper().strip()
             arcpy.AddMessage(classValue)
@@ -1200,9 +1201,6 @@ def Tooele(rows):
                 # store the row
                 rows.updateRow(row)
                 del row
-
-    # remove class=private or class=dugway
-    # removeUnneededClassesFromTooele(rows)
 
 
 def Cache(rows):
@@ -1347,22 +1345,6 @@ def ValidateAssign_DOT_SRFTYP(row, county_srftype, countyNumber):
         # add the bad domain value to the text file log
         AddBadValueToTextFile(countyNumber, "DOT_SRFTYP", _county_srftype)
  
-# remove Tooele's private classes
-def removeUnneededClassesFromTooele(rows):
-    for row in rows: 
-        arcpy.AddMessage("In")
-        if HasFieldValue(row.CLASS):
-            classValue = row.CLASS.upper().strip()
-            arcpy.AddMessage(classValue)
-            if classValue in ('DUGWAY', 'PRIVATE', 'TRAIL', 'ATV', 'ALLEY', 'AIRPLANE', 'VACATED'):
-                rows.deleteRow()            
-
-        # store the row
-        rows.updateRow(row)
-        del row
-
-
-
 
 ## global variables that are dependent on function instantiation
 dictOfValidPostTypes = CreateDomainDictionary('CVDomain_StreetType')
