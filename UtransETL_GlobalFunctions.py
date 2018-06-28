@@ -3,7 +3,8 @@ import os.path
 from datetime import date
 
 # global scope variables -- see bottom of file for those dependent on fucntion data, aka: variable is assigned after the functions have been instantiated
-NextGenFGDB = "K:/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb"
+#NextGenFGDB = "K:/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb"
+NextGenFGDB = "G:/Team Drives/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb"
 officialPostTypeDomains = []
 
 ### THESE FUNCTIONS ARE USED IN THE COUNTY TO UTRANS SCRIPT ###
@@ -578,7 +579,8 @@ def GetCodedDomainValue(valueToCheck, dictionaryToCheck):
 # add bad value to domain text file log
 def AddBadValueToTextFile(county_number, field_name, field_value):
     # add the bad domain value to the text doc so we can inspect them
-    text_file_path = "K:/AGRC Projects/UtransEditing/Scripts and Tools/_script_logs/CountiesDomainValueErrors.txt"
+    #text_file_path = "K:/AGRC Projects/UtransEditing/Scripts and Tools/_script_logs/CountiesDomainValueErrors.txt"
+    text_file_path = "G:/Team Drives/AGRC Projects/UtransEditing/Scripts and Tools/_script_logs/CountiesDomainValueErrors.txt"
     if os.path.exists(text_file_path):
         file = open(text_file_path, "a")
         # DATE, COUNTY, FIELDNAME, VALUE

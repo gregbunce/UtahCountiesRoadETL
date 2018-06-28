@@ -4,7 +4,7 @@ import os.path
 from UtransETL_GlobalFunctions import ValidateAndAssign_FieldValue, setDefaultValues, removePostTypeIfNumeric, removePostDirIfAlpha, CreateDomainDictionary, GetCodedDomainValue, AddBadValueToTextFile, Validate_AN_NAME, ParseFullAddress, ParseAndAssign_FullAddress, HasFieldValue, HasValidDirection, VertLevel_TranslateOldDomainToNewDomain
 
 ## global scope variables -- see bottom of file for those dependent on fucntion data, aka: variable is assigned after the functions have been instantiated
-#NextGenFGDB = "K:/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb"
+#NextGenFGDB = "G:/Team Drives/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb"
 
 # MODIFY THIS FUNCTION TO INCORPORATE NEW HELPER FUNCTIONS #
 def Washington(rows):
