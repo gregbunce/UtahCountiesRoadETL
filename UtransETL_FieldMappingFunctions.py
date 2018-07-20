@@ -1,8 +1,7 @@
 import arcpy
 from datetime import date
 import os.path
-from UtransETL_GlobalFunctions import ValidateAndAssign_FieldValue, setDefaultValues, removePostTypeIfNumeric, removePostDirIfAlpha, CreateDomainDictionary, GetCodedDomainValue, AddBadValueToTextFile, Validate_AN_NAME, ParseFullAddress, ParseAndAssign_FullAddress, HasFieldValue, HasValidDirection, VertLevel_TranslateOldDomainToNewDomain
-
+from UtransETL_GlobalFunctions import ValidateAndAssign_FieldValue, setDefaultValues, removePostTypeIfNumeric, removePostDirIfAlpha, CreateDomainDictionary, GetCodedDomainValue, AddBadValueToTextFile, Validate_AN_NAME, ParseFullAddress, ParseAndAssign_FullAddress, HasFieldValue, HasValidDirection, VertLevel_TranslateOldDomainToNewDomain, TryToParse100N
 ## global scope variables -- see bottom of file for those dependent on fucntion data, aka: variable is assigned after the functions have been instantiated
 #NextGenFGDB = "G:/Team Drives/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb"
 
@@ -1288,6 +1287,97 @@ def Daggett(rows):
         rows.updateRow(row)
         del row
 
+
+def Emery(rows):
+    for row in rows: 
+        # remove the trails data from the etl dataset (where surf_type in 400, 410, 420, 430, 440 - from the old data model)
+        if row.S_SURF in (400, 410, 420, 430, 440):
+            rows.deleteRow(row)
+        else:
+            # set all fields to empty or zero or none
+            setDefaultValues(row)
+            countyNumber = "49015"
+
+            ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
+            row.COUNTY_L = countyNumber
+            row.COUNTY_R = countyNumber   
+            if row.L_F_ADD != "":
+                row.FROMADDR_L = row.L_F_ADD
+            if row.L_T_ADD != "":
+                row.TOADDR_L = row.L_T_ADD
+            if row.R_F_ADD != "":     
+                row.FROMADDR_R = row.R_F_ADD
+            if row.R_T_ADD != "":
+                row.TOADDR_R = row.R_T_ADD
+            if row.S_NAME != "":
+                row.NAME = row.S_NAME
+            if HasValidDirection(row.PRE_DIR):
+                row.PREDIR = row.PRE_DIR[:1]
+            if HasValidDirection(row.SUF_DIR):
+                row.POSTDIR = row.SUF_DIR[:1]
+            if HasFieldValue(row.CO_UNIQUE):
+                row.LOCAL_UID = row.CO_UNIQUE
+
+            ## TRANSFER OVER FIELDS THAT WE RENAMED WITH AN APPENDED UNDERSCORE (FIELDNAME_) BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
+            ValidateAndAssign_FieldValue(row, "STATUS", row.STATUS_, countyNumber, dictOfValidStatus)
+
+            ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
+            ValidateAndAssign_FieldValue(row, "POSTTYPE", row.S_TYPE, countyNumber, dictOfValidPostTypes)
+            ValidateAndAssign_FieldValue(row, "DOT_CLASS", row.CLASS, countyNumber, dictOfValidRoadClass)
+            ValidateAndAssign_FieldValue(row, "ONEWAY", row.ONE_WAY, countyNumber, dictOfValidOneWay)
+            if HasFieldValue(row.S_SURF2):
+                ValidateAndAssign_FieldValue(row, "DOT_SRFTYP", row.S_SURF2, countyNumber, dictOfValidSurfaceType)
+            else:
+                ValidateAndAssign_FieldValue(row, "DOT_SRFTYP", row.S_SURF, countyNumber, dictOfValidSurfaceType)
+
+            # transfer SPEED_LMT value if it's not zero and if it's valid
+            if row.SPD_LMT != 0:
+                ValidateAndAssign_FieldValue(row, "SPEED_LMT", row.SPD_LMT, countyNumber, dictOfValidSpeedLmt)
+
+
+            # parse the alias values, if needed... emery has mixed values in these fields such as '100 North', '100 N', '100N', as well as alpha street names...
+            ## AN_NAME ##
+            numeric_name = ""
+            alias_postdir = ""
+            if HasFieldValue(row.ACS_ALIAS):
+                numeric_name, alias_postdir = TryToParse100N(row.ACS_ALIAS)
+            if numeric_name != "" and alias_postdir != "":
+                # the exapmle value of 100N was parsed
+                row.AN_NAME = numeric_name
+                if HasValidDirection(alias_postdir):
+                    row.AN_POSTDIR = alias_postdir
+            else:
+                if row.ACS_ALIAS.isdigit():
+                    row.AN_NAME = row.ACS_ALIAS
+            ## A1_NAME ## (check for these values, too: '3627A')
+            numeric_name = ""
+            alias_postdir = ""
+            if HasFieldValue(row.ALIAS1):
+                numeric_name, alias_postdir = TryToParse100N(row.ALIAS1)
+            if (numeric_name != "" and alias_postdir != "") and (HasValidDirection(alias_postdir)):
+                # the exapmle value of 100N was validated and parsed
+                row.AN_NAME = numeric_name
+                row.AN_POSTDIR = alias_postdir
+            else:
+                row.A1_NAME = row.ALIAS1
+                ValidateAndAssign_FieldValue(row, "A1_POSTTYPE", row.ALIAS1_TYP, countyNumber, dictOfValidPostTypes)
+
+            ## A2_NAME ## (check for these values, too: '3627A')
+            numeric_name = ""
+            alias_postdir = ""
+            if HasFieldValue(row.ALIAS2):
+                numeric_name, alias_postdir = TryToParse100N(row.ALIAS2)
+            if (numeric_name != "" and alias_postdir != "") and (HasValidDirection(alias_postdir)):
+                # the exapmle value of 100N was validated and parsed
+                row.AN_NAME = numeric_name
+                row.AN_POSTDIR = alias_postdir
+            else:
+                row.A2_NAME = row.ALIAS2
+                ValidateAndAssign_FieldValue(row, "A2_POSTTYPE", row.ALIAS2_TYP, countyNumber, dictOfValidPostTypes)
+        
+            # store the row
+            rows.updateRow(row)
+        del row
 
 
 ######################################################################

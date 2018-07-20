@@ -3,7 +3,7 @@ import sys
 # sys.path.insert(0, '..')
 # import functions from global functions
 from UtransETL_GlobalFunctions import CalcUtransFields, GetUtransFieldSpecs, UpperCoreUtransFields, RemoveSpecialCharacters, FormatToAgrcHighwayNamingConvention, MoveNumericA1orA2ToANfield
-from UtransETL_FieldMappingFunctions import Washington, Utah, Davis, Weber, SaltLake, Beaver, BoxElder, Carbon, Wasatch, Duchesne, Iron, Summit, Tooele, Morgan, Cache, Daggett
+from UtransETL_FieldMappingFunctions import Washington, Utah, Davis, Weber, SaltLake, Beaver, BoxElder, Carbon, Wasatch, Duchesne, Iron, Summit, Tooele, Morgan, Cache, Daggett, Emery
 import arcpy, os
 from arcpy import env
 import time
@@ -42,7 +42,7 @@ arcpy.CopyFeatures_management(countySource, countySourceTEMP)
 outputFeatureClass = dirname + "\\" + countyName + "Temp"
 
 #utdm = r"K:\AGRC Projects\UtransEditing\Data\UtahRoadsNGSchema.gdb\Roads_Edit"
-utdm = r"G:\Team Drives\AGRC Projects\UtransEditing\Data\UtahRoadsNGSchema.gdb\Roads_Edit"
+utdm = r"O:\UtransEditing\Data\UtahRoadsNGSchema.gdb\Roads_Edit"
 
 arcpy.CopyFeatures_management(utdm, outputFeatureClass)
 
@@ -165,4 +165,4 @@ finalFeatureClassOutput = dirname + "\\" + countyName + "ETL_" + strDate + "_" +
 arcpy.AlterAliasName(finalFeatureClassOutput, "COUNTY_STREETS")
 
 arcpy.AddMessage("ETL Process Done!")
-arcpy.AddMessage("*REMINDER*: Check for non-valid domains in either the UTRANS_NOTES field or the text file here G:/Team Drives/AGRC Projects/UtransEditing/Scripts and Tools/_script_logs/CountiesDomainValueErrors.txt")
+arcpy.AddMessage("*REMINDER*: Check for non-valid domains in either the UTRANS_NOTES field or the text file here O:/UtransEditing/Scripts and Tools/_script_logs/CountiesDomainValueErrors.txt")

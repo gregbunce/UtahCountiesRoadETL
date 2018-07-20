@@ -4,7 +4,7 @@ from datetime import date
 
 # global scope variables -- see bottom of file for those dependent on fucntion data, aka: variable is assigned after the functions have been instantiated
 #NextGenFGDB = "K:/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb"
-NextGenFGDB = "G:/Team Drives/AGRC Projects/UtransEditing/Data/UtahRoadsNGSchema.gdb"
+NextGenFGDB = "O:/UtransEditing/Data/UtahRoadsNGSchema.gdb"
 officialPostTypeDomains = []
 
 ### THESE FUNCTIONS ARE USED IN THE COUNTY TO UTRANS SCRIPT ###
@@ -477,16 +477,29 @@ def CreateDomainDictionary(domain_name):
                     if domainVal.upper() == "I": # IMPROVED
                         listOfDomainDescriptions.append("GRAVEL")
                         listOfDomainDescriptions.append("200")
+                        listOfDomainDescriptions.append("210")
+                        listOfDomainDescriptions.append("211")
+                        listOfDomainDescriptions.append("212")
+                        listOfDomainDescriptions.append("213")
+                        listOfDomainDescriptions.append("220")
+                        listOfDomainDescriptions.append("221")
+                        listOfDomainDescriptions.append("222")
+                        listOfDomainDescriptions.append("223")
                     if domainVal.upper() == "P": # PAVED
                         listOfDomainDescriptions.append("100")
+                        listOfDomainDescriptions.append("110")
+                        listOfDomainDescriptions.append("115")
+                        listOfDomainDescriptions.append("120")
                     if domainVal.upper() == "P-ASP": # PAVED ASPHALT
                         listOfDomainDescriptions.append("PAVED_ASPHALT")
                     #if val.upper() == "P-CON": # PAVED CONCRETE
                     #    listOfDomainDescriptions.append("")
-                    if domainVal.upper() == "D": # DIRT
-                        listOfDomainDescriptions.append("300")
-                    #if val.upper() == "N": # NATIVE
+                    #if domainVal.upper() == "D": # DIRT
                     #    listOfDomainDescriptions.append("")
+                    if val.upper() == "N": # NATIVE
+                        listOfDomainDescriptions.append("300")
+                        listOfDomainDescriptions.append("310")
+                        listOfDomainDescriptions.append("320")
 
                 # if domain is 'CVDomain_FunctionalClass'
                 if domain_name == 'CVDomain_FunctionalClass':
@@ -580,7 +593,7 @@ def GetCodedDomainValue(valueToCheck, dictionaryToCheck):
 def AddBadValueToTextFile(county_number, field_name, field_value):
     # add the bad domain value to the text doc so we can inspect them
     #text_file_path = "K:/AGRC Projects/UtransEditing/Scripts and Tools/_script_logs/CountiesDomainValueErrors.txt"
-    text_file_path = "G:/Team Drives/AGRC Projects/UtransEditing/Scripts and Tools/_script_logs/CountiesDomainValueErrors.txt"
+    text_file_path = "O:/UtransEditing/Scripts and Tools/_script_logs/CountiesDomainValueErrors.txt"
     if os.path.exists(text_file_path):
         file = open(text_file_path, "a")
         # DATE, COUNTY, FIELDNAME, VALUE
@@ -803,9 +816,10 @@ def ValidateAndAssign_FieldValue(row, utrans_field_name, county_field_value, cou
         elif _validated_field_value == "" and len(_county_field_value) > 0:
             # does not have valid value
             # add the dot_fclass they gave to the notes field so we can evaluate it
-            row.setValue("UTRANS_NOTES", row.getValue("UTRANS_NOTES") + utrans_field_name + ": " + _county_field_value + "; ")
-            # add the bad domain value to the text file log
-            AddBadValueToTextFile(county_number, utrans_field_name, _county_field_value)
+            if _county_field_value is not None: # check if value is not none type
+                row.setValue("UTRANS_NOTES", row.getValue("UTRANS_NOTES") + utrans_field_name + ": " + _county_field_value + "; ")
+                # add the bad domain value to the text file log
+                AddBadValueToTextFile(county_number, utrans_field_name, _county_field_value)
 
 
 def HasFieldValue(field_value):
@@ -883,3 +897,18 @@ def GetOfficalPOSTTYPE_domainValues():
     return listOfDomainValues
 # call the function and create the list
 officialPostTypeDomains = GetOfficalPOSTTYPE_domainValues()
+
+
+# try to parse values such as '100N' to '100 N'
+def TryToParse100N(val):
+    numericVal = ""
+    alphaVal = ""
+
+    if not ' ' in val:
+        numericVal = val[:-1] # get all values except the last
+        alphaVal = val[-1:] # get the last value
+
+    if numericVal.isdigit() & alphaVal.isalpha():
+        return numericVal, alphaVal
+    else:
+        return "", ""
