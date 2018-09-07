@@ -448,10 +448,17 @@ def CreateDomainDictionary(domain_name):
                 # if domain is 'CVDomain_StreetType'
                 if domain_name == 'CVDomain_StreetType':
                     # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
+                    # NOTE: if you add any custom values here make sure to add them below to this variable as well "listOfDomainValues"
                     if domainVal == "WAY":
                         listOfDomainDescriptions.append("WY")
                     if domainVal == "PKWY":
                         listOfDomainDescriptions.append("PKY")
+                    if domainVal == "DR":
+                        listOfDomainDescriptions.append("DRIVE")
+                    if domainVal == "RD":
+                        listOfDomainDescriptions.append("ROAD")
+                    if domainVal == "ST":
+                        listOfDomainDescriptions.append("STREET")
 
                 # if domain is 'CVDomain_Status'
                 if domain_name == 'CVDomain_Status':
@@ -668,14 +675,14 @@ def ParseFullAddress(full_address):
             __has_predir = True
 
 
-        # check last word and see if it's a valid posttype (only check if for posttype if last word is four characters long so we don't trim off valid streetname such as Canyon, Creek, Park, etc.)
+        # check last word and see if it's a valid posttype (only check for posttype if last word is four characters (by using only domain value - not description) long so we don't trim off valid streetname such as Canyon, Creek, Park, etc.)
         last_word = full_address_split[-1]
         last_word = last_word.strip()
         last_word = last_word.upper()
 
         if last_word in officialPostTypeDomains:
             # test if posttype
-            _posttype = GetCodedDomainValue(full_address_split[-1], dictOfValidPostTypes)
+            _posttype = GetCodedDomainValue(last_word, dictOfValidPostTypes)
             if _posttype != "":
                 __has_postype = True
         elif last_word in ("N", "S", "E", "W", "NORTH", "SOUTH", "EAST", "WEST"):
@@ -894,10 +901,24 @@ def GetOfficalPOSTTYPE_domainValues():
             for val, desc in coded_values.items():
                 #print(val)
                 listOfDomainValues.append(val)
+
+                # add custom values to certain coded domain vals - these would be common, known abbreviations the counties use
+                # NOTE: if you add any custom values here make sure to add them above to this variable as well "listOfDomainDescriptions"
+                if val == "WAY":
+                    listOfDomainValues.append("WY")
+                if val == "PKWY":
+                    listOfDomainValues.append("PKY")
+                if val == "DR":
+                    listOfDomainValues.append("DRIVE")
+                if val == "RD":
+                    listOfDomainValues.append("ROAD")
+                if val == "ST":
+                    listOfDomainValues.append("STREET")
+
     return listOfDomainValues
 # call the function and create the list
 officialPostTypeDomains = GetOfficalPOSTTYPE_domainValues()
-
+#arcpy.AddMessage(officialPostTypeDomains)
 
 # try to parse values such as '100N' to '100 N'
 def TryToParse100N(val):

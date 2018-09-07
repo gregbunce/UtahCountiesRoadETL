@@ -1380,6 +1380,41 @@ def Emery(rows):
         del row
 
 
+def Grand(rows):
+    for row in rows: 
+        # set all fields to empty or zero or none
+        setDefaultValues(row)
+        countyNumber = "49019"
+            
+        ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
+        ParseAndAssign_FullAddress(row, row.NAME_, "NAME_", True, False, False)
+
+        
+        # store the row
+        rows.updateRow(row)
+    del row
+
+
+def SanJuan(rows):
+    for row in rows: 
+        # set all fields to empty or zero or none
+        setDefaultValues(row)
+        countyNumber = "49037"
+
+        ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
+        ParseAndAssign_FullAddress(row, row.S_NAME, "S_NAME", True, False, False)
+
+        if HasFieldValue(row.CO_UNIQUE):
+            row.LOCAL_UID = row.CO_UNIQUE
+
+        ValidateAndAssign_FieldValue(row, "DOT_CLASS", row.CLASS, countyNumber, dictOfValidRoadClass)
+        
+        # store the row
+        rows.updateRow(row)
+    del row
+
+
+
 ######################################################################
 #### GENERAL (NON-FIELD COUNTY MAPPING) FUNCTIONS BELOW THIS LINE ####
 
