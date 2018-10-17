@@ -459,6 +459,8 @@ def CreateDomainDictionary(domain_name):
                         listOfDomainDescriptions.append("ROAD")
                     if domainVal == "ST":
                         listOfDomainDescriptions.append("STREET")
+                    if domainVal == "LN":
+                        listOfDomainDescriptions.append("LANE")
 
                 # if domain is 'CVDomain_Status'
                 if domain_name == 'CVDomain_Status':
@@ -914,6 +916,8 @@ def GetOfficalPOSTTYPE_domainValues():
                     listOfDomainValues.append("ROAD")
                 if val == "ST":
                     listOfDomainValues.append("STREET")
+                if val == "LN":
+                    listOfDomainValues.append("LANE")
 
     return listOfDomainValues
 # call the function and create the list
