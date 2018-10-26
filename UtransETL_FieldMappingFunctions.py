@@ -576,6 +576,7 @@ def SaltLake(rows):
         row.EXPIRE = row.EXPIRE_
         row.EDITOR = row.EDITOR_
         row.CUSTOMTAGS = row.CUSTOMTAGS_
+        row.UTRANS_NOTES = ""
 
         ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
         ValidateAndAssign_FieldValue(row, "POSTTYPE", row.POSTTYPE_, countyNumber, dictOfValidPostTypes)
