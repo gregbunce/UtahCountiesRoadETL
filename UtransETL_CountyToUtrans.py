@@ -42,8 +42,8 @@ arcpy.CopyFeatures_management(countySource, countySourceTEMP)
 outputFeatureClass = dirname + "\\" + countyName + "Temp"
 
 #utdm = r"K:\AGRC Projects\UtransEditing\Data\UtahRoadsNGSchema.gdb\Roads_Edit"
-utdm = r"O:\UtransEditing\Data\UtahRoadsNGSchema.gdb\Roads_Edit"
-
+#utdm = r"O:\UtransEditing\Data\UtahRoadsNGSchema.gdb\Roads_Edit"
+utdm = r"L:\agrc\data\schemas\UtahRoadsNGSchema.gdb\Roads_Edit"
 arcpy.CopyFeatures_management(utdm, outputFeatureClass)
 
 # get array of utrans field info.
@@ -165,4 +165,4 @@ finalFeatureClassOutput = dirname + "\\" + countyName + "ETL_" + strDate + "_" +
 arcpy.AlterAliasName(finalFeatureClassOutput, "COUNTY_STREETS")
 
 arcpy.AddMessage("ETL Process Done!")
-arcpy.AddMessage("*REMINDER*: Check for non-valid domains in either the UTRANS_NOTES field or the text file here O:/UtransEditing/Scripts and Tools/_script_logs/CountiesDomainValueErrors.txt")
+arcpy.AddMessage("*REMINDER*: Check for non-valid domains in either the UTRANS_NOTES field or the text file here L:\agrc\utrans\UtransEditing\scripts_and_tools\_script_logs\CountiesDomainValueErrors.txt")
