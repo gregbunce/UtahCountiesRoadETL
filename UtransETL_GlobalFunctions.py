@@ -418,8 +418,9 @@ def removePostTypeIfNumeric(row):
 
 # remove the post dir if the street name is alpha
 def removePostDirIfAlpha(row):
-    if row.NAME[0].isalpha():
-        return True
+    if HasFieldValue(row.NAME):
+        if row.NAME[0].isalpha():
+            return True
 
 
 # create a dictionary of coded domain values and descripitons for fields with domains
