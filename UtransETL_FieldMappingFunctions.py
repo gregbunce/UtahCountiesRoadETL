@@ -773,144 +773,225 @@ def BoxElder(rows):
 
 # MODIFY THIS FUNCTION TO INCORPORATE NEW HELPER FUNCTIONS #
 def Carbon(rows):
-    for row in rows:
+    for row in rows: 
+             
         # set all fields to empty or zero or none
         setDefaultValues(row)
         countyNumber = "49007"
-        postType_fromStreetName = False
-
-        # set county specific fields
         row.COUNTY_L = countyNumber
-        row.COUNTY_R = countyNumber    
+        row.COUNTY_R = countyNumber
+        row.STATE_L = "UT"
+        row.STATE_R = "UT"
           
-        row.FROMADDR_L = row.L_F_ADD
-        row.TOADDR_L = row.L_T_ADD
-        row.FROMADDR_R = row.R_F_ADD
-        row.TOADDR_R = row.R_T_ADD
-        row.PREDIR = row.PRE_DIR[:1]
+        ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
+        # transfer values from same name fields that were renamed with an underscore (this allows us to enforce our domains via the validation code here)
+        row.STATUS = row.STATUS_
+        row.CARTOCODE = row.CARTOCODE_
+        row.FULLNAME = row.FULLNAME_
+        row.FROMADDR_L = row.FROMADDR_L_
+        row.TOADDR_L = row.TOADDR_L_
+        row.FROMADDR_R = row.FROMADDR_R_
+        row.TOADDR_R = row.TOADDR_R_
+        row.PARITY_L = row.PARITY_L_
+        row.PARITY_R = row.PARITY_R_
+        row.PREDIR = row.PREDIR_
+        row.NAME = row.NAME_
+        row.POSTTYPE = row.POSTTYPE_
+        row.POSTDIR = row.POSTDIR_
+        row.AN_NAME = row.AN_NAME_
+        row.AN_POSTDIR = row.AN_POSTDIR_
+        row.A1_NAME = row.A1_NAME_
+        row.A1_POSTTYPE = row.A1_POSTTYPE_
+        row.A1_POSTDIR = row.A1_POSTDIR_
+        row.A2_PREDIR = row.A2_PREDIR_
+        row.A2_NAME = row.A2_NAME_
+        row.A2_POSTTYPE = row.A2_POSTTYPE_
+        row.A2_POSTDIR = row.A2_POSTDIR_
+        # if HasFieldValue(row.ADDRSYS_L_):
+        #     row.ADDRSYS_L = row.ADDRSYS_L_
+        # if HasFieldValue(row.ADDRSYS_R_):
+        #     row.ADDRSYS_R = row.ADDRSYS_R_
+        # row.ZIPCODE_L = row.ZIPCODE_L_
+        # row.ZIPCODE_R = row.ZIPCODE_R_
+        # row.INCMUNI_L = row.INCMUNI_L_
+        # row.INCMUNI_R = row.INCMUNI_R_
+        # row.UNINCCOM_L = row.UNINCCOM_L_
+        # row.UNINCCOM_R = row.UNINCCOM_R_
+        #row.VERT_LEVEL = row.VERT_LEVEL_
+        row.SPEED_LMT = row.SPEED_LMT_
+        row.ACCESSCODE = row.ACCESSCODE_
+        row.DOT_HWYNAM = row.DOT_HWYNAM_
+        row.DOT_RTNAME = row.DOT_RTNAME_
+        # row.DOT_RTPART = row.DOT_RTPART_
+        # row.DOT_F_MILE = row.DOT_F_MILE_
+        # row.DOT_T_MILE = row.DOT_T_MILE_
+        # row.DOT_FCLASS = row.DOT_FCLASS_
+        # row.DOT_SRFTYP = row.DOT_SRFTYP_
+        # row.DOT_CLASS = row.DOT_CLASS_
+        # row.DOT_OWN_L = row.DOT_OWN_L_
+        # row.DOT_OWN_R = row.DOT_OWN_R_
+        # row.DOT_AADT = row.DOT_AADT_
+        # row.DOT_AADTYR = row.DOT_AADTYR_
+        # row.BIKE_L = row.BIKE_L_
+        # row.BIKE_R = row.BIKE_R_
+        #row.BIKE_PLN_L = row.BIKE_PLN_L_
+        #row.BIKE_PLN_R = row.BIKE_PLN_R_
+        #row.BIKE_NOTES = row.BIKE_NOTES_
+        # row.UNIQUE_ID = row.UNIQUE_ID_
+        row.LOCAL_UID = row.LOCAL_UID_
+        row.UTAHRD_UID = row.UTAHRD_UID_
+        row.SOURCE = row.SOURCE_
+        row.UPDATED = row.UPDATED_
+        # row.EFFECTIVE = row.EFFECTIVE_
+        # row.EXPIRE = row.EXPIRE_
+        #row.EDITOR = row.EDITOR_
+        row.CUSTOMTAGS = row.CUSTOMTAGS_
+        # row.UTRANS_NOTES = ""    
         
-        ## NAME
-        ParseAndAssign_FullAddress(row, row.S_NAME, "S_NAME", True, False, False)
-        ## remove the posttype, if present.
-        ## get the last word in the string.
-        #countystreetname = row.S_NAME
-        #if countystreetname != "":
-        #    if not countystreetname.isspace():
-        #        row.NAME = countystreetname
-                
-        #        countystreetname_split = countystreetname.split()
-        #        # make sure there's more than one word
-        #        if len(countystreetname_split) > 1:
-        #            last_word = countystreetname_split[-1]
-        #            # if the last word is "AV" just remove it and move on (they add AV when they have an AVE already in the s_type)
-        #            if last_word == "AV":
-        #                # remove the word.
-        #                countystreetname = countystreetname.rsplit(' ', 1)[0]
-        #                # write value to NAME field.
-        #                row.NAME = countystreetname
-        #            else:
-        #                # check if last word in streetname is posttype, only if it's two characters long (so we don't remove valid road names line canyon, creek, park, etc.)
-        #                if len(last_word) == 2:
-        #                    postTypeDomain = GetCodedDomainValue(last_word, dictOfValidPostTypes)
-        #                    if postTypeDomain != "":
-        #                        # a recognized posttype was found in the streettype, maybe use this as the valid posttype
-        #                        # check if county's s_type has a value, if not use this one from the streetname.
-        #                        if row.S_TYPE == "":
-        #                            # no value in s_type, so use this value.
-        #                            row.POSTTYPE = postTypeDomain
-        #                            postType_fromStreetName = True
-
-        #                            # remove this posttype value from the streetname and then assign it.
-        #                            countystreetname = countystreetname.rsplit(' ', 1)[0]
-                    
-        #                            # write value to NAME field.
-        #                            row.NAME = countystreetname
-        #                        else: # s_type has a posttype, so use this one instead below
-        #                            # remove this posttype value from the streetname.
-        #                            countystreetname = countystreetname.rsplit(' ', 1)[0]
-        #                            postType_fromStreetName = False
-        #                            row.NAME = countystreetname
-        #                    else: # last word in street name is not a valid posttype   
-        #                        row.NAME = countystreetname
-        #                else: # the last word is not two characters long so just use the whole thing in the NAME field
-        #                    row.NAME = countystreetname
-        #        else:
-        #            # the county street name is less than two words
-        #            row.NAME = countystreetname
-
-        
-        ## POSTTYPE 
-        if postType_fromStreetName == False:
-            ValidateAssign_POSTTYPE(row, row.S_TYPE, countyNumber)
-        
-        ## POSTDIR
-        if HasValidDirection(row.SUF_DIR): #row.SUF_DIR in ("N","S","E","W"):
-            row.POSTDIR = row.SUF_DIR
-
-        # AN_NAME and AN_POSTDIR
-        if row.ACS_ALIAS != "":
-            # call the validation function
-            an_Name, an_PostDir = Validate_AN_NAME(row.ACS_ALIAS)
-            # AN_NAME
-            if an_Name != "":
-                row.AN_NAME = an_Name            
-                
-            # AN_POSTDIR
-            if an_PostDir != "":
-                row.AN_POSTDIR = an_PostDir
-                # if an_postdir is same as postdir then remove postdir
-                if an_PostDir == row.POSTDIR:
-                    row.POSTDIR = ""
-
-        row.A1_NAME = row.ALIAS1
-        row.A1_POSTTYPE = row.ALIAS1_TYP
-        row.A2_NAME = row.ALIAS2
-        row.A2_POSTTYPE = row.ALIAS2_TYP
-        
-        ## DOT_SRFTYP - check if valid value
-        classSurfType = GetCodedDomainValue(row.S_SURF2, dictOfValidSurfaceType)
-        if classSurfType != "":
-            row.DOT_SRFTYP = classSurfType
-
-        # CLASS - check if valid value
-        classDomain = GetCodedDomainValue(row.CLASS, dictOfValidRoadClass)
-        if classDomain != "":
-            row.DOT_CLASS = classDomain
-        elif classDomain == "" and row.CLASS is not None:
-            if not row.CLASS.isspace():
-                # add the CLASS they gave to the notes field so we can evaluate it
-                row.UTRANS_NOTES = row.UTRANS_NOTES + "DOT_CLASS: " + row.CLASS + "; "
-                # add the bad domain value to the text file log
-                AddBadValueToTextFile(countyNumber, "DOT_CLASS", str(row.CLASS))
-        
-        row.SPEED_LMT = row.SPD_LMT
-
-        ## check if NAME is empty and one of the numeric alias field is not, if so carry those values to the primary road name fields
-        if row.NAME == "" and row.AN_NAME != "":
-            row.NAME = row.AN_NAME
-            row.POSTDIR = row.AN_POSTDIR
-            row.AN_NAME = ""
-            row.AN_POSTDIR = ""
-
-        # check if numeric values in alpha alias fields - and if so, move them over
-        # check A1 values
-        if row.A1_NAME.isdigit() and HasFieldValue(row.A1_POSTDIR):
-            if HasFieldValue(row.AN_NAME) == false:
-                row.AN_NAME = row.A1_NAME
-                row.AN_POSTDIR = row.A1_POSTDIR
-                row.A1_NAME = ""
-                row.A1_POSTDIR = ""
-        # check A2 values
-        if row.A2_NAME.isdigit() and HasFieldValue(row.A2_POSTDIR):
-            if HasFieldValue(row.AN_NAME) == false:
-                row.AN_NAME = row.A2_NAME
-                row.AN_POSTDIR = row.A2_POSTDIR
-                row.A2_NAME = ""
-                row.A2_POSTDIR = ""                            
-
         # store the row
         rows.updateRow(row)
-        del row
+        del row    
+    
+
+    # #: OLD VERSION AND SCHEMA
+    # for row in rows:
+    #     # set all fields to empty or zero or none
+    #     setDefaultValues(row)
+    #     countyNumber = "49007"
+    #     postType_fromStreetName = False
+
+    #     # set county specific fields
+    #     row.COUNTY_L = countyNumber
+    #     row.COUNTY_R = countyNumber    
+          
+    #     row.FROMADDR_L = row.L_F_ADD
+    #     row.TOADDR_L = row.L_T_ADD
+    #     row.FROMADDR_R = row.R_F_ADD
+    #     row.TOADDR_R = row.R_T_ADD
+    #     row.PREDIR = row.PRE_DIR[:1]
+        
+    #     ## NAME
+    #     ParseAndAssign_FullAddress(row, row.S_NAME, "S_NAME", True, False, False)
+    #     ## remove the posttype, if present.
+    #     ## get the last word in the string.
+    #     #countystreetname = row.S_NAME
+    #     #if countystreetname != "":
+    #     #    if not countystreetname.isspace():
+    #     #        row.NAME = countystreetname
+                
+    #     #        countystreetname_split = countystreetname.split()
+    #     #        # make sure there's more than one word
+    #     #        if len(countystreetname_split) > 1:
+    #     #            last_word = countystreetname_split[-1]
+    #     #            # if the last word is "AV" just remove it and move on (they add AV when they have an AVE already in the s_type)
+    #     #            if last_word == "AV":
+    #     #                # remove the word.
+    #     #                countystreetname = countystreetname.rsplit(' ', 1)[0]
+    #     #                # write value to NAME field.
+    #     #                row.NAME = countystreetname
+    #     #            else:
+    #     #                # check if last word in streetname is posttype, only if it's two characters long (so we don't remove valid road names line canyon, creek, park, etc.)
+    #     #                if len(last_word) == 2:
+    #     #                    postTypeDomain = GetCodedDomainValue(last_word, dictOfValidPostTypes)
+    #     #                    if postTypeDomain != "":
+    #     #                        # a recognized posttype was found in the streettype, maybe use this as the valid posttype
+    #     #                        # check if county's s_type has a value, if not use this one from the streetname.
+    #     #                        if row.S_TYPE == "":
+    #     #                            # no value in s_type, so use this value.
+    #     #                            row.POSTTYPE = postTypeDomain
+    #     #                            postType_fromStreetName = True
+
+    #     #                            # remove this posttype value from the streetname and then assign it.
+    #     #                            countystreetname = countystreetname.rsplit(' ', 1)[0]
+                    
+    #     #                            # write value to NAME field.
+    #     #                            row.NAME = countystreetname
+    #     #                        else: # s_type has a posttype, so use this one instead below
+    #     #                            # remove this posttype value from the streetname.
+    #     #                            countystreetname = countystreetname.rsplit(' ', 1)[0]
+    #     #                            postType_fromStreetName = False
+    #     #                            row.NAME = countystreetname
+    #     #                    else: # last word in street name is not a valid posttype   
+    #     #                        row.NAME = countystreetname
+    #     #                else: # the last word is not two characters long so just use the whole thing in the NAME field
+    #     #                    row.NAME = countystreetname
+    #     #        else:
+    #     #            # the county street name is less than two words
+    #     #            row.NAME = countystreetname
+
+        
+    #     ## POSTTYPE 
+    #     if postType_fromStreetName == False:
+    #         ValidateAssign_POSTTYPE(row, row.S_TYPE, countyNumber)
+        
+    #     ## POSTDIR
+    #     if HasValidDirection(row.SUF_DIR): #row.SUF_DIR in ("N","S","E","W"):
+    #         row.POSTDIR = row.SUF_DIR
+
+    #     # AN_NAME and AN_POSTDIR
+    #     if row.ACS_ALIAS != "":
+    #         # call the validation function
+    #         an_Name, an_PostDir = Validate_AN_NAME(row.ACS_ALIAS)
+    #         # AN_NAME
+    #         if an_Name != "":
+    #             row.AN_NAME = an_Name            
+                
+    #         # AN_POSTDIR
+    #         if an_PostDir != "":
+    #             row.AN_POSTDIR = an_PostDir
+    #             # if an_postdir is same as postdir then remove postdir
+    #             if an_PostDir == row.POSTDIR:
+    #                 row.POSTDIR = ""
+
+    #     row.A1_NAME = row.ALIAS1
+    #     row.A1_POSTTYPE = row.ALIAS1_TYP
+    #     row.A2_NAME = row.ALIAS2
+    #     row.A2_POSTTYPE = row.ALIAS2_TYP
+        
+    #     ## DOT_SRFTYP - check if valid value
+    #     classSurfType = GetCodedDomainValue(row.S_SURF2, dictOfValidSurfaceType)
+    #     if classSurfType != "":
+    #         row.DOT_SRFTYP = classSurfType
+
+    #     # CLASS - check if valid value
+    #     classDomain = GetCodedDomainValue(row.CLASS, dictOfValidRoadClass)
+    #     if classDomain != "":
+    #         row.DOT_CLASS = classDomain
+    #     elif classDomain == "" and row.CLASS is not None:
+    #         if not row.CLASS.isspace():
+    #             # add the CLASS they gave to the notes field so we can evaluate it
+    #             row.UTRANS_NOTES = row.UTRANS_NOTES + "DOT_CLASS: " + row.CLASS + "; "
+    #             # add the bad domain value to the text file log
+    #             AddBadValueToTextFile(countyNumber, "DOT_CLASS", str(row.CLASS))
+        
+    #     row.SPEED_LMT = row.SPD_LMT
+
+    #     ## check if NAME is empty and one of the numeric alias field is not, if so carry those values to the primary road name fields
+    #     if row.NAME == "" and row.AN_NAME != "":
+    #         row.NAME = row.AN_NAME
+    #         row.POSTDIR = row.AN_POSTDIR
+    #         row.AN_NAME = ""
+    #         row.AN_POSTDIR = ""
+
+    #     # check if numeric values in alpha alias fields - and if so, move them over
+    #     # check A1 values
+    #     if row.A1_NAME.isdigit() and HasFieldValue(row.A1_POSTDIR):
+    #         if HasFieldValue(row.AN_NAME) == false:
+    #             row.AN_NAME = row.A1_NAME
+    #             row.AN_POSTDIR = row.A1_POSTDIR
+    #             row.A1_NAME = ""
+    #             row.A1_POSTDIR = ""
+    #     # check A2 values
+    #     if row.A2_NAME.isdigit() and HasFieldValue(row.A2_POSTDIR):
+    #         if HasFieldValue(row.AN_NAME) == false:
+    #             row.AN_NAME = row.A2_NAME
+    #             row.AN_POSTDIR = row.A2_POSTDIR
+    #             row.A2_NAME = ""
+    #             row.A2_POSTDIR = ""                            
+
+    #     # store the row
+    #     rows.updateRow(row)
+    #     del row
 
 
 def Wasatch(rows):
@@ -1267,57 +1348,6 @@ def Tooele(rows):
                 # store the row
                 rows.updateRow(row)
                 del row
-
-
-## Tooele old schema (changed on 3/25/2019) ##
-#def Tooele(rows):
-#    for row in rows: 
-             
-#        # set all fields to empty or zero or none
-#        setDefaultValues(row)
-#        countyNumber = "49045"
-        
-#        ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
-#        row.COUNTY_L = countyNumber
-#        row.COUNTY_R = countyNumber   
-#        if row.FromLeft != "":
-#            row.FROMADDR_L = row.FromLeft
-#        if row.ToLeft != "":
-#            row.TOADDR_L = row.ToLeft
-#        if row.FromRight != "":     
-#            row.FROMADDR_R = row.FromRight
-#        if row.ToRight != "":
-#            row.TOADDR_R = row.ToRight
-#        if HasFieldValue(row.S_UNIQUE):
-#            row.LOCAL_UID = row.S_UNIQUE
-#        if HasFieldValue(row.NOTE_):
-#            row.CUSTOMTAGS = row.NOTE_        
-
-#        ## TRANSFER OVER FIELDS THAT WE RENAMED WITH AN APPENDED UNDERSCORE (FIELDNAME_) BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
-
-#        ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
-#        ParseAndAssign_FullAddress(row, row.SP_Street, "SP_Street", True, False, False)
-#        ParseAndAssign_FullAddress(row, row.SP_Alias_1, "SP_Alias_1", False, True, False)
-#        ParseAndAssign_FullAddress(row, row.SP_Alias_2, "SP_Alias_2", False, False, True)
-        
-#        ValidateAndAssign_FieldValue(row, "STATUS", row.CONSTRUCTI, countyNumber, dictOfValidStatus)
-        
-#        # remove "Road" from class before validating... tooele does A Road; B Road; C Road
-#        if HasFieldValue(row.CLASS):
-#            _class = row.CLASS
-#            _class = _class.replace(" Road", "")
-#            ValidateAndAssign_FieldValue(row, "DOT_CLASS", _class, countyNumber, dictOfValidRoadClass)
-
-#        # remove rows that are private, etc in CLASS
-#        if HasFieldValue(row.CLASS):
-#            classValue = row.CLASS.upper().strip()
-#            arcpy.AddMessage(classValue)
-#            if classValue in ('DUGWAY', 'PRIVATE', 'TRAIL', 'ATV', 'ALLEY', 'AIRPLANE', 'VACATED'):
-#                rows.deleteRow(row)   
-#            else:
-#                # store the row
-#                rows.updateRow(row)
-#                del row
 
 
 def Cache(rows):
