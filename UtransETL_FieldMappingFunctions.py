@@ -821,7 +821,7 @@ def Carbon(rows):
         row.SPEED_LMT = row.SPEED_LMT_
         row.ACCESSCODE = row.ACCESSCODE_
         row.DOT_HWYNAM = row.DOT_HWYNAM_
-        row.DOT_RTNAME = row.DOT_RTNAME_
+        # row.DOT_RTNAME = row.DOT_RTNAME_
         # row.DOT_RTPART = row.DOT_RTPART_
         # row.DOT_F_MILE = row.DOT_F_MILE_
         # row.DOT_T_MILE = row.DOT_T_MILE_
