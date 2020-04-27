@@ -541,14 +541,14 @@ def SaltLake(rows):
         row.UNIQUE_ID = row.UNIQUE_ID_
         row.SOURCE = row.SOURCE_
         row.CREATED = row.CREATED_
-        row.UPDATED = row.MODIFIED        
+        row.UPDATED = row.MODIFIED
         row.UTRANS_NOTES = ""
 
         ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
         ValidateAndAssign_FieldValue(row, "POSTTYPE", row.POSTTYPE_, countyNumber, dictOfValidPostTypes)
         ValidateAndAssign_FieldValue(row, "STATUS", row.STATUS_, countyNumber, dictOfValidStatus)
         ValidateAndAssign_FieldValue(row, "ONEWAY", row.ONEWAY_, countyNumber, dictOfValidOneWay)
-        ValidateAndAssign_FieldValue(row, "DOT_SRFTYP", row.SURFTYPE, countyNumber, dictOfValidSurfaceType)
+        ValidateAndAssign_FieldValue(row, "DOT_SRFTYP", row.DOT_SRFTYP, countyNumber, dictOfValidSurfaceType)
         #ValidateAndAssign_FieldValue(row, "DOT_CLASS", row.CLASS, countyNumber, dictOfValidRoadClass)
 
 
@@ -807,7 +807,7 @@ def Carbon(rows):
         row.LOCAL_UID = row.LOCAL_UID_
         row.UTAHRD_UID = row.UTAHRD_UID_
         row.SOURCE = row.SOURCE_
-        row.UPDATED = row.UPDATED_
+        #row.UPDATED = row.UPDATED_
         # row.EFFECTIVE = row.EFFECTIVE_
         # row.EXPIRE = row.EXPIRE_
         #row.EDITOR = row.EDITOR_
