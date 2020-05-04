@@ -965,51 +965,143 @@ def Wasatch(rows):
         # set all fields to empty or zero or none
         setDefaultValues(row)
         countyNumber = "49051"
- 
-        ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
         row.COUNTY_L = countyNumber
         row.COUNTY_R = countyNumber
-        row.FROMADDR_L = row.L_F_ADD
-        row.TOADDR_L = row.L_T_ADD
-        row.FROMADDR_R = row.R_F_ADD
-        row.TOADDR_R = row.R_T_ADD
-        row.PREDIR = row.PRE_DIR[:1]
-        row.NAME = row.S_NAME  
-        row.POSTDIR = row.SUF_DIR[:1]              
-        row.AN_NAME = row.ACS_STREET
-        row.AN_POSTDIR = row.ACS_SUFDIR[:1] 
+ 
+         ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
+        # transfer values from same name fields that were renamed with an underscore (this allows us to enforce our domains via the validation code here)
+        row.STATUS = row.STATUS_
+        row.CARTOCODE = row.CARTOCODE_
+        row.FULLNAME = row.FULLNAME_
+        row.FROMADDR_L = row.FROMADDR_L_
+        row.TOADDR_L = row.TOADDR_L_
+        row.FROMADDR_R = row.FROMADDR_R_
+        row.TOADDR_R = row.TOADDR_R_
+        row.PARITY_L = row.PARITY_L_
+        row.PARITY_R = row.PARITY_R_
+        row.PREDIR = row.PREDIR_
+        row.NAME = row.NAME_
+        row.POSTTYPE = row.POSTTYPE_
+        row.POSTDIR = row.POSTDIR_
+        row.AN_NAME = row.AN_NAME_
+        row.AN_POSTDIR = row.AN_POSTDIR_
+        row.A1_NAME = row.A1_NAME_
+        row.A1_POSTTYPE = row.A1_POSTTYPE_
+        row.A1_POSTDIR = row.A1_POSTDIR_
+        row.A2_PREDIR = row.A2_PREDIR_
+        row.A2_NAME = row.A2_NAME_
+        row.A2_POSTTYPE = row.A2_POSTTYPE_
+        row.A2_POSTDIR = row.A2_POSTDIR_
+        if HasFieldValue(row.ADDRSYS_L_):
+            row.ADDRSYS_L = row.ADDRSYS_L_
+        if HasFieldValue(row.ADDRSYS_R_):
+            row.ADDRSYS_R = row.ADDRSYS_R_
+        row.ZIPCODE_L = row.ZIPCODE_L_
+        row.ZIPCODE_R = row.ZIPCODE_R_
+        row.INCMUNI_L = row.INCMUNI_L_
+        row.INCMUNI_R = row.INCMUNI_R_
+        row.UNINCCOM_L = row.UNINCCOM_L_
+        row.UNINCCOM_R = row.UNINCCOM_R_
+        row.VERT_LEVEL = row.VERT_LEVEL_
+        row.SPEED_LMT = row.SPEED_LMT_
+        row.ACCESSCODE = row.ACCESSCODE_
+        row.DOT_HWYNAM = row.DOT_HWYNAM_
+        row.DOT_RTNAME = row.DOT_RTNAME_
+        row.DOT_RTPART = row.DOT_RTPART_
+        row.DOT_F_MILE = row.DOT_F_MILE_
+        row.DOT_T_MILE = row.DOT_T_MILE_
+        row.DOT_FCLASS = row.DOT_FCLASS_
+        row.DOT_SRFTYP = row.DOT_SRFTYP_
+        row.DOT_CLASS = row.DOT_CLASS_
+        row.DOT_OWN_L = row.DOT_OWN_L_
+        row.DOT_OWN_R = row.DOT_OWN_R_
+        row.DOT_AADT = row.DOT_AADT_
+        row.DOT_AADTYR = row.DOT_AADTYR_
+        row.BIKE_L = row.BIKE_L_
+        row.BIKE_R = row.BIKE_R_
+        #row.BIKE_PLN_L = row.BIKE_PLN_L_
+        #row.BIKE_PLN_R = row.BIKE_PLN_R_
+        row.BIKE_NOTES = row.BIKE_NOTES_
+        row.UNIQUE_ID = row.UNIQUE_ID_
+        row.LOCAL_UID = row.LOCAL_UID_
+        row.UTAHRD_UID = row.UTAHRD_UID_
+        row.SOURCE = row.SOURCE_
+        row.UPDATED = row.UPDATED_
+        row.EFFECTIVE = row.EFFECTIVE_
+        row.EXPIRE = row.EXPIRE_
+        row.EDITOR = row.EDITOR_
+        row.CUSTOMTAGS = row.CUSTOMTAGS_
+        row.UTRANS_NOTES = ""
 
-        ## TRANSFER OVER FIELDS THAT WE RENAMED BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
-        # ValidateAssign_STATUS(row, row.STATUS_, countyNumber)
+        ## TRANSFER OVER FIELDS THAT WE RENAMED WITH AN APPENDED UNDERSCORE (FIELDNAME_) BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
 
         ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
-        ValidateAndAssign_FieldValue(row, "POSTTYPE", row.S_TYPE, countyNumber, dictOfValidPostTypes)
-        ValidateAndAssign_FieldValue(row, "DOT_FCLASS", row.S_AGFUNC, countyNumber, dictOfValidFunctionalClass)
-        # seems like they removed this field in their last submission...    ValidateAndAssign_FieldValue(row, "DOT_SRFTYP", row.S_SURF, countyNumber, dictOfValidSurfaceType)
+        # if it's a numeric road name, then use the parser to parse out the post direction
+        # if HasFieldValue(row.NAME):
+        #     if row.NAME[0].isdigit():
+        #         ParseAndAssign_FullAddress(row, row.NAME, "NAME", True, False, False)
 
-        # check if we need to parse the ALIAS_1 field (they have predir, postdir, and posttypes in the field)
-        if row.ALIAS_1 is not None or row.ALIAS_1 != "":
-            is_valid_parse, pre_dir, street_name, post_type, post_dir = ParseFullAddress(row.ALIAS_1)
+        # remove rows that are private
+        classValueOwnL = ""
+        classValueOwnR = ""
+        if HasFieldValue(row.DOT_OWN_L_):
+            classValueOwnL = row.DOT_OWN_L_.upper().strip()
+        if HasFieldValue(row.DOT_OWN_R_):
+            classValueOwnR = row.DOT_OWN_R_.upper().strip()
+        
+        if classValueOwnL == 'PRIVATE' and classValueOwnR == 'PRIVATE':
+            rows.deleteRow(row)
+            arcpy.AddMessage('Deleted row with Private value in either DOT_OWN_L or DOT_OWN_R field')
+        else:
+            # store the row
+            rows.updateRow(row)
+            del row
 
-            if is_valid_parse == True:
-                # it WAS a valid parse
-                if street_name.isdigit():
-                    # the street name is numeric
-                    row.AN_NAME = street_name
-                    row.AN_POSTDIR = post_dir
-                else:
-                    # the streetname is alpha
-                    row.A1_PREDIR = pre_dir
-                    row.A1_NAME = street_name
-                    row.A1_POSTTYPE = post_type
-                    row.A1_POSTDIR = post_dir
-            else:
-                # it was NOT a valid parse
-                row.A1_NAME = row.ALIAS_1
+        #: Wasatch old schema (changed on may 2020)
+        # ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
+        # row.COUNTY_L = countyNumber
+        # row.COUNTY_R = countyNumber
+        # row.FROMADDR_L = row.L_F_ADD
+        # row.TOADDR_L = row.L_T_ADD
+        # row.FROMADDR_R = row.R_F_ADD
+        # row.TOADDR_R = row.R_T_ADD
+        # row.PREDIR = row.PRE_DIR[:1]
+        # row.NAME = row.S_NAME  
+        # row.POSTDIR = row.SUF_DIR[:1]              
+        # row.AN_NAME = row.ACS_STREET
+        # row.AN_POSTDIR = row.ACS_SUFDIR[:1] 
+
+        # ## TRANSFER OVER FIELDS THAT WE RENAMED BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
+        # # ValidateAssign_STATUS(row, row.STATUS_, countyNumber)
+
+        # ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
+        # ValidateAndAssign_FieldValue(row, "POSTTYPE", row.S_TYPE, countyNumber, dictOfValidPostTypes)
+        # ValidateAndAssign_FieldValue(row, "DOT_FCLASS", row.S_AGFUNC, countyNumber, dictOfValidFunctionalClass)
+        # # seems like they removed this field in their last submission...    ValidateAndAssign_FieldValue(row, "DOT_SRFTYP", row.S_SURF, countyNumber, dictOfValidSurfaceType)
+
+        # # check if we need to parse the ALIAS_1 field (they have predir, postdir, and posttypes in the field)
+        # if row.ALIAS_1 is not None or row.ALIAS_1 != "":
+        #     is_valid_parse, pre_dir, street_name, post_type, post_dir = ParseFullAddress(row.ALIAS_1)
+
+        #     if is_valid_parse == True:
+        #         # it WAS a valid parse
+        #         if street_name.isdigit():
+        #             # the street name is numeric
+        #             row.AN_NAME = street_name
+        #             row.AN_POSTDIR = post_dir
+        #         else:
+        #             # the streetname is alpha
+        #             row.A1_PREDIR = pre_dir
+        #             row.A1_NAME = street_name
+        #             row.A1_POSTTYPE = post_type
+        #             row.A1_POSTDIR = post_dir
+        #     else:
+        #         # it was NOT a valid parse
+        #         row.A1_NAME = row.ALIAS_1
                         
-        # store the row
-        rows.updateRow(row)
-        del row
+        # # store the row
+        # rows.updateRow(row)
+        # del row
 
 
 def Duchesne(rows):
@@ -1224,7 +1316,7 @@ def Tooele(rows):
         setDefaultValues(row)
         countyNumber = "49045"
         row.COUNTY_L = countyNumber
-        row.COUNTY_R = countyNumber       
+        row.COUNTY_R = countyNumber
           
         ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
         # transfer values from same name fields that were renamed with an underscore (this allows us to enforce our domains via the validation code here)
@@ -1300,20 +1392,20 @@ def Tooele(rows):
                 ParseAndAssign_FullAddress(row, row.NAME, "NAME", True, False, False)
 
         # remove rows that are private, etc in Exclude field
-        if HasFieldValue(row.Exclude) or HasFieldValue(row.STATUS_):
-            classValueExclude = ""
-            classValueStatus_ = ""
-            if HasFieldValue(row.Exclude):
-                classValueExclude = row.Exclude.upper().strip()
-            if HasFieldValue(row.STATUS_):
-                classValueStatus_ = row.STATUS_.upper().strip()
-            if classValueExclude in ('X', 'P') or classValueStatus_ in ('CONSTRUCTION', 'PLANNED'): # planned and classified (dugway)
-                rows.deleteRow(row)
-                arcpy.AddMessage('Deleted row with Exclude value of: ' + classValueExclude + ' and STATUS_ value of :' + classValueStatus_)   
-            else:
-                # store the row
-                rows.updateRow(row)
-                del row
+        classValueExclude = ""
+        classValueStatus_ = ""
+        if HasFieldValue(row.Exclude):
+            classValueExclude = row.Exclude.upper().strip()
+        if HasFieldValue(row.STATUS_):
+            classValueStatus_ = row.STATUS_.upper().strip()
+        
+        if classValueExclude in ('X', 'P') or classValueStatus_ in ('CONSTRUCTION', 'PLANNED'): # planned and classified (dugway)
+            rows.deleteRow(row)
+            arcpy.AddMessage('Deleted row with Exclude value of: ' + classValueExclude + ' and STATUS_ value of :' + classValueStatus_)   
+        else:
+            # store the row
+            rows.updateRow(row)
+            del row
 
 
 def Cache(rows):
