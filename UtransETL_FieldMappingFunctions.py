@@ -540,8 +540,8 @@ def SaltLake(rows):
         row.DOT_CLASS = row.DOT_CLASS_
         row.UNIQUE_ID = row.UNIQUE_ID_
         row.SOURCE = row.SOURCE_
-        row.CREATED = row.CREATED_
-        row.UPDATED = row.MODIFIED
+        #row.CREATED = row.CREATED_
+        #row.UPDATED = row.MODIFIED
         row.UTRANS_NOTES = ""
 
         ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
