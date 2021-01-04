@@ -1983,6 +1983,62 @@ def Uintah(rows):
         rows.updateRow(row)
         del row
 
+
+def Millard(rows):
+    for row in rows: 
+        # set all fields to empty or zero or none
+        setDefaultValues(row)
+        countyNumber = "49027"
+
+        ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
+        row.COUNTY_L = countyNumber
+        row.COUNTY_R = countyNumber
+        if row.L_F_ADD != "":
+            row.FROMADDR_L = row.L_F_ADD
+        if row.L_T_ADD != "":
+            row.TOADDR_L = row.L_T_ADD
+        if row.R_F_ADD != "":
+            row.FROMADDR_R = row.R_F_ADD
+        if row.R_T_ADD != "":
+            row.TOADDR_R = row.R_T_ADD
+        if HasValidDirection(row.PREDIR_):
+            row.PREDIR = row.PREDIR_[:1]
+        if row.STREETNAME != "":
+            row.NAME = row.STREETNAME
+        if HasValidDirection(row.SUFDIR):
+            row.POSTDIR = row.SUFDIR[:1]
+        if HasFieldValue(row.ALIAS1):
+            row.A1_NAME = row.ALIAS1
+        if HasFieldValue(row.ALIAS2):
+            row.A2_NAME = row.ALIAS2
+        if HasFieldValue(row.ACSNAME) and row.ACSNAME.isdigit():
+            row.AN_NAME = row.ACSNAME
+        if HasValidDirection(row.ACSSUF):
+            row.AN_POSTDIR = row.ACSSUF[:1]
+        if HasFieldValue(row.COUNIQUE):
+            row.LOCAL_UID = row.COUNIQUE
+
+        ## TRANSFER OVER FIELDS THAT WE RENAMED WITH AN APPENDED UNDERSCORE (FIELDNAME_) BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
+        #: none
+
+        ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
+        ValidateAndAssign_FieldValue(row, "POSTTYPE", row.STREETTYPE, countyNumber, dictOfValidPostTypes)
+        ValidateAndAssign_FieldValue(row, "A1_POSTTYPE", row.ALIAS1TYPE, countyNumber, dictOfValidPostTypes)
+        ValidateAndAssign_FieldValue(row, "A2_POSTTYPE", row.ALIAS2TYPE, countyNumber, dictOfValidPostTypes)
+        ValidateAndAssign_FieldValue(row, "ONEWAY", row.ONEWAY_, countyNumber, dictOfValidOneWay)
+        ValidateAndAssign_FieldValue(row, "CARTOCODE", row.CARTOCODE_, countyNumber, dictOfValidCartocode)
+        
+        #: BIKE ATTRIBUTES
+        #: none
+
+        # transfer SPEED_LMT value if it's not zero and if it's valid
+        if row.SPEED != 0:
+            ValidateAndAssign_FieldValue(row, "SPEED_LMT", row.SPEED, countyNumber, dictOfValidSpeedLmt)
+
+        # store the row
+        rows.updateRow(row)
+    del row        
+
 ######################################################################
 #### GENERAL (NON-FIELD COUNTY MAPPING) FUNCTIONS BELOW THIS LINE ####
 
