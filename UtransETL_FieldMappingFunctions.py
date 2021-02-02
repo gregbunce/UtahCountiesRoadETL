@@ -1017,11 +1017,11 @@ def Wasatch(rows):
         row.DOT_OWN_R = row.DOT_OWN_R_
         row.DOT_AADT = row.DOT_AADT_
         row.DOT_AADTYR = row.DOT_AADTYR_
-        row.BIKE_L = row.BIKE_L_
-        row.BIKE_R = row.BIKE_R_
+        #row.BIKE_L = row.BIKE_L_
+        #row.BIKE_R = row.BIKE_R_
         #row.BIKE_PLN_L = row.BIKE_PLN_L_
         #row.BIKE_PLN_R = row.BIKE_PLN_R_
-        row.BIKE_NOTES = row.BIKE_NOTES_
+        #row.BIKE_NOTES = row.BIKE_NOTES_
         row.UNIQUE_ID = row.UNIQUE_ID_
         row.LOCAL_UID = row.LOCAL_UID_
         row.UTAHRD_UID = row.UTAHRD_UID_

@@ -148,7 +148,7 @@ if queryCountyName == "SanJuan":
 queryString = "NAME = '" + queryCountyName + "'"
 current_step += 1
 arcpy.AddMessage("[step " + str(current_step) + " of " + str(total_steps) + "] Query string for county boundaries layer: " + queryString)
-arcpy.MakeFeatureLayer_management(r"Database Connections\DC_agrc@SGID10@sgid.agrc.utah.gov.sde\SGID10.BOUNDARIES.Counties", "counties_lyr", queryString)
+arcpy.MakeFeatureLayer_management(r"Database Connections\internal@SGID@internal.agrc.utah.gov.sde\SGID.BOUNDARIES.Counties", "counties_lyr", queryString)
 arcpy.MakeFeatureLayer_management(outputFeatureClass, 'countyETL_lyr')
 
 arcpy.SelectLayerByLocation_management('countyETL_lyr', 'intersect', "counties_lyr")
