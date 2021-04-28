@@ -1841,7 +1841,7 @@ def Sevier(rows):
     for row in rows: 
         # set all fields to empty or zero or none
         setDefaultValues(row)
-        countyNumber = "49039"
+        countyNumber = "49041"
         
         ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
         row.COUNTY_L = countyNumber
@@ -1855,12 +1855,23 @@ def Sevier(rows):
         if row.R_T_ADD != "":
             row.TOADDR_R = row.R_T_ADD
         if HasValidDirection(row.PRE_DIR):
-            row.PREDIR = row.PRE_DIR[:1]     
-                     
+            row.PREDIR = row.PRE_DIR[:1]
+        if HasFieldValue(row.CO_UNIQUE):
+            row.LOCAL_UID = row.CO_UNIQUE
+
         ## TRANSFER OVER FIELDS THAT WE RENAMED WITH AN APPENDED UNDERSCORE (FIELDNAME_) BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
         # parse fulladdresses for primary, alias1 and alias2
-        ParseAndAssign_FullAddress(row, row.S_NAME, "S_NAME", True, False, False)
+        ParseAndAssign_FullAddress(row, row.STREET, "STREET", True, False, False)
         ParseAndAssign_FullAddress(row, row.ALIAS, "ALIAS", False, True, False)
+
+        ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
+        ValidateAndAssign_FieldValue(row, "DOT_CLASS", row.CLASS, countyNumber, dictOfValidRoadClass)
+        ValidateAndAssign_FieldValue(row, "POSTTYPE", row.S_TYPE, countyNumber, dictOfValidPostTypes)
+
+        # Check if POSTDIR was populated from S_NAME or STREET, if not then use SUR_DIR value
+        if not HasFieldValue(row.POSTDIR):
+            row.POSTDIR = row.SUR_DIR
+
 
         # store the row
         rows.updateRow(row)
