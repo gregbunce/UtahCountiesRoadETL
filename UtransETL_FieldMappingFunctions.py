@@ -1906,7 +1906,7 @@ def Wayne(rows):
         ParseAndAssign_FullAddress(row, row.ALIAS1, "ALIAS1", False, True, False)
         # ParseAndAssign_FullAddress(row, row.ACS_ALIAS, "ACS_ALIAS", False, False, True)        
         
-        ValidateAndAssign_FieldValue(row, "STATUS", row.STATUS_, countyNumber, dictOfValidStatus)
+        #ValidateAndAssign_FieldValue(row, "STATUS", row.STATUS_, countyNumber, dictOfValidStatus)
 
         ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
         ValidateAndAssign_FieldValue(row, "DOT_CLASS", row.CLASS, countyNumber, dictOfValidRoadClass)
