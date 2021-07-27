@@ -1914,9 +1914,9 @@ def Wayne(rows):
         ValidateAndAssign_FieldValue(row, "DOT_SRFTYP", row.S_SURF2, countyNumber, dictOfValidSurfaceType)
         ValidateAndAssign_FieldValue(row, "VERT_LEVEL", row.VERTLEVEL, countyNumber, dictOfValidVerticalLevel)
 
-        # transfer SPEED_LMT value if it's not zero and if it's valid
-        if row.SPD_LMT != 0:
-            ValidateAndAssign_FieldValue(row, "SPEED_LMT", row.SPD_LMT, countyNumber, dictOfValidSpeedLmt)
+        # transfer SPEED_LMT value if it's not zero and if it's valid (note: as of 7/27/2021 they seem to have dropped the speed limit field)
+        # if row.SPD_LMT != 0:
+        #     ValidateAndAssign_FieldValue(row, "SPEED_LMT", row.SPD_LMT, countyNumber, dictOfValidSpeedLmt)
         
         # AN_NAME and AN_POSTDIR (parse the ACS_ALIAS values)
         if row.ACS_ALIAS != "":
