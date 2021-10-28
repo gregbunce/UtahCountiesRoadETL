@@ -2022,12 +2022,12 @@ def Millard(rows):
             row.A1_NAME = row.ALIAS1
         if HasFieldValue(row.ALIAS2):
             row.A2_NAME = row.ALIAS2
-        if HasFieldValue(row.ACSNAME) and row.ACSNAME.isdigit():
-            row.AN_NAME = row.ACSNAME
-        if HasValidDirection(row.ACSSUF):
-            row.AN_POSTDIR = row.ACSSUF[:1]
-        if HasFieldValue(row.COUNIQUE):
-            row.LOCAL_UID = row.COUNIQUE
+        # if HasFieldValue(row.ACSNAME) and row.ACSNAME.isdigit():
+        #     row.AN_NAME = row.ACSNAME
+        # if HasValidDirection(row.ACSSUF):
+        #     row.AN_POSTDIR = row.ACSSUF[:1]
+        # if HasFieldValue(row.COUNIQUE):
+        #     row.LOCAL_UID = row.COUNIQUE
 
         ## TRANSFER OVER FIELDS THAT WE RENAMED WITH AN APPENDED UNDERSCORE (FIELDNAME_) BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
         #: none
