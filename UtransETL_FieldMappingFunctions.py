@@ -1865,7 +1865,7 @@ def Sevier(rows):
         ParseAndAssign_FullAddress(row, row.ALIAS, "ALIAS", False, True, False)
 
         ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
-        ValidateAndAssign_FieldValue(row, "DOT_CLASS", row.CLASS, countyNumber, dictOfValidRoadClass)
+        # ValidateAndAssign_FieldValue(row, "DOT_CLASS", row.CLASS, countyNumber, dictOfValidRoadClass) --note: they did not have this field in the dataset on 6/2/2023
         ValidateAndAssign_FieldValue(row, "POSTTYPE", row.S_TYPE, countyNumber, dictOfValidPostTypes)
 
         # Check if POSTDIR was populated from S_NAME or STREET, if not then use SUR_DIR value
