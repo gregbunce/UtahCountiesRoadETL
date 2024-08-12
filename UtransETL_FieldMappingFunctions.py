@@ -341,28 +341,28 @@ def Davis(rows):
         row.TOADDR_L = row.LeftTo
         row.FROMADDR_R = row.RightFrom
         row.TOADDR_R = row.RightTo
-        if row.PrefixDire != None:
-            row.PREDIR = row.PrefixDire[:1]
+        if row.PrefixDirection != None:
+            row.PREDIR = row.PrefixDirection[:1]
         if row.RoadName != None:
             row.NAME = row.RoadName[:40]
 
         # check if valid post type
-        postTypeDomain = GetCodedDomainValue(row.RoadNameTy, dictOfValidPostTypes)
+        postTypeDomain = GetCodedDomainValue(row.RoadNameType, dictOfValidPostTypes)
         if postTypeDomain != "":
             row.POSTTYPE = postTypeDomain
-        elif postTypeDomain == "" and len(row.RoadNameTy) > 1:  
+        elif postTypeDomain == "" and len(row.RoadNameType) > 1:  
             # add the post type they gave to the notes field so we can evaluate it
-            row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.RoadNameTy + "; "
+            row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.RoadNameType + "; "
             # add the bad domain value to the text file log
             AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.STREETTYPE))
            
-        row.POSTDIR = row.PostDirect
-        row.DOT_SRFTYP = row.RoadSurfac
+        row.POSTDIR = row.PostDirection
+        row.DOT_SRFTYP = row.RoadSurfaceType
 
         # check if alias names exist (maybe make this a global function that we can reuse for other counties who do a similar alias name concatination field)
-        if row.RoadAliasN != None:
+        if row.RoadAliasName != None:
             # get alias name as string
-            davisAliasName = row.RoadAliasN
+            davisAliasName = row.RoadAliasName
 
             # check if there's a least one letter in the string
             if len(davisAliasName) > 0:
@@ -1025,13 +1025,13 @@ def Wasatch(rows):
         row.UNIQUE_ID = row.UNIQUE_ID_
         row.LOCAL_UID = row.LOCAL_UID_
         row.UTAHRD_UID = row.UTAHRD_UID_
-        row.SOURCE = row.SOURCE_
-        row.UPDATED = row.UPDATED_
-        row.EFFECTIVE = row.EFFECTIVE_
-        row.EXPIRE = row.EXPIRE_
-        row.EDITOR = row.EDITOR_
-        row.CUSTOMTAGS = row.CUSTOMTAGS_
-        row.UTRANS_NOTES = ""
+        #row.SOURCE = row.SOURCE_
+        #row.UPDATED = row.UPDATED_
+        #row.EFFECTIVE = row.EFFECTIVE_
+        #row.EXPIRE = row.EXPIRE_
+        #row.EDITOR = row.EDITOR_
+        #row.CUSTOMTAGS = row.CUSTOMTAGS_
+        #row.UTRANS_NOTES = ""
 
         ## TRANSFER OVER FIELDS THAT WE RENAMED WITH AN APPENDED UNDERSCORE (FIELDNAME_) BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##
 
@@ -1812,25 +1812,25 @@ def Piute(rows):
         ## TRANSFER OVER SIMPLE VALUES THAT DON'T NEED VALIDATION ##
         row.COUNTY_L = countyNumber
         row.COUNTY_R = countyNumber   
-        if row.L_F_ADD != "":
-            row.FROMADDR_L = row.L_F_ADD
-        if row.L_T_ADD != "":
-            row.TOADDR_L = row.L_T_ADD
-        if row.R_F_ADD != "":     
-            row.FROMADDR_R = row.R_F_ADD
-        if row.R_T_ADD != "":
-            row.TOADDR_R = row.R_T_ADD
-        if row.STREET != "":
-            row.NAME = row.STREET   
-        if HasValidDirection(row.PRE_DIR):
-            row.PREDIR = row.PRE_DIR[:1]
-        if HasValidDirection(row.SUF_DIR):
-            row.POSTDIR = row.SUF_DIR[:1]
+        if row.FROMADDR_L != "":
+            row.FROMADDR_L = row.FROMADDR_L
+        if row.TOADDR_L != "":
+            row.TOADDR_L = row.TOADDR_L
+        if row.FROMADDR_R != "":     
+            row.FROMADDR_R = row.FROMADDR_R
+        if row.TOADDR_R != "":
+            row.TOADDR_R = row.TOADDR_R
+        if row.NAME != "":
+            row.NAME = row.NAME   
+        if HasValidDirection(row.PREDIR):
+            row.PREDIR = row.PREDIR[:1]
+        if HasValidDirection(row.POSTDIR):
+            row.POSTDIR = row.POSTDIR[:1]
                 
         ## TRANSFER OVER FIELDS THAT WE RENAMED WITH AN APPENDED UNDERSCORE (FIELDNAME_) BECUASE WE SHARED THE SAME NAME (this allows us to validate our domain names) ##    
 
         ## TRANSFER OVER VALUES THAT NEED VALIDATION AND FURTHER PROCESSING ##
-        ValidateAndAssign_FieldValue(row, "POSTTYPE", row.S_TYPE, countyNumber, dictOfValidPostTypes)
+        ValidateAndAssign_FieldValue(row, "POSTTYPE", row.POSTTYPE, countyNumber, dictOfValidPostTypes)
 
         # store the row
         rows.updateRow(row)
