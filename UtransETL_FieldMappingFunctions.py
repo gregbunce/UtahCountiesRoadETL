@@ -354,7 +354,7 @@ def Davis(rows):
             # add the post type they gave to the notes field so we can evaluate it
             row.UTRANS_NOTES = row.UTRANS_NOTES + "POSTTYPE: " + row.RoadNameType + "; "
             # add the bad domain value to the text file log
-            AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.STREETTYPE))
+            AddBadValueToTextFile(countyNumber, "POSTTYPE", str(row.RoadNameType))
            
         row.POSTDIR = row.PostDirection
         row.DOT_SRFTYP = row.RoadSurfaceType
@@ -366,46 +366,49 @@ def Davis(rows):
 
             # check if there's a least one letter in the string
             if len(davisAliasName) > 0:
-                # parse out the string into array, so we can check for sufdir or street type
-                davisAliasName_split = davisAliasName.split(" ")
+                # check if they're using an ampersand, if no, skip this alias name
+                if '&' not in davisAliasName:
+                
+                    # parse out the string into array, so we can check for sufdir or street type
+                    davisAliasName_split = davisAliasName.split(" ")
 
-                # check if first word is number
-                if davisAliasName[0].isdigit():
-                    # get the last word in the array
-                    if davisAliasName_split[-1] == "N" or davisAliasName_split[-1] == "S" or davisAliasName_split[-1] == "E" or davisAliasName_split[-1] == "W":
-                        POSTDIR_FROM_ROADNAME = str(davisAliasName_split[-1]).strip()
+                    # check if first word is number
+                    if davisAliasName[0].isdigit():
+                        # get the last word in the array
+                        if davisAliasName_split[-1] == "N" or davisAliasName_split[-1] == "S" or davisAliasName_split[-1] == "E" or davisAliasName_split[-1] == "W":
+                            POSTDIR_FROM_ROADNAME = str(davisAliasName_split[-1]).strip()
 
-                        # check if first word in array is number
-                        if davisAliasName_split[0].isdigit():
-                            row.AN_NAME = davisAliasName_split[0].strip()
-                            row.AN_POSTDIR = davisAliasName_split[1].strip()
+                            # check if first word in array is number
+                            if davisAliasName_split[0].isdigit():
+                                row.AN_NAME = davisAliasName_split[0].strip()
+                                row.AN_POSTDIR = davisAliasName_split[1].strip()
+                            else:
+                                row.A1_NAME = davisAliasName[:30]
                         else:
                             row.A1_NAME = davisAliasName[:30]
+                    # the first word was not a number, and is therefore an alpha
                     else:
-                        row.A1_NAME = davisAliasName[:30]
-                # the first word was not a number, and is therefore an alpha
-                else:
-                    # check if last word is alpha, before we upper it and check if valid street type
-                    if davisAliasName_split[-1].isalpha():
-                        # check if last word in string is a valid street type
-                        if davisAliasName_split[-1].upper() in dictOfValidPostTypes:
-                            # add the street type to the street type field
-                            row.A1_POSTTYPE = davisAliasName_split[-1]
+                        # check if last word is alpha, before we upper it and check if valid street type
+                        if davisAliasName_split[-1].isalpha():
+                            # check if last word in string is a valid street type
+                            if davisAliasName_split[-1].upper() in dictOfValidPostTypes:
+                                # add the street type to the street type field
+                                row.A1_POSTTYPE = davisAliasName_split[-1]
 
-                            # remove the street type from the string
-                            alphaStreetName = davisAliasName.rsplit(' ', 1)[0]
-                            row.A1_NAME = alphaStreetName
-                        # check if street type is WY - Davis county uses that abbreviation for WAY
-                        elif (davisAliasName_split[-1].upper() == "WY"):
-                            row.A1_POSTTYPE = "WAY"
+                                # remove the street type from the string
+                                alphaStreetName = davisAliasName.rsplit(' ', 1)[0]
+                                row.A1_NAME = alphaStreetName
+                            # check if street type is WY - Davis county uses that abbreviation for WAY
+                            elif (davisAliasName_split[-1].upper() == "WY"):
+                                row.A1_POSTTYPE = "WAY"
 
-                            # remove the street type from the string
-                            alphaStreetName = davisAliasName.rsplit(' ', 1)[0]
-                            row.A1_NAME = alphaStreetName
+                                # remove the street type from the string
+                                alphaStreetName = davisAliasName.rsplit(' ', 1)[0]
+                                row.A1_NAME = alphaStreetName
+                            else:
+                                row.A1_NAME = davisAliasName[:30]
                         else:
                             row.A1_NAME = davisAliasName[:30]
-                    else:
-                        row.A1_NAME = davisAliasName[:30]
         # store the row
         rows.updateRow(row)
         del row
